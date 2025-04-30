@@ -21,14 +21,12 @@ WORKDIR $APP_HOME
 # Move in necessary assets
 COPY package/data/container_bash_profile /root/.profile
 COPY package/data/files/opt/drupal/web/sites/default/settings.php /opt/drupal/web/sites/default/settings.php
-# COPY package/data/files/opt/drupal/composer.json /opt/drupal/composer.json
-# COPY package/data/files/opt/drupal/composer.lock /opt/drupal/composer.lock
 
 # github checkout drupal-dhportal dir and symlink appropriate directories
 RUN 	mkdir /opt/drupal/util \
 	&& git clone https://github.com/uvalib/drupal-dhportal /opt/drupal/util/drupal-dhportal \
-	&& ln -sf util/drupal-dhportal/local/ddev/composer.lock /opt/drupal/composer.lock \
-	&& ln -sf util/drupal-dhportal/local/ddev/composer.json /opt/drupal/composer.json \
+	&& ln -sf util/drupal-dhportal/composer.lock /opt/drupal/composer.lock \
+	&& ln -sf util/drupal-dhportal/composer.json /opt/drupal/composer.json \
 	&& ln -sf util/drupal-dhportal/local/ddev/config /opt/drupal/config \
 	&& ls -l /opt/drupal/web/modules /opt/drupal/web/themes \
         && rm -rf /opt/drupal/web/modules \
