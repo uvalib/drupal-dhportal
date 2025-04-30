@@ -1,0 +1,52 @@
+# Ignore Composer dependencies
+/vendor/
+composer.lock
+
+# Ignore Drupal core (handled by Composer)
+/web/core/
+/web/modules/contrib/
+/web/profiles/contrib/
+/web/themes/contrib/
+/web/libraries/
+
+# Ignore Drupal private files and generated content
+/web/sites/*/files/
+/web/sites/*/private/
+/web/sites/*/settings.local.php
+
+# Ignore config splits and sync if not used for deployment
+# Uncomment if you're using config export
+#/config/sync/
+
+# Ignore temporary and cache files
+*.log
+*.tmp
+*.cache
+*.sqlite
+*.DS_Store
+Thumbs.db
+
+# Ignore IDE/editor files
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# Ignore DDEV (optional local dev environment)
+/.ddev/db_snapshots/
+/.ddev/import-db/
+/.ddev/nfs_mount/*
+/.ddev/.global_commands/*
+/.ddev/homeadditions/*
+/.ddev/*.bak
+/.ddev/docker-compose.*
+
+# Ignore PHPUnit test outputs
+/phpunit.xml
+/web/sites/simpletest
+/web/sites/default/files/simpletest
+
+# Ignore asset build outputs (if using frontend build tools)
+node_modules/
+dist/
+build/
