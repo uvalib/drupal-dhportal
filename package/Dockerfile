@@ -27,12 +27,6 @@ RUN 	mkdir /opt/drupal/util \
 	&& git clone https://github.com/uvalib/drupal-dhportal /opt/drupal/util/drupal-dhportal \
 	&& ln -sf util/drupal-dhportal/composer.lock /opt/drupal/composer.lock \
 	&& ln -sf util/drupal-dhportal/composer.json /opt/drupal/composer.json \
-	&& ln -sf util/drupal-dhportal/local/ddev/config /opt/drupal/config \
-	&& ls -l /opt/drupal/web/modules /opt/drupal/web/themes \
-        && rm -rf /opt/drupal/web/modules \
-        && ln -sf /opt/drupal/util/drupal-dhportal/local/ddev/web/modules /opt/drupal/web \
-        && rm -rf /opt/drupal/web/themes \
-        && ln -sf /opt/drupal/util/drupal-dhportal/local/ddev/web/themes /opt/drupal/web \
 	&& ls -l /opt/drupal/web/modules /opt/drupal/web/themes
 
 # install other dependancies
