@@ -29,8 +29,8 @@ RUN 	mkdir /opt/drupal/util \
 	&& ln -sf util/drupal-dhportal/composer.json /opt/drupal/composer.json \
 	&& ls -l /opt/drupal/web/modules /opt/drupal/web/themes
 RUN     mkdir -p /opt/drupal/config/sync \
-	&& chown www-data:www-data /opt/drupal/config/sync
-	&& chown -R www-data:www-data /opt/drupal/web/sites/default/files
+	&& chown www-data:www-data /opt/drupal/config/sync \
+	&& chown -R www-data:www-data /opt/drupal/web/sites/default/files \
 	&& chown www-data:www-data /opt/drupal/web/sites/default/settings.php
 
 # install other dependancies
