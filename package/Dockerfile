@@ -44,6 +44,7 @@ RUN pecl install apcu-5.1.22 && docker-php-ext-enable apcu
 # Need to flush and rebuild caches here
 
 WORKDIR /opt/drupal
+RUN mkdir -p /opt/drupal/web/modules/contrib && chmod 644 /opt/drupal/web/modules/contrib
 RUN ls -l
 RUN ls -l /opt/drupal/web/themes
 RUN ls -l /opt/drupal/web/modules
