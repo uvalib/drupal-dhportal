@@ -28,10 +28,6 @@ RUN 	mkdir /opt/drupal/util \
 	&& ln -sf util/drupal-dhportal/composer.lock /opt/drupal/composer.lock \
 	&& ln -sf util/drupal-dhportal/composer.json /opt/drupal/composer.json \
 	&& ls -l /opt/drupal/web/modules /opt/drupal/web/themes
-RUN     mkdir -p /opt/drupal/config/sync \
-	&& chown www-data:www-data /opt/drupal/config/sync \
-	&& chown -R www-data:www-data /opt/drupal/web/sites/default/files \
-	&& chown www-data:www-data /opt/drupal/web/sites/default/settings.php
 
 # install other dependancies
 RUN pecl install apcu-5.1.22 && docker-php-ext-enable apcu
@@ -42,10 +38,10 @@ RUN pecl install apcu-5.1.22 && docker-php-ext-enable apcu
 # Need to flush and rebuild caches here
 
 WORKDIR /opt/drupal
-RUN mkdir -p /opt/drupal/web/modules/contrib && chmod 644 /opt/drupal/web/modules/contrib
+RUN mkdir -p /opt/drupal/web/modules/contrib && chmod 755 /opt/drupal/web/modules/contrib
+RUN mkdir -p /opt/drupal/config/sync && chown www-data:www-data /opt/drupal/config/sync && chmod 2775 /opt/drupal/config/sync
 RUN composer install
 RUN mkdir /var/run/sqlite && chown www-data:www-data /var/run/sqlite 
-WORKDIR /opt/drupal
 # Add the build tag
 ARG BUILD_TAG
 RUN test -n "$BUILD_TAG" && touch $APP_HOME/buildtag.build-$BUILD_TAG || touch $APP_HOME/buildtag.build-0
