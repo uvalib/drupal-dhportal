@@ -49,9 +49,9 @@ phases:
           echo "ERROR: cannot determine instance AMI" ;
           exit 1 ;
         fi
-      #- terraform apply -auto-approve -no-color -var instance_ami="${ami}" --target=local_file.inventory --target=local_file.tfvars
-      #- cd ansible
-      #- ansible-playbook ${ansible_debug} deploy_backend_0.yml
+      - terraform apply -auto-approve -no-color -var instance_ami="${ami}" --target=local_file.inventory --target=local_file.tfvars
+      - cd ansible
+      - ansible-playbook ${ansible_debug} deploy_backend_1.yml
 
 #  post_build:
 #    commands:
