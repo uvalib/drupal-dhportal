@@ -27,7 +27,10 @@ RUN 	mkdir /opt/drupal/util \
 	&& git clone https://github.com/uvalib/drupal-dhportal /opt/drupal/util/drupal-dhportal \
 	&& ln -sf util/drupal-dhportal/composer.lock /opt/drupal/composer.lock \
 	&& ln -sf util/drupal-dhportal/composer.json /opt/drupal/composer.json \
-	&& ls -l /opt/drupal/web/modules /opt/drupal/web/themes
+	&& rm -rf /opt/drupal/web/modules/custom \
+  	&& ln -sf util/drupal-dhportal/web/modules/custom /opt/drupal/web/modules/custom \
+	&& rm -rf /opr/drupal/web/themes/custom \
+        && ln -sf util/drupal-dhportal/web/themes/custom /opt/drupal/web/themes/custom
 
 # install other dependancies
 RUN pecl install apcu-5.1.22 && docker-php-ext-enable apcu
