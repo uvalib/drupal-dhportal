@@ -1,6 +1,5 @@
 # Ignore Composer dependencies
 /vendor/
-composer.lock
 
 # Ignore Drupal core (handled by Composer)
 /web/core/
