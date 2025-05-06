@@ -28,9 +28,9 @@ RUN 	mkdir /opt/drupal/util \
 	&& ln -sf util/drupal-dhportal/composer.lock /opt/drupal/composer.lock \
 	&& ln -sf util/drupal-dhportal/composer.json /opt/drupal/composer.json \
 	&& rm -rf /opt/drupal/web/modules/custom \
-  	&& ln -sf util/drupal-dhportal/web/modules/custom /opt/drupal/web/modules/custom \
-	&& rm -rf /opr/drupal/web/themes/custom \
-        && ln -sf util/drupal-dhportal/web/themes/custom /opt/drupal/web/themes/custom
+  	&& ln -sf /opt/drupal/util/drupal-dhportal/web/modules/custom /opt/drupal/web/modules/custom \
+	&& rm -rf /opt/drupal/web/themes/custom \
+        && ln -sf /opt/drupal/util/drupal-dhportal/web/themes/custom /opt/drupal/web/themes/custom
 
 # install other dependancies
 RUN pecl install apcu-5.1.22 && docker-php-ext-enable apcu
