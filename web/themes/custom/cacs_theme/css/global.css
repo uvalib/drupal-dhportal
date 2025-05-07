@@ -1,13 +1,14 @@
 body {
-  background-color: #ffffff;
-  color: #666666;
   font-family: "franklin-gothic-urw", sans-serif;
+  color: #666666;
   font-size: 16px;
-  line-height: 1.5;
+  line-height: 1.6;
 }
 
-h1, h2, h3 {
-  font-family: "franklin-gothic-urw-cond", sans-serif;
+h1, h2, h3, h4, h5, h6 {
+  font-family: "bodoni-urw", serif;
+  font-weight: 400;
+  line-height: 1.2;
 }
 
 .container {
