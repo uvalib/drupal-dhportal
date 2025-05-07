@@ -16,12 +16,18 @@
     ],
     "require": {
         "composer/installers": "^2.0",
+        "drupal/admin_toolbar": "^3.5",
+        "drupal/bootstrap": "^5.0",
         "drupal/core-composer-scaffold": "^10.4",
         "drupal/core-project-message": "^10.4",
         "drupal/core-recommended": "^10.4",
         "drupal/feeds": "^3.0",
         "drupal/feeds_tamper": "^2.0@beta",
+        "drupal/metatag": "^2.1",
+        "drupal/paragraphs": "^1.19",
+        "drupal/pathauto": "^1.13",
         "drupal/tamper": "^1.0@beta",
+        "drupal/token": "^1.15",
         "drupal/views_data_export": "^1.5"
     },
     "conflict": {
