@@ -13,39 +13,24 @@
 .branding-bar {
   background-color: #232d4b;
   color: white;
-  padding: 0.5rem 0;
 
-  .branding {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
+  .branding-logo img {
+    max-height: 60px;
+  }
 
-    img {
-      max-height: 50px;
-    }
+  .branding-search input {
+    border-radius: 0.25rem;
+  }
 
-    .site-search {
-      margin-left: auto;
-
-      input[type='search'] {
-        border-radius: 4px;
-        padding: 0.25rem 0.5rem;
-        border: 1px solid #ccc;
-      }
-
-      button {
-        background-color: #e57200;
-        color: white;
-        border: none;
-        padding: 0.4rem 0.75rem;
-        border-radius: 4px;
-        margin-left: 0.5rem;
-      }
-    }
-
-    .user-menu {
+  .branding-user-menu {
+    a {
+      color: white;
+      text-decoration: none;
       margin-left: 1rem;
-      font-size: 0.9rem;
+
+      &:hover {
+        text-decoration: underline;
+      }
     }
   }
 }

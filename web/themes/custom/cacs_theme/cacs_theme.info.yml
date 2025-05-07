@@ -8,7 +8,9 @@ package: 'Bootstrap'
 
 regions:
   page_top: 'Page Top'
-  branding: 'Branding'
+  branding_logo: 'Branding Logo'
+  branding_search: 'Branding Search'
+  branding_user: 'Branding User Menu'
   header: 'Header'
   navigation: 'Navigation'
   content: 'Content'
@@ -16,7 +18,7 @@ regions:
   sidebar_second: 'Sidebar Second'
   footer: 'Footer'
   page_bottom: 'Page Bottom'
-
+  
 libraries:
   - 'cacs_theme/global-styling'
   - 'cacs_theme/adobe-fonts'
