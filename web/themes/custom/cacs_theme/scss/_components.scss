@@ -1,0 +1,11 @@
+@use 'variables';
+
+.button-primary {
+  background-color: variables.$primary-color;
+  color: #fff;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  text-decoration: none;
+  display: inline-block;
+}
