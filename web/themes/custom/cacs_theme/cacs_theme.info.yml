@@ -7,14 +7,14 @@ description: 'A subtheme of Bootstrap Barrio with custom SCSS.'
 package: 'Bootstrap'
 
 regions:
+  page_top: 'Page Top'
   branding: 'Branding'
-  navigation: 'Navigation'
   header: 'Header'
+  navigation: 'Navigation'
   content: 'Content'
   sidebar_first: 'Sidebar First'
   sidebar_second: 'Sidebar Second'
   footer: 'Footer'
-  page_top: 'Page Top'
   page_bottom: 'Page Bottom'
 
 libraries:
