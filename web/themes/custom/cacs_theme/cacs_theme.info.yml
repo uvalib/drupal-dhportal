@@ -1,0 +1,22 @@
+core_version_requirement: ^10
+type: theme
+base theme: bootstrap_barrio
+
+name: 'CACS Barrio Subtheme'
+description: 'A subtheme of Bootstrap Barrio with custom SCSS.'
+package: 'Bootstrap'
+
+regions:
+  branding: 'Branding'
+  navigation: 'Navigation'
+  header: 'Header'
+  content: 'Content'
+  sidebar_first: 'Sidebar First'
+  sidebar_second: 'Sidebar Second'
+  footer: 'Footer'
+  page_top: 'Page Top'
+  page_bottom: 'Page Bottom'
+
+libraries:
+  - 'cacs_theme/global-styling'
+  - 'cacs_theme/adobe-fonts'

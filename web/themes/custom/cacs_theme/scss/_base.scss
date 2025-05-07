@@ -1,0 +1,13 @@
+@use 'variables';
+
+body {
+  background-color: variables.$body-bg;
+  color: variables.$text-color;
+  font-family: variables.$font-primary;
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+h1, h2, h3 {
+  font-family: variables.$font-condensed;
+}
