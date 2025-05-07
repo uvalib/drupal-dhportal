@@ -4,9 +4,9 @@ const sass = require('gulp-sass')(require('sass'));
 // Compile SCSS to CSS
 function compileSCSS() {
   return gulp
-    .src('scss/global.scss')        // entry point
-    .pipe(sass().on('error', sass.logError))
-    .pipe(gulp.dest('css'));        // output path
+    .src('scss/global.scss')
+    .pipe(sass({ quietDeps: true }).on('error', sass.logError))
+    .pipe(gulp.dest('css'));
 }
 
 // Watch for changes
