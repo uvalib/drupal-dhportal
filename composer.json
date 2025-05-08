@@ -27,6 +27,9 @@
         "drupal/metatag": "^2.1",
         "drupal/paragraphs": "^1.19",
         "drupal/pathauto": "^1.13",
+        "drupal/smart_date": "^4.2",
+        "drupal/smart_date_calendar_kit": "^2.2",
+        "drupal/superfish": "^1.12",
         "drupal/tamper": "^1.0@beta",
         "drupal/token": "^1.15",
         "drupal/views_data_export": "^1.5"
