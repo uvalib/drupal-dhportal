@@ -11898,6 +11898,12 @@ h1, h2, h3, h4, h5, h6 {
   color: #666666;
   padding: 1.5rem 0;
 }
+.site-header .navbar-brand img {
+  width: 200px;
+}
+.site-header .branding-logo img {
+  max-height: 60px;
+}
 .site-header .header-inner {
   display: flex;
   justify-content: space-between;

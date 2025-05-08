@@ -43,6 +43,14 @@
   color: variables.$text-color;
   padding: 1.5rem 0;
 
+  .navbar-brand img  {
+    width: 200px;
+  }
+
+  .branding-logo img {
+    max-height: 60px;
+  }
+
   .header-inner {
     display: flex;
     justify-content: space-between;
