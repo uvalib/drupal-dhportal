@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "847fb44c7efc6f556d628553c17e2542",
+    "content-hash": "404f2556a8fd2124de87c6a2108d4c96",
     "packages": [
         {
             "name": "asm89/stack-cors",
@@ -1592,6 +1592,59 @@
                 "source": "https://git.drupalcode.org/project/fullcalendar_io/-/tree/6.1.17"
             },
             "time": "2025-04-08T15:20:12+00:00"
+        },
+        {
+            "name": "drupal/fullcalendar_view",
+            "version": "5.2.4",
+            "source": {
+                "type": "git",
+                "url": "https://git.drupalcode.org/project/fullcalendar_view.git",
+                "reference": "5.2.4"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://ftp.drupal.org/files/projects/fullcalendar_view-5.2.4.zip",
+                "reference": "5.2.4",
+                "shasum": "cb13b70d38c7f9b299b8661d3e8e03624d5079db"
+            },
+            "require": {
+                "drupal/core": "^9.2.0 || ^10 || ^11"
+            },
+            "type": "drupal-module",
+            "extra": {
+                "drupal": {
+                    "version": "5.2.4",
+                    "datestamp": "1734475570",
+                    "security-coverage": {
+                        "status": "covered",
+                        "message": "Covered by Drupal's security advisory policy"
+                    }
+                }
+            },
+            "notification-url": "https://packages.drupal.org/8/downloads",
+            "license": [
+                "GPL-2.0+"
+            ],
+            "authors": [
+                {
+                    "name": "karing",
+                    "homepage": "https://www.drupal.org/user/787114"
+                },
+                {
+                    "name": "mingsong",
+                    "homepage": "https://www.drupal.org/user/2986445"
+                }
+            ],
+            "description": "This is a lightweight View plugin module that provides a calendar view format powered by FullCalendar JavaScript.",
+            "homepage": "http://drupal.org/project/fullcalendar_view",
+            "keywords": [
+                "Drupal",
+                "fullcalendar_view"
+            ],
+            "support": {
+                "source": "http://cgit.drupalcode.org/fullcalendar_view",
+                "issues": "http://drupal.org/project/issues/fullcalendar_view"
+            }
         },
         {
             "name": "drupal/gin",
