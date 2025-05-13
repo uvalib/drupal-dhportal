@@ -11998,3 +11998,18 @@ h1, h2, h3, h4, h5, h6 {
   text-decoration: none;
   display: inline-block;
 }
+
+.paragraph--type--masthead-title-left-image-right .two-wide {
+  display: flex;
+  justify-content: space-between;
+}
+
+.field--name-field-h1-title {
+  font-size: 4rem;
+}
+
+.field--name-field-full-width-banner-text {
+  background-color: #242d4c;
+  height: 4em;
+  color: #fff;
+}
