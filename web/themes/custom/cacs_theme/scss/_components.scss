@@ -52,3 +52,39 @@ ul.sf-menu.sf-style-white a, ul.sf-menu.sf-style-white a:visited, ul.sf-menu.sf-
 .field--type-image img, .field--name-field-user-picture img {
     margin: 0 0 0em;
 }
+
+.paragraph--type--image-left-text-right .field--name-field-title
+,.paragraph--type--image-right-text-left .field--name-field-title{
+  color:variables.$primary-color;
+  font-size: 2em;
+  margin-bottom:1em;
+  font-family:variables.$font-headings;
+}
+
+
+
+.paragraph{
+  margin-bottom:4em;
+}
+
+.paragraph--type--image-left-text-right .two-wide{
+  display:flex;
+}
+
+.paragraph--type--image-left-text-right .two-wide{
+  .group-left, .group-right{
+      width:48%;
+  }
+
+}
+
+.paragraph--type--image-right-text-left .two-wide{
+  display:flex;
+}
+
+.paragraph--type--image-right-text-left .two-wide{
+  .group-left, .group-right{
+      width:48%;
+  }
+
+}
