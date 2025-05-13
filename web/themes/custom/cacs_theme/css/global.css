@@ -12006,10 +12006,37 @@ h1, h2, h3, h4, h5, h6 {
 
 .field--name-field-h1-title {
   font-size: 4rem;
+  color: #232D4B;
+  font-family: "bodoni-urw", serif;
+  font-weight: bold;
+}
+
+.field--name-field-sub-title {
+  font-size: 2rem;
+  font-weight: bold;
+  color: #dc762c;
+  font-family: "bodoni-urw", serif;
 }
 
 .field--name-field-full-width-banner-text {
-  background-color: #242d4c;
-  height: 4em;
+  background-color: #232D4B;
+  font-size: 1.8em;
   color: #fff;
+  padding: 2em 1em;
+  font-family: "bodoni-urw", serif;
+}
+
+.block-superfish {
+  width: 50%;
+}
+
+ul.sf-menu.sf-style-white a, ul.sf-menu.sf-style-white a:visited, ul.sf-menu.sf-style-white span.nolink {
+  border: 0 none;
+  color: #232D4B;
+  padding: 0.75em 1em;
+  text-transform: uppercase;
+}
+
+.field--type-image img, .field--name-field-user-picture img {
+  margin: 0 0 0em;
 }
