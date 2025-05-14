@@ -26,7 +26,7 @@
   font-size:2rem;
   font-weight:bold;
   color:variables.$secondary-color;
-  font-family:variables.$font-headings;
+  font-family:variables.$font-primary;
 }
 
 .field--name-field-full-width-banner-text{
@@ -34,7 +34,7 @@
   font-size: 1.8em;
   color:#fff;
   padding:2em 1em;
-  font-family:variables.$font-headings;
+  font-family:variables.$font-primary;
 }
 
 .block-superfish {
@@ -53,12 +53,28 @@ ul.sf-menu.sf-style-white a, ul.sf-menu.sf-style-white a:visited, ul.sf-menu.sf-
     margin: 0 0 0em;
 }
 
-.paragraph--type--image-left-text-right .field--name-field-title
-,.paragraph--type--image-right-text-left .field--name-field-title{
+.paragraph--type--image-right-text-left{
+  background-color:variables.$primary-color;
+  color:#fff;
+}
+
+.paragraph--type--image-right-text-left .field--name-field-title{
+    font-size: 2em;
+  margin-bottom:1em;
+  font-family:variables.$font-headings;
+    color:#fff;
+}
+
+.paragraph--type--image-left-text-right .field--name-field-title,
+.paragraph--type--four-column-links .field--name-field-title-fourlink{
   color:variables.$primary-color;
   font-size: 2em;
   margin-bottom:1em;
   font-family:variables.$font-headings;
+}
+
+.paragraph--type--four-column-links .field--name-field-title-fourlink{
+text-align: center;
 }
 
 
@@ -88,3 +104,10 @@ ul.sf-menu.sf-style-white a, ul.sf-menu.sf-style-white a:visited, ul.sf-menu.sf-
   }
 
 }
+
+
+.paragraph--type--four-column-links .four-wide{
+  display:flex;
+  justify-content: space-between;
+}
+

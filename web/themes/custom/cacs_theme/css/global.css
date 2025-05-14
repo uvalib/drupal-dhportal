@@ -12015,7 +12015,7 @@ h1, h2, h3, h4, h5, h6 {
   font-size: 2rem;
   font-weight: bold;
   color: #dc762c;
-  font-family: "bodoni-urw", serif;
+  font-family: "franklin-gothic-urw", sans-serif;
 }
 
 .field--name-field-full-width-banner-text {
@@ -12023,7 +12023,7 @@ h1, h2, h3, h4, h5, h6 {
   font-size: 1.8em;
   color: #fff;
   padding: 2em 1em;
-  font-family: "bodoni-urw", serif;
+  font-family: "franklin-gothic-urw", sans-serif;
 }
 
 .block-superfish {
@@ -12041,12 +12041,28 @@ ul.sf-menu.sf-style-white a, ul.sf-menu.sf-style-white a:visited, ul.sf-menu.sf-
   margin: 0 0 0em;
 }
 
-.paragraph--type--image-left-text-right .field--name-field-title,
+.paragraph--type--image-right-text-left {
+  background-color: #232D4B;
+  color: #fff;
+}
+
 .paragraph--type--image-right-text-left .field--name-field-title {
+  font-size: 2em;
+  margin-bottom: 1em;
+  font-family: "bodoni-urw", serif;
+  color: #fff;
+}
+
+.paragraph--type--image-left-text-right .field--name-field-title,
+.paragraph--type--four-column-links .field--name-field-title-fourlink {
   color: #232D4B;
   font-size: 2em;
   margin-bottom: 1em;
   font-family: "bodoni-urw", serif;
+}
+
+.paragraph--type--four-column-links .field--name-field-title-fourlink {
+  text-align: center;
 }
 
 .paragraph {
@@ -12067,4 +12083,9 @@ ul.sf-menu.sf-style-white a, ul.sf-menu.sf-style-white a:visited, ul.sf-menu.sf-
 
 .paragraph--type--image-right-text-left .two-wide .group-left, .paragraph--type--image-right-text-left .two-wide .group-right {
   width: 48%;
+}
+
+.paragraph--type--four-column-links .four-wide {
+  display: flex;
+  justify-content: space-between;
 }
