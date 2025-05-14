@@ -11999,6 +11999,11 @@ h1, h2, h3, h4, h5, h6 {
   display: inline-block;
 }
 
+.paragraph--type--masthead-title-left-image-right, .paragraph--type--image-right-text-left {
+  margin-left: calc(50% - 50vw);
+  margin-right: calc(50% - 50vw);
+}
+
 .paragraph--type--masthead-title-left-image-right .two-wide {
   display: flex;
   justify-content: space-between;
@@ -12018,12 +12023,20 @@ h1, h2, h3, h4, h5, h6 {
   font-family: "franklin-gothic-urw", sans-serif;
 }
 
+.wrapper {
+  max-width: 1200px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
 .field--name-field-full-width-banner-text {
   background-color: #232D4B;
   font-size: 1.8em;
   color: #fff;
   padding: 2em 1em;
   font-family: "franklin-gothic-urw", sans-serif;
+  margin-left: calc(50% - 50vw);
+  margin-right: calc(50% - 50vw);
 }
 
 .block-superfish {
@@ -12079,10 +12092,22 @@ ul.sf-menu.sf-style-white a, ul.sf-menu.sf-style-white a:visited, ul.sf-menu.sf-
 
 .paragraph--type--image-right-text-left .two-wide {
   display: flex;
+  justify-content: space-between;
 }
 
-.paragraph--type--image-right-text-left .two-wide .group-left, .paragraph--type--image-right-text-left .two-wide .group-right {
+.paragraph--type--image-right-text-left .two-wide .group-left, .paragraph--type--image-right-text-left .two-wide .group-right, .field--name-field-full-width-banner-text .group-left, .field--name-field-full-width-banner-text .group-right {
   width: 48%;
+}
+
+.paragraph--type--image-right-text-left .two-wide {
+  max-width: 1200px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.node .paragraph--type--image-right-text-left .field--type-image {
+  float: right;
+  margin: 0 0em 0 0;
 }
 
 .paragraph--type--four-column-links .four-wide {
