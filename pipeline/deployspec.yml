@@ -37,10 +37,10 @@ phases:
       - PRIVATE_KEY=${CODEBUILD_SRC_DIR}/terraform-infrastructure/${PRIVATE_KEY_NAME}
       - ${CODEBUILD_SRC_DIR}/terraform-infrastructure/scripts/decrypt-key.ksh ${PRIVATE_KEY}.cpt ${PRIVATE_KEY_NAME}
       - chmod 600 ${PRIVATE_KEY}
-      # - echo "ys2n: Detecting changed files..."
-      - git clone https://github.com/uvalib/drupal-dhportal.git
-      - cd ${CODEBUILD_SRC_DIR}/drupal-dhportal
-      - CHANGED_FILES=$(git diff --name-only origin/main...HEAD)
+      - echo "Detecting changed files..."
+      # - git clone https://github.com/uvalib/drupal-dhportal.git
+      - cd ${CODEBUILD_SRC_DIR}
+      - CHANGED_FILES=$(git diff --name-only HEAD HEAD^1)
       - echo "$CHANGED_FILES"
       # - >
       #   if echo "$CHANGED_FILES" | grep -v '^web/themes/custom/cacs_theme' > /dev/null; then
