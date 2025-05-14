@@ -69,11 +69,11 @@ phases:
       - ansible-playbook ${ansible_debug} deploy_backend_1.yml
       - source /tmp/env
       - |
-      if [ "$THEME_ONLY" = "true" ]; then
-        echo "DEBUG: Running limited theme update..."
-      else
-        echo "DEBUG: Running full rebuild and deploy..."
-      fi
+        if [ "$THEME_ONLY" = "true" ]; then
+          echo "DEBUG: Running limited theme update..."
+        else
+          echo "DEBUG: Running full rebuild and deploy..."
+        fi
 
 #  post_build:
 #    commands:
