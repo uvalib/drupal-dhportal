@@ -39,8 +39,7 @@ phases:
       - chmod 600 ${PRIVATE_KEY}
       - echo "Detecting changed files..."
       - cd ${CODEBUILD_SRC_DIR}
-      - ls -l
-      - git status
+      - echo source version = $CODEBUILD_RESOLVED_SOURCE_VERSION
       - git clone https://github.com/uvalib/drupal-dhportal.git
       - cd ./drupal-dhportal
       - CHANGED_FILES=$(git diff --name-only HEAD HEAD^1)
