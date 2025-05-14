@@ -38,6 +38,8 @@ phases:
       - ${CODEBUILD_SRC_DIR}/terraform-infrastructure/scripts/decrypt-key.ksh ${PRIVATE_KEY}.cpt ${PRIVATE_KEY_NAME}
       - chmod 600 ${PRIVATE_KEY}
       # - echo "ys2n: Detecting changed files..."
+      - git clone https://github.com/uvalib/drupal-dhportal.git
+      - cd ${CODEBUILD_SRC_DIR}/drupal-dhportal
       - CHANGED_FILES=$(git diff --name-only origin/main...HEAD)
       - echo "$CHANGED_FILES"
       # - >
