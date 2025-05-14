@@ -1,0 +1,78 @@
+{% set container = 'container' %}
+
+{# Page Top #}
+{% if page.page_top %}
+  <div id="page-top">
+    {{ page.page_top }}
+  </div>
+{% endif %}
+
+{# Branding Bar (logo + search + user menu) #}
+<div class="branding-bar text-white py-2">
+  <div class="{{ container }} d-flex justify-content-between align-items-center flex-wrap">
+    <div class="branding-logo col-sm-12 col-md-6 ">
+      {{ page.branding_logo }}
+    </div>
+    <div class="branding-search col-sm-12 col-md-3">
+      {{ page.branding_search }}
+    </div>
+    <div class="branding-user-menu text-end col-sm-12 col-md-3">
+      {{ page.branding_user }}
+    </div>
+  </div>
+</div>
+
+{# Middle White Bar: Header Region (Program Logo, Title, etc.) #}
+{% if page.header %}
+  <header class="site-header py-3" role="banner">
+    <div class="{{ container }} d-flex justify-content-between align-items-center flex-wrap">
+      {{ page.header }}
+    </div>
+  </header>
+{% endif %}
+
+{# Navigation Bar (Menu Links) #}
+{% if page.navigation %}
+  <nav class="site-nav border-bottom py-2" role="navigation">
+    <div class="{{ container }}">
+      {{ page.navigation }}
+    </div>
+  </nav>
+{% endif %}
+
+{# Main Content + Sidebars #}
+<main role="main" class="main-content {{ container }} py-4">
+  <div class="row">
+    {% if page.sidebar_first %}
+      <aside class="col-md-3" role="complementary">
+        {{ page.sidebar_first }}
+      </aside>
+    {% endif %}
+
+    <section class="{% if page.sidebar_first and page.sidebar_second %}col-md-6{% elseif page.sidebar_first or page.sidebar_second %}col-md-9{% else %}col-md-12{% endif %}">
+      {{ page.content }}
+    </section>
+
+    {% if page.sidebar_second %}
+      <aside class="col-md-3" role="complementary">
+        {{ page.sidebar_second }}
+      </aside>
+    {% endif %}
+  </div>
+</main>
+
+{# Footer #}
+{% if page.footer %}
+  <footer class="site-footer text-white py-4 mt-5" role="contentinfo">
+    <div class="{{ container }}">
+      {{ page.footer }}
+    </div>
+  </footer>
+{% endif %}
+
+{# Page Bottom #}
+{% if page.page_bottom %}
+  <div id="page-bottom">
+    {{ page.page_bottom }}
+  </div>
+{% endif %}

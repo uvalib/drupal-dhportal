@@ -1,0 +1,113 @@
+@use 'variables';
+
+.button-primary {
+  background-color: variables.$primary-color;
+  color: #fff;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  text-decoration: none;
+  display: inline-block;
+}
+
+.paragraph--type--masthead-title-left-image-right .two-wide{
+  display:flex;
+  justify-content: space-between;
+}
+
+.field--name-field-h1-title{
+  font-size:4rem;
+  color:variables.$primary-color;
+  font-family:variables.$font-headings;
+  font-weight:bold;
+}
+
+.field--name-field-sub-title{
+  font-size:2rem;
+  font-weight:bold;
+  color:variables.$secondary-color;
+  font-family:variables.$font-primary;
+}
+
+.field--name-field-full-width-banner-text{
+  background-color:variables.$primary-color;
+  font-size: 1.8em;
+  color:#fff;
+  padding:2em 1em;
+  font-family:variables.$font-primary;
+}
+
+.block-superfish {
+  width:50%;
+}
+
+
+ul.sf-menu.sf-style-white a, ul.sf-menu.sf-style-white a:visited, ul.sf-menu.sf-style-white span.nolink {
+    border: 0 none;
+    color:variables.$primary-color;
+    padding: 0.75em 1em;
+    text-transform: uppercase;
+}
+
+.field--type-image img, .field--name-field-user-picture img {
+    margin: 0 0 0em;
+}
+
+.paragraph--type--image-right-text-left{
+  background-color:variables.$primary-color;
+  color:#fff;
+}
+
+.paragraph--type--image-right-text-left .field--name-field-title{
+    font-size: 2em;
+  margin-bottom:1em;
+  font-family:variables.$font-headings;
+    color:#fff;
+}
+
+.paragraph--type--image-left-text-right .field--name-field-title,
+.paragraph--type--four-column-links .field--name-field-title-fourlink{
+  color:variables.$primary-color;
+  font-size: 2em;
+  margin-bottom:1em;
+  font-family:variables.$font-headings;
+}
+
+.paragraph--type--four-column-links .field--name-field-title-fourlink{
+text-align: center;
+}
+
+
+
+.paragraph{
+  margin-bottom:4em;
+}
+
+.paragraph--type--image-left-text-right .two-wide{
+  display:flex;
+}
+
+.paragraph--type--image-left-text-right .two-wide{
+  .group-left, .group-right{
+      width:48%;
+  }
+
+}
+
+.paragraph--type--image-right-text-left .two-wide{
+  display:flex;
+}
+
+.paragraph--type--image-right-text-left .two-wide{
+  .group-left, .group-right{
+      width:48%;
+  }
+
+}
+
+
+.paragraph--type--four-column-links .four-wide{
+  display:flex;
+  justify-content: space-between;
+}
+
