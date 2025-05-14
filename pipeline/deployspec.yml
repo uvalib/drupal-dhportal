@@ -49,7 +49,6 @@ phases:
       #     echo "THEME_ONLY=true" >> /tmp/env
       #   fi
 
-
   build:
     commands:
       - cd ${CODEBUILD_SRC_DIR}/terraform-infrastructure/dh.library.virginia.edu/staging
@@ -71,7 +70,6 @@ phases:
       #   else
       #     echo "DEBUG: Running full rebuild and deploy..."
       #   fi
-      
 
 #  post_build:
 #    commands:
