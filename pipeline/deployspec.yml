@@ -40,14 +40,14 @@ phases:
       - echo "ys2n: Detecting changed files..."
       - CHANGED_FILES=$(git diff --name-only origin/main...HEAD)
       - echo "$CHANGED_FILES"
-      - >
-        if echo "$CHANGED_FILES" | grep -v '^web/themes/custom/cacs_theme' > /dev/null; then
-          echo "Non-theme files changed → full deploy"
-          echo "THEME_ONLY=false" >> /tmp/env
-        else
-          echo "Only theme files changed → limited deploy"
-          echo "THEME_ONLY=true" >> /tmp/env
-        fi
+      # - >
+      #   if echo "$CHANGED_FILES" | grep -v '^web/themes/custom/cacs_theme' > /dev/null; then
+      #     echo "Non-theme files changed → full deploy"
+      #     echo "THEME_ONLY=false" >> /tmp/env
+      #   else
+      #     echo "Only theme files changed → limited deploy"
+      #     echo "THEME_ONLY=true" >> /tmp/env
+      #   fi
 
 
   build:
@@ -61,12 +61,13 @@ phases:
       - cd ansible
       - ansible-playbook ${ansible_debug} deploy_backend_1.yml
       - source /tmp/env
-      - >
-        if [ "$THEME_ONLY" = "true" ]; then
-          echo "DEBUG: Running limited theme update..."
-        else
-          echo "DEBUG: Running full rebuild and deploy..."
-        fi
+      - echo THEME_ONLY = $THEME_ONLY
+      # - >
+      #   if [ "$THEME_ONLY" = "true" ]; then
+      #     echo "DEBUG: Running limited theme update..."
+      #   else
+      #     echo "DEBUG: Running full rebuild and deploy..."
+      #   fi
       
 
 #  post_build:
