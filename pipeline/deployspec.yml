@@ -66,13 +66,14 @@ phases:
         fi
       - terraform apply -auto-approve -no-color -var instance_ami="${ami}" --target=local_file.inventory --target=local_file.tfvars
       - cd ansible
-      - ansible-playbook ${ansible_debug} deploy_backend_1.yml
       - source /tmp/env
       - |
         if [ "$THEME_ONLY" = "true" ]; then
           echo "DEBUG: Running limited theme update..."
+          ansible-playbook ${ansible_debug} deploy_theme_changes_1.yml
         else
           echo "DEBUG: Running full rebuild and deploy..."
+          ansible-playbook ${ansible_debug} deploy_backend_1.yml
         fi
 
 #  post_build:
