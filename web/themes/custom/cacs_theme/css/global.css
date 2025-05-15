@@ -12154,10 +12154,6 @@ ul.sf-menu.sf-style-white a, ul.sf-menu.sf-style-white a:visited, ul.sf-menu.sf-
   color: white;
 }
 
-tr:nth-child(odd) {
-  background-color: #000;
-}
-
 .views-field-title, .views-field-field-course-mnemonic, .views-field-field-related-projects,
 .views-field-title, .views-field-field-tools, .views-field-field-affiliation, .views-field-field-affiliation {
   width: 16.6%;
