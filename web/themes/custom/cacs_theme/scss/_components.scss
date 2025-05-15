@@ -20,11 +20,23 @@
   justify-content: space-between;
 }
 
+.paragraph--type--masthead-title-left-image-right .group-left{
+  padding:1.75em;
+}
+
+.field--name-field-full-width-banner-text p{
+  width:50%;
+  margin-left: auto;
+  margin-right: auto;
+}
+
 .field--name-field-h1-title{
   font-size:4rem;
   color:variables.$primary-color;
   font-family:variables.$font-headings;
-  font-weight:bold;
+  font-weight: 600;
+  font-style: italic;
+  text-transform: uppercase;
 }
 
 .field--name-field-sub-title{
@@ -75,6 +87,9 @@ ul.sf-menu.sf-style-white a, ul.sf-menu.sf-style-white a:visited, ul.sf-menu.sf-
   font-size: 2em;
   margin-bottom:.75em;
   font-family:variables.$font-headings;
+  font-weight: 600;
+  font-style: italic;
+  text-transform: uppercase;
   color:#fff;
 }
 
@@ -84,6 +99,9 @@ ul.sf-menu.sf-style-white a, ul.sf-menu.sf-style-white a:visited, ul.sf-menu.sf-
   font-size: 2rem;
   margin-bottom:.75em;
   font-family:variables.$font-headings;
+  font-weight: 600;
+  font-style: italic;
+  text-transform: uppercase;
   line-height: 1.5;
 }
 
