@@ -40,9 +40,10 @@ phases:
       - echo "Detecting changed files..."
       - cd ${CODEBUILD_SRC_DIR}
       - echo source version = $CODEBUILD_RESOLVED_SOURCE_VERSION
-      - git clone https://github.com/uvalib/drupal-dhportal.git
-      - cd ./drupal-dhportal
-      - CHANGED_FILES=$(git diff --name-only $CODEBUILD_RESOLVED_SOURCE_VERSION $CODEBUILD_RESOLVED_SOURCE_VERSION^1)
+      - CHANGED_FILES=$(curl -s  https://api.github.com/repos/uvalib/drupal-dhportal/compare/$CODEBUILD_RESOLVED_SOURCE_VERSION^1...$CODEBUILD_RESOLVED_SOURCE_VERSION | jq -r '.files[].filename' )
+      # - git clone https://github.com/uvalib/drupal-dhportal.git
+      # - cd ./drupal-dhportal
+      # - CHANGED_FILES=$(git diff --name-only $CODEBUILD_RESOLVED_SOURCE_VERSION $CODEBUILD_RESOLVED_SOURCE_VERSION^1)
       - echo "$CHANGED_FILES"
       - |
         if echo "$CHANGED_FILES" | grep -v '^web/themes/custom/cacs_theme' > /dev/null; then
