@@ -73,7 +73,7 @@ ul.sf-menu.sf-style-white a, ul.sf-menu.sf-style-white a:visited, ul.sf-menu.sf-
 
 .paragraph--type--image-right-text-left .field--name-field-title{
   font-size: 2em;
-  margin-bottom:1em;
+  margin-bottom:.75em;
   font-family:variables.$font-headings;
   color:#fff;
 }
@@ -81,9 +81,10 @@ ul.sf-menu.sf-style-white a, ul.sf-menu.sf-style-white a:visited, ul.sf-menu.sf-
 .paragraph--type--image-left-text-right .field--name-field-title,
 .paragraph--type--four-column-links .field--name-field-title-fourlink{
   color:variables.$primary-color;
-  font-size: 2em;
-  margin-bottom:1em;
+  font-size: 2rem;
+  margin-bottom:.75em;
   font-family:variables.$font-headings;
+  line-height: 1.5;
 }
 
 .paragraph--type--four-column-links .field--name-field-title-fourlink{
@@ -128,6 +129,10 @@ text-align: center;
         float: right;
         margin: 0 0em 0 0;
     }
+
+  .paragraph--type--image-right-text-left .group-right{
+    padding:3em;
+  }
 
 .paragraph--type--four-column-links .four-wide{
   display:flex;
