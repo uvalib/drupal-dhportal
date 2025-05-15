@@ -11862,7 +11862,7 @@ body {
 }
 
 h1, h2, h3, h4, h5, h6 {
-  font-family: "bodoni-urw", serif;
+  font-family: "franklin-gothic-urw", serif;
   font-weight: 400;
   line-height: 1.2;
   color: #232D4B;
@@ -11919,7 +11919,7 @@ h1, h2, h3, h4, h5, h6 {
   max-height: 80px;
 }
 .site-header .header-inner .program-branding .text h1 {
-  font-family: "bodoni-urw", serif;
+  font-family: "franklin-gothic-urw", serif;
   font-size: 1.75rem;
   margin: 0;
 }
@@ -12009,11 +12009,23 @@ h1, h2, h3, h4, h5, h6 {
   justify-content: space-between;
 }
 
+.paragraph--type--masthead-title-left-image-right .group-left {
+  padding: 1.75em;
+}
+
+.field--name-field-full-width-banner-text p {
+  width: 50%;
+  margin-left: auto;
+  margin-right: auto;
+}
+
 .field--name-field-h1-title {
   font-size: 4rem;
   color: #232D4B;
-  font-family: "bodoni-urw", serif;
-  font-weight: bold;
+  font-family: "franklin-gothic-urw", serif;
+  font-weight: 600;
+  font-style: italic;
+  text-transform: uppercase;
 }
 
 .field--name-field-sub-title {
@@ -12061,17 +12073,24 @@ ul.sf-menu.sf-style-white a, ul.sf-menu.sf-style-white a:visited, ul.sf-menu.sf-
 
 .paragraph--type--image-right-text-left .field--name-field-title {
   font-size: 2em;
-  margin-bottom: 1em;
-  font-family: "bodoni-urw", serif;
+  margin-bottom: 0.75em;
+  font-family: "franklin-gothic-urw", serif;
+  font-weight: 600;
+  font-style: italic;
+  text-transform: uppercase;
   color: #fff;
 }
 
 .paragraph--type--image-left-text-right .field--name-field-title,
 .paragraph--type--four-column-links .field--name-field-title-fourlink {
   color: #232D4B;
-  font-size: 2em;
-  margin-bottom: 1em;
-  font-family: "bodoni-urw", serif;
+  font-size: 2rem;
+  margin-bottom: 0.75em;
+  font-family: "franklin-gothic-urw", serif;
+  font-weight: 600;
+  font-style: italic;
+  text-transform: uppercase;
+  line-height: 1.5;
 }
 
 .paragraph--type--four-column-links .field--name-field-title-fourlink {
@@ -12110,7 +12129,75 @@ ul.sf-menu.sf-style-white a, ul.sf-menu.sf-style-white a:visited, ul.sf-menu.sf-
   margin: 0 0em 0 0;
 }
 
+.paragraph--type--image-right-text-left .group-right {
+  padding: 3em;
+}
+
 .paragraph--type--four-column-links .four-wide {
   display: flex;
   justify-content: space-between;
+}
+
+.view-grouping-header {
+  font-size: 2rem;
+  font-weight: bold;
+  color: #dc762c;
+  font-family: "franklin-gothic-urw", sans-serif;
+}
+
+.table {
+  font-family: Arial, Helvetica, sans-serif;
+  border-collapse: collapse;
+  width: 100%;
+}
+
+tr {
+  background: none;
+}
+
+.table td, .table th {
+  border: 1px solid #ddd;
+  padding: 8px;
+}
+
+.table tr:nth-child(even) {
+  background-color: #e9f0fb;
+}
+
+.table a {
+  color: #495E9D;
+  text-decoration: underline;
+  font-size: 1rem;
+}
+
+.table tr:hover {
+  background-color: #ddd;
+}
+
+.table th {
+  padding-top: 12px;
+  padding-bottom: 12px;
+  text-align: left;
+  background-color: #232D4B;
+  color: white;
+}
+
+.view-filters {
+  background-color: #e9f0fb;
+  padding: 1em;
+  margin-bottom: 2em;
+}
+
+.table {
+  --bs-table-bg:none;
+}
+
+.four-wide div {
+  max-width: 200px;
+  vertical-align: middle;
+}
+
+.views-field-title, .views-field-field-course-mnemonic, .views-field-field-related-projects,
+.views-field-title, .views-field-field-tools, .views-field-field-affiliation, .views-field-field-affiliation {
+  width: 16.6%;
 }
