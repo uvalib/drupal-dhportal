@@ -4,9 +4,12 @@
 
 version: 0.2
 
-#env:
-#  variables:
-#    name: value
+env:
+  variables:
+    target_host: dh-drupal-dev-1.internal.lib.virginia.edu
+    target_host_user: aws_deploy
+    target_host_key: aws_deploy
+    target_command: "sudo docker exec drupal-0 /opt/drupal/util/drupal-dhportal/scripts/server/pull-git-changes.sh"
 
 phases:
   install:
@@ -19,9 +22,19 @@ phases:
       - aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $CONTAINER_REGISTRY
       - BUILD_VERSION=$(date --date="@$(echo $CODEBUILD_START_TIME | cut -c1-10)" +"%Y%m%d%H%M%S")
       - COMMIT_TAG=gitcommit-$CODEBUILD_RESOLVED_SOURCE_VERSION
+      # prepare for quick theme update
+      - dnf install -y http://ccrypt.sourceforge.net/download/1.11/ccrypt-1.11-1.x86_64.rpm
+      - git clone https://${GITLAB_USER}:${GITLAB_TOKEN}@gitlab.com/uvalib/terraform-infrastructure.git
+      - ${CODEBUILD_SRC_DIR}/terraform-infrastructure/scripts/decrypt-key.ksh ${CODEBUILD_SRC_DIR}/terraform-infrastructure/global/private-keys/${target_host_key}.pem.cpt global/private-keys/${target_host_key}.pem
+      - PRIVATE_KEY=${CODEBUILD_SRC_DIR}/terraform-infrastructure/global/private-keys/${target_host_key}.pem
+      - chmod 600 ${PRIVATE_KEY}
 
   build:
     commands:
+      # quick theme update
+      - echo "Executing as ${target_host_user} on ${target_host}, command \"${target_command}\""
+      - ssh -oStrictHostKeyChecking=accept-new -i ${PRIVATE_KEY} ${target_host_user}@${target_host} ${target_command}
+      # resume regular build
       - docker build -f package/Dockerfile -t $CONTAINER_IMAGE:latest --build-arg BUILD_TAG=$BUILD_VERSION .
       - docker tag $CONTAINER_IMAGE:latest $CONTAINER_REGISTRY/$CONTAINER_IMAGE:latest
       - docker tag $CONTAINER_IMAGE:latest $CONTAINER_REGISTRY/$CONTAINER_IMAGE:build-$BUILD_VERSION
