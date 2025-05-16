@@ -22,6 +22,8 @@ WORKDIR $APP_HOME
 COPY package/data/container_bash_profile /root/.profile
 COPY package/data/files/opt/drupal/web/sites/default/settings.php /opt/drupal/web/sites/default/settings.php
 
+RUN mkdir -p /opt/drupal/dhportal && chown www-data:www-data /opt/drupal/dhportal
+
 # github checkout drupal-dhportal dir and symlink appropriate directories
 RUN 	mkdir /opt/drupal/util \
 	&& git clone https://github.com/uvalib/drupal-dhportal /opt/drupal/util/drupal-dhportal \
