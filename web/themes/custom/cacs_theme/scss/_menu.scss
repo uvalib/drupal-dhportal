@@ -1,0 +1,13 @@
+@use 'variables';
+
+
+ul.sf-menu.sf-style-white a, ul.sf-menu.sf-style-white a:visited, ul.sf-menu.sf-style-white span.nolink {
+    border: 0 none;
+    color: #232D4B;
+    padding: 0.75em 1em;
+    text-transform: none;
+    font-size: 1rem;
+    font-weight: 600;
+    text-decoration: none;
+    font-style: bold;
+}
