@@ -68,6 +68,7 @@ phases:
       - terraform apply -auto-approve -no-color -var instance_ami="${ami}" --target=local_file.inventory --target=local_file.tfvars
       - cd ansible
       - source /tmp/env
+      - printenv
       - |
         if [ "$THEME_ONLY" = "true" ]; then
           echo "DEBUG: Running limited theme update..."
