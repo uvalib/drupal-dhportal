@@ -118,10 +118,21 @@ text-align: center;
   flex-wrap: wrap;
 }
 
+.paragraph--type--four-column-links .four-wide .field--type-image {
+        width:100%;
+        height: 400px;
+        vertical-align: middle;
+        border: #ccc 1px solid;
+        align-items: center;
+        display: flex;
+        justify-content: center;
+}
+
+
 .paragraph--type--four-column-links .four-wide div.group-one,
 .paragraph--type--four-column-links .four-wide div.group-four
 {
-    display: flex;
+  display: flex;
   flex-direction: column;
   flex-basis: 100%;
   flex: 1;
@@ -160,9 +171,13 @@ text-align: center;
   margin-right: auto;
 }
 
+
+/*create home.scss*/
+
 .node .paragraph--type--image-right-text-left .field--type-image {
         float: right;
         margin: 0 0em 0 0;
+
     }
 
   .paragraph--type--image-right-text-left .group-right{
@@ -171,3 +186,7 @@ text-align: center;
 
 
 
+ul.sf-menu.sf-style-white li, ul.sf-menu.sf-style-white.sf-navbar {
+    background: none;
+ 
+}
