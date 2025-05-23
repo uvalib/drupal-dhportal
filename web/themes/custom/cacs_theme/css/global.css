@@ -12104,6 +12104,7 @@ ul.sf-menu.sf-style-white a, ul.sf-menu.sf-style-white a:visited, ul.sf-menu.sf-
 .paragraph--type--four-column-links .four-wide {
   display: flex;
   flex-wrap: wrap;
+  justify-content: space-between;
 }
 
 .paragraph--type--four-column-links .four-wide .field--type-image {
@@ -12122,6 +12123,18 @@ ul.sf-menu.sf-style-white a, ul.sf-menu.sf-style-white a:visited, ul.sf-menu.sf-
   flex-direction: column;
   flex-basis: 100%;
   flex: 1;
+}
+
+.paragraph--type--four-column-links .four-wide div {
+  width: 90%;
+}
+
+.paragraph--type--four-column-links .four-wide img {
+  width: 80%;
+}
+
+.paragraph--type--four-column-links .four-wide .field--type-link {
+  margin-bottom: 4em;
 }
 
 .paragraph {
