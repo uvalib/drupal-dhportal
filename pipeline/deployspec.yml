@@ -72,7 +72,8 @@ phases:
       - |
         if [ "$THEME_ONLY" = "true" ]; then
           echo "DEBUG: Running limited theme update..."
-          ssh -oStrictHostKeyChecking=accept-new -i ${PRIVATE_KEY} aws_deploy@dh-drupal-dev-1.internal.lib.virginia.edu docker exec drupal-0 /opt/drupal/util/drupal-dhportal/scripts/server/pull-git-changes.sh
+          echo "Skipping Redundant checkout... "
+          # ssh -oStrictHostKeyChecking=accept-new -i ${PRIVATE_KEY} aws_deploy@dh-drupal-dev-1.internal.lib.virginia.edu docker exec drupal-0 /opt/drupal/util/drupal-dhportal/scripts/server/pull-git-changes.sh
         else
           echo "DEBUG: Running full rebuild and deploy..."
           ansible-playbook ${ansible_debug} deploy_backend_1.yml
