@@ -12098,15 +12098,23 @@ ul.sf-menu.sf-style-white a, ul.sf-menu.sf-style-white a:visited, ul.sf-menu.sf-
 }
 
 .paragraph--type--four-column-links {
-  display: flex;
-  flex-direction: row;
-  flex-wrap: wrap;
   width: 100%;
 }
 
 .paragraph--type--four-column-links .four-wide {
   display: flex;
   flex-wrap: wrap;
+  justify-content: space-between;
+}
+
+.paragraph--type--four-column-links .four-wide .field--type-image {
+  width: 100%;
+  height: 400px;
+  vertical-align: middle;
+  border: #ccc 1px solid;
+  align-items: center;
+  display: flex;
+  justify-content: center;
 }
 
 .paragraph--type--four-column-links .four-wide div.group-one,
@@ -12115,6 +12123,18 @@ ul.sf-menu.sf-style-white a, ul.sf-menu.sf-style-white a:visited, ul.sf-menu.sf-
   flex-direction: column;
   flex-basis: 100%;
   flex: 1;
+}
+
+.paragraph--type--four-column-links .four-wide div {
+  width: 90%;
+}
+
+.paragraph--type--four-column-links .four-wide img {
+  width: 80%;
+}
+
+.paragraph--type--four-column-links .four-wide .field--type-link {
+  margin-bottom: 4em;
 }
 
 .paragraph {
@@ -12144,6 +12164,7 @@ ul.sf-menu.sf-style-white a, ul.sf-menu.sf-style-white a:visited, ul.sf-menu.sf-
   margin-right: auto;
 }
 
+/*create home.scss*/
 .node .paragraph--type--image-right-text-left .field--type-image {
   float: right;
   margin: 0 0em 0 0;
@@ -12151,6 +12172,10 @@ ul.sf-menu.sf-style-white a, ul.sf-menu.sf-style-white a:visited, ul.sf-menu.sf-
 
 .paragraph--type--image-right-text-left .group-right {
   padding: 3em;
+}
+
+ul.sf-menu.sf-style-white li, ul.sf-menu.sf-style-white.sf-navbar {
+  background: none;
 }
 
 .view-grouping-header {
@@ -12214,11 +12239,6 @@ tr {
   --bs-table-bg:none;
 }
 
-.four-wide div {
-  max-width: 200px;
-  vertical-align: middle;
-}
-
 .views-field-field-course-mnemonic, .views-field-field-related-projects,
 .views-field-field-tools, .views-field-field-affiliation {
   width: 16.6%;
@@ -12232,13 +12252,25 @@ tr {
   width: 24.6%;
 }
 
+.list-group-item {
+  background-color: none;
+  background: none;
+  border: none;
+  border-bottom: 1px solid #ccc;
+  margin-bottom: 0.5em;
+}
+
 ul.sf-menu.sf-style-white a, ul.sf-menu.sf-style-white a:visited, ul.sf-menu.sf-style-white span.nolink {
   border: 0 none;
   color: #232D4B;
   padding: 0.75em 1em;
   text-transform: none;
-  font-size: 1rem;
-  font-weight: 600;
+  font-size: 1.4rem;
+  font-weight: 800;
   text-decoration: none;
   font-style: bold;
+}
+
+.block-superfish {
+  width: 70%;
 }

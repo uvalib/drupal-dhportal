@@ -60,10 +60,7 @@ tr {
   --bs-table-bg:none;
 }
 
-.four-wide div{
-  max-width:200px;
-  vertical-align: middle;
-}
+
 
 
 .views-field-field-course-mnemonic, .views-field-field-related-projects, 
@@ -77,4 +74,12 @@ tr {
 
 .views-field-title {
     width:24.6%;
+}
+
+.list-group-item {
+background-color: none;
+background: none;
+border: none;
+border-bottom:1px solid #ccc;
+margin-bottom: .5em;
 }
