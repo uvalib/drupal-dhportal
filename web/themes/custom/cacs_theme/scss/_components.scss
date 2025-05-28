@@ -146,6 +146,13 @@ text-align: center;
   width:80%;
 }
 
+.paragraph--type--four-column-links .four-wide h2{
+  width:100%;
+  text-align: center;
+  text-transform: uppercase;
+  margin-bottom: 2em;
+}
+
 
 .paragraph--type--four-column-links .four-wide .field--type-link{
 
@@ -202,4 +209,18 @@ text-align: center;
 ul.sf-menu.sf-style-white li, ul.sf-menu.sf-style-white.sf-navbar {
     background: none;
  
+}
+
+.site-footer .content{
+  color:#000;
+}
+
+.site-footer .content {
+    color: #c0c0c0;
+    color: rgba(0, 0, 000, 0.65);
+    font-size: 0.857em;
+}
+
+#block-cacs-theme-generallinks{
+  background-color: variables.$primary-color;
 }
