@@ -8,7 +8,7 @@ env:
   variables:
     target_host: dh-drupal-dev-1.internal.lib.virginia.edu
     target_host_user: aws_deploy
-    target_host_key: dh-drupal-staging
+    target_host_key: aws_deploy
     target_command: "sudo docker exec drupal-0 /opt/drupal/util/drupal-dhportal/scripts/server/pull-git-changes.sh"
     terraform_version: 1.11.1
     #ansible_debug: -vvvv
@@ -37,9 +37,9 @@ phases:
       - BASTION_KEY=${CODEBUILD_SRC_DIR}/terraform-infrastructure/${BASTION_KEY_NAME}
       - ${CODEBUILD_SRC_DIR}/terraform-infrastructure/scripts/decrypt-key.ksh ${BASTION_KEY}.cpt ${BASTION_KEY_NAME}
       # decrypt the instance private key
-      - ${CODEBUILD_SRC_DIR}/terraform-infrastructure/scripts/decrypt-key.ksh ${CODEBUILD_SRC_DIR}/terraform-infrastructure/dh.library.virginia.edu/staging/keys/${target_host_key}.pem.cpt global/private-keys/${target_host_key}.pem
+      - ${CODEBUILD_SRC_DIR}/terraform-infrastructure/scripts/decrypt-key.ksh ${CODEBUILD_SRC_DIR}/terraform-infrastructure/global/private-keys/${target_host_key}.pem.cpt global/private-keys/${target_host_key}.pem
       - HOST_PRIVATE_KEY=${CODEBUILD_SRC_DIR}/terraform-infrastructure/global/private-keys/${target_host_key}.pem
-      - chmod 600 ${HOST_PRIVATE_KEY}
+      - chmod 600 ${PRIVATE_KEY}
       - echo "Detecting changed files!"
       - ls -l 
       - echo `ls -l`
