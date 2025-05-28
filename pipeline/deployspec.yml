@@ -37,22 +37,22 @@ phases:
       - BASTION_KEY=${CODEBUILD_SRC_DIR}/terraform-infrastructure/${BASTION_KEY_NAME}
       - ${CODEBUILD_SRC_DIR}/terraform-infrastructure/scripts/decrypt-key.ksh ${BASTION_KEY}.cpt ${BASTION_KEY_NAME}
       # decrypt the instance private key
-      # - ${CODEBUILD_SRC_DIR}/terraform-infrastructure/scripts/decrypt-key.ksh ${CODEBUILD_SRC_DIR}/terraform-infrastructure/global/private-keys/${target_host_key}.pem.cpt global/private-keys/${target_host_key}.pem
-      # - PRIVATE_KEY=${CODEBUILD_SRC_DIR}/terraform-infrastructure/global/private-keys/${target_host_key}.pem
-      # - chmod 600 ${PRIVATE_KEY}
-      # - echo "Detecting changed files..."
-      # - cd ${CODEBUILD_SRC_DIR}
-      # - echo source version = $CODEBUILD_RESOLVED_SOURCE_VERSION
-      # - CHANGED_FILES=$(curl -s  https://api.github.com/repos/uvalib/drupal-dhportal/compare/$CODEBUILD_RESOLVED_SOURCE_VERSION^1...$CODEBUILD_RESOLVED_SOURCE_VERSION | jq -r '.files[].filename' )
-      # - echo "$CHANGED_FILES"
-      # - |
-      #  if echo "$CHANGED_FILES" | grep -v '^web/themes/custom/cacs_theme' > /dev/null; then
-      #    echo "Non-theme files changed → full deploy"
-      #    echo "THEME_ONLY=false" >> /tmp/env
-      #  else
-      #    echo "Only theme files changed → limited deploy"
-      #    echo "THEME_ONLY=true" >> /tmp/env
-      #  fi
+      - ${CODEBUILD_SRC_DIR}/terraform-infrastructure/scripts/decrypt-key.ksh ${CODEBUILD_SRC_DIR}/terraform-infrastructure/global/private-keys/${target_host_key}.pem.cpt global/private-keys/${target_host_key}.pem
+      - PRIVATE_KEY=${CODEBUILD_SRC_DIR}/terraform-infrastructure/global/private-keys/${target_host_key}.pem
+      - chmod 600 ${PRIVATE_KEY}
+      - echo "Detecting changed files..."
+      - cd ${CODEBUILD_SRC_DIR}
+      - echo source version = $CODEBUILD_RESOLVED_SOURCE_VERSION
+      - CHANGED_FILES=$(curl -s  https://api.github.com/repos/uvalib/drupal-dhportal/compare/$CODEBUILD_RESOLVED_SOURCE_VERSION^1...$CODEBUILD_RESOLVED_SOURCE_VERSION | jq -r '.files[].filename' )
+      - echo "$CHANGED_FILES"
+      - |
+       if echo "$CHANGED_FILES" | grep -v '^web/themes/custom/cacs_theme' > /dev/null; then
+         echo "Non-theme files changed → full deploy"
+         echo "THEME_ONLY=false" >> /tmp/env
+       else
+         echo "Only theme files changed → limited deploy"
+         echo "THEME_ONLY=true" >> /tmp/env
+       fi
 
   build:
     commands:
@@ -66,8 +66,8 @@ phases:
           exit 1 ;
         fi
       - terraform apply -auto-approve -no-color -var instance_ami="${ami}" --target=local_file.inventory --target=local_file.tfvars
+      - cd ansible
       - ansible-playbook ${ansible_debug} deploy_backend_1.yml
-      # - cd ansible
       # - source /tmp/env
       # - printenv
       # - |
