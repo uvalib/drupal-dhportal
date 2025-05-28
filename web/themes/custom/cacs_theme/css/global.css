@@ -11988,12 +11988,17 @@ ul.sf-menu.sf-style-white a, ul.sf-menu.sf-style-white a:visited, ul.sf-menu.sf-
 
 .paragraph--type--four-column-links .four-wide .field--type-image {
   width: 100%;
-  height: 400px;
+  height: 250px;
   vertical-align: middle;
-  border: #ccc 1px solid;
+  border: none;
   align-items: center;
   display: flex;
   justify-content: center;
+}
+
+.paragraph--type--four-column-links .four-wide .field--type-image img {
+  max-width: 200;
+  height: auto;
 }
 
 .paragraph--type--four-column-links .four-wide div.group-one,
@@ -12071,11 +12076,17 @@ ul.sf-menu.sf-style-white li, ul.sf-menu.sf-style-white.sf-navbar {
 .site-footer .content {
   color: #c0c0c0;
   color: rgba(0, 0, 0, 0.65);
-  font-size: 0.857em;
+  font-size: 1rem;
 }
 
 #block-cacs-theme-generallinks {
   background-color: #232D4B;
+  color: #fff;
+  font-size: 1rem;
+}
+
+#copyrightInfo {
+  color: #fff;
 }
 
 .container {
@@ -12201,13 +12212,29 @@ ul.sf-menu.sf-style-white li, ul.sf-menu.sf-style-white.sf-navbar {
   width: 33%;
 }
 
+.region-footer nav,
+.region-footer .nav,
+.site-footer .block {
+  display: block;
+  text-align: left;
+}
+
+.region-footer nav .flex-row {
+  flex-direction: column !important;
+}
+
+.region-footer nav li {
+  clear: both;
+}
+
 #block-cacs-theme-contactinfofooter a {
-  color: #495E9D;
+  color: #dc762c;
+  font-size: 1rem;
 }
 
 .site-footer {
   background-color: #fff;
-  font-size: 0.9rem;
+  font-size: 1rem;
   padding: 2rem 0;
   text-align: center;
   color: #000;
@@ -12215,8 +12242,10 @@ ul.sf-menu.sf-style-white li, ul.sf-menu.sf-style-white.sf-navbar {
   font-size: 1remßem;
 }
 .site-footer a {
-  color: #495E9D;
+  color: #dc762c;
   text-decoration: underline;
+  font-style: bold;
+  font-size: 1.4rem;
 }
 .site-footer a:hover {
   text-decoration: none;
