@@ -67,18 +67,18 @@ phases:
         fi
       - terraform apply -auto-approve -no-color -var instance_ami="${ami}" --target=local_file.inventory --target=local_file.tfvars
       - cd ansible
-      - ansible-playbook ${ansible_debug} deploy_backend_1.yml
+      # - ansible-playbook ${ansible_debug} deploy_backend_1.yml
       - source /tmp/env
       - printenv
-      # - |
-      # if [ "$THEME_ONLY" = "true" ]; then
-      #    echo "DEBUG: Running limited theme update..."
-      #    echo "Skipping Redundant checkout... "
+      - |
+        if [ "$THEME_ONLY" = "true" ]; then
+          echo "DEBUG: Running limited theme update..."
+          echo "Skipping Redundant checkout... "
           # ssh -oStrictHostKeyChecking=accept-new -i ${HOST_PRIVATE_KEY} aws_deploy@dh-drupal-dev-1.internal.lib.virginia.edu docker exec drupal-0 /opt/drupal/util/drupal-dhportal/scripts/server/pull-git-changes.sh
-      #  else
-      #    echo "DEBUG: Running full rebuild and deploy..."
-      #    ansible-playbook ${ansible_debug} deploy_backend_1.yml
-      #  fi
+        else
+          echo "DEBUG: Running full rebuild and deploy..."
+          ansible-playbook ${ansible_debug} deploy_backend_1.yml
+        fi
 
 #  post_build:
 #    commands:
