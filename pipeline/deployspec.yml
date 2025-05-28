@@ -37,9 +37,10 @@ phases:
       - BASTION_KEY=${CODEBUILD_SRC_DIR}/terraform-infrastructure/${BASTION_KEY_NAME}
       - ${CODEBUILD_SRC_DIR}/terraform-infrastructure/scripts/decrypt-key.ksh ${BASTION_KEY}.cpt ${BASTION_KEY_NAME}
       # decrypt the instance private key
-      - ${CODEBUILD_SRC_DIR}/terraform-infrastructure/scripts/decrypt-key.ksh ${CODEBUILD_SRC_DIR}/terraform-infrastructure/global/private-keys/${target_host_key}.pem.cpt global/private-keys/${target_host_key}.pem
-      - HOST_PRIVATE_KEY=${CODEBUILD_SRC_DIR}/terraform-infrastructure/global/private-keys/${target_host_key}.pem
-      - chmod 600 ${HOST_PRIVATE_KEY}
+      - PRIVATE_KEY_NAME=dh.library.virginia.edu/staging/keys/dh-drupal-staging.pem
+      - PRIVATE_KEY=${CODEBUILD_SRC_DIR}/terraform-infrastructure/${PRIVATE_KEY_NAME}
+      - ${CODEBUILD_SRC_DIR}/terraform-infrastructure/scripts/decrypt-key.ksh ${PRIVATE_KEY}.cpt ${PRIVATE_KEY_NAME}
+      - chmod 600 ${PRIVATE_KEY}
       - echo "Detecting changed files!"
       - echo source version = $CODEBUILD_RESOLVED_SOURCE_VERSION
       - CHANGED_FILES=$(curl -s  https://api.github.com/repos/uvalib/drupal-dhportal/compare/$CODEBUILD_RESOLVED_SOURCE_VERSION^1...$CODEBUILD_RESOLVED_SOURCE_VERSION | jq -r '.files[].filename' )
@@ -67,8 +68,8 @@ phases:
       - terraform apply -auto-approve -no-color -var instance_ami="${ami}" --target=local_file.inventory --target=local_file.tfvars
       - cd ansible
       - ansible-playbook ${ansible_debug} deploy_backend_1.yml
-      # - source /tmp/env
-      # - printenv
+      - source /tmp/env
+      - printenv
       # - |
       # if [ "$THEME_ONLY" = "true" ]; then
       #    echo "DEBUG: Running limited theme update..."
