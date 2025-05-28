@@ -162,14 +162,31 @@ display: flex;
   width:33%;
 }
 
+.region-footer nav,
+.region-footer .nav,
+.site-footer .block {
+  display: block;
+  text-align: left;
+}
+
+
+  .region-footer nav .flex-row {
+    flex-direction: column !important;
+}
+
+.region-footer nav li{
+clear:both
+}
+
 #block-cacs-theme-contactinfofooter a{
-  color:variables.$link-color;
+  color:variables.$secondary-color;
+      font-size: 1rem;
 }
 
 
 .site-footer {
   background-color: #fff;
-  font-size: 0.9rem;
+  font-size: 1rem;
   padding: 2rem 0;
   text-align: center;
     color: #000;
@@ -179,8 +196,11 @@ display: flex;
 
 
   a {
-    color: variables.$link-color;
+    color: variables.$secondary-color;
     text-decoration: underline;
+    font-style: bold;
+    font-size: 1.4rem;
+
 
     &:hover {
       text-decoration: none;
