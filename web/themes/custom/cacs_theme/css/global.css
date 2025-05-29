@@ -12089,6 +12089,21 @@ ul.sf-menu.sf-style-white li, ul.sf-menu.sf-style-white.sf-navbar {
   color: #fff;
 }
 
+#block-cacs-theme-aslogodark {
+  padding-left: 39%;
+}
+
+#block-cacs-theme-aslogodark img {
+  width: 400px;
+  height: auto;
+}
+
+.site-footer h2 {
+  color: #000;
+  color: rgba(0, 0, 0, 0.65);
+  margin-bottom: 0.75em;
+}
+
 .container {
   max-width: 1200px;
   margin: 0 auto;
