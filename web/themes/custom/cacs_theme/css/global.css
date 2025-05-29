@@ -11901,7 +11901,7 @@ h1, h2, h3, h4, h5, h6 {
 .field--name-field-h1-title {
   font-size: 3rem;
   color: #232D4B;
-  font-family: "franklin-gothic-urw", serif;
+  font-family: "ITC Franklin Gothic LT W01 BkC", Arial, sans-serif;
   font-weight: 800;
 }
 
@@ -11909,7 +11909,7 @@ h1, h2, h3, h4, h5, h6 {
   font-size: 2rem;
   font-weight: bold;
   color: #dc762c;
-  font-family: "franklin-gothic-urw", sans-serif;
+  font-family: "ITC Franklin Gothic LT W01 BkC", Arial, sans-serif;
 }
 
 .wrapper {
@@ -11923,7 +11923,7 @@ h1, h2, h3, h4, h5, h6 {
   font-size: 1.8em;
   color: #fff;
   padding: 2em 1em;
-  font-family: "franklin-gothic-urw", sans-serif;
+  font-family: "ITC Franklin Gothic LT W01 BkC", Arial, sans-serif;
   margin-left: calc(50% - 50vw);
   margin-right: calc(50% - 50vw);
 }
@@ -12100,6 +12100,7 @@ ul.sf-menu.sf-style-white li, ul.sf-menu.sf-style-white.sf-navbar {
   color: #000;
   color: rgba(0, 0, 0, 0.65);
   margin-bottom: 0.75em;
+  font-size: 1.2rem;
 }
 
 .container {
@@ -12246,7 +12247,7 @@ ul.sf-menu.sf-style-white li, ul.sf-menu.sf-style-white.sf-navbar {
 }
 
 .site-footer {
-  background-color: #fff;
+  background-color: #ebebeb;
   font-size: 1rem;
   padding: 2rem 0;
   text-align: center;
@@ -12268,7 +12269,7 @@ ul.sf-menu.sf-style-white li, ul.sf-menu.sf-style-white.sf-navbar {
   font-size: 2rem;
   font-weight: bold;
   color: #dc762c;
-  font-family: "franklin-gothic-urw", sans-serif;
+  font-family: "ITC Franklin Gothic LT W01 BkC", Arial, sans-serif;
 }
 
 .table {
