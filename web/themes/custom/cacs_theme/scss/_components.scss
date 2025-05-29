@@ -52,16 +52,12 @@
 
 .field--name-field-full-width-banner-text{
   background-color:variables.$primary-color;
-  font-size: 1.8em;
+  font-size: 1.2em;
   color:#fff;
-  padding:2em 1em;
+  padding:1em 1em;
   font-family:variables.$font-primary;
       margin-left: calc(50% - 50vw);
     margin-right: calc(50% - 50vw);
-}
-
-.block-superfish {
-  width:50%;
 }
 
 
@@ -155,7 +151,8 @@ max-width:200;
   width:100%;
   text-align: center;
   text-transform: uppercase;
-  margin-bottom: 2em;
+  margin-bottom: 0em;
+  margin-top:2em;
 }
 
 

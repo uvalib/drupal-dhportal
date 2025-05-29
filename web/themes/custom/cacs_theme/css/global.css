@@ -11920,16 +11920,12 @@ h1, h2, h3, h4, h5, h6 {
 
 .field--name-field-full-width-banner-text {
   background-color: #232D4B;
-  font-size: 1.8em;
+  font-size: 1.2em;
   color: #fff;
-  padding: 2em 1em;
+  padding: 1em 1em;
   font-family: "ITC Franklin Gothic LT W01 BkC", Arial, sans-serif;
   margin-left: calc(50% - 50vw);
   margin-right: calc(50% - 50vw);
-}
-
-.block-superfish {
-  width: 50%;
 }
 
 ul.sf-menu.sf-style-white a, ul.sf-menu.sf-style-white a:visited, ul.sf-menu.sf-style-white span.nolink {
@@ -12019,7 +12015,8 @@ ul.sf-menu.sf-style-white a, ul.sf-menu.sf-style-white a:visited, ul.sf-menu.sf-
   width: 100%;
   text-align: center;
   text-transform: uppercase;
-  margin-bottom: 2em;
+  margin-bottom: 0em;
+  margin-top: 2em;
 }
 
 .paragraph--type--four-column-links .four-wide .field--type-link {
@@ -12425,11 +12422,15 @@ ul.sf-menu.sf-style-white a, ul.sf-menu.sf-style-white a:visited, ul.sf-menu.sf-
   font-style: bold;
 }
 
-.block-superfish {
-  width: 70%;
-}
-
 ul.sf-menu.sf-style-default {
   float: left;
   margin-bottom: 0em;
+}
+
+.mb-3 {
+  margin-bottom: 0rem 0px !important;
+}
+
+.block-superfish {
+  margin-top: 2em;
 }
