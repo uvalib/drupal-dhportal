@@ -12103,6 +12103,64 @@ ul.sf-menu.sf-style-white li, ul.sf-menu.sf-style-white.sf-navbar {
   font-size: 1.2rem;
 }
 
+.site-footer a {
+  font-size: 1rem;
+  line-height: 1rem;
+}
+
+.form-control {
+  display: block;
+  width: 100%;
+  padding: 0.75rem 0.75rem;
+  font-size: 1rem;
+  font-weight: 400;
+  line-height: 1.5;
+  color: var(--bs-body-color);
+  appearance: none;
+  background-color: var(--bs-body-bg);
+  background-clip: padding-box;
+  border: 1px solid #000;
+}
+
+.form-select {
+  --bs-form-select-bg-img: url(data:image/svg+xml,%3csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"%3e%3cpath fill="none" stroke="%23343a40" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m2 5 6 6 6-6"/%3e%3c/svg%3e);
+  display: block;
+  width: 100%;
+  padding: 0.75rem 2.25rem 0.75rem 0.75rem;
+  font-size: 1rem;
+  font-weight: 400;
+  line-height: 1.5;
+  color: var(--bs-body-color);
+  appearance: none;
+  background-color: var(--bs-body-bg);
+  background-image: var(--bs-form-select-bg-img), var(--bs-form-select-bg-icon, none);
+  background-repeat: no-repeat;
+  background-size: 16px 12px;
+  border: 1px solid #000;
+  border-radius: var(--bs-border-radius);
+  transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+.js-form-item {
+  margin: 1em;
+}
+
+.js-form-item label {
+  font-size: 1rem;
+  font-weight: 900;
+}
+
+.btn-primary {
+  background-color: #dc762c;
+  color: #fff;
+  border: none;
+}
+
+.view-filters {
+  margin-top: 1em;
+  margin-bottom: 3em;
+}
+
 .container {
   max-width: 1200px;
   margin: 0 auto;
@@ -12207,6 +12265,15 @@ ul.sf-menu.sf-style-white li, ul.sf-menu.sf-style-white.sf-navbar {
 }
 .branding-bar .region-branding .user-menu {
   margin-left: 1rem;
+}
+
+h1 {
+  font-size: 4rem;
+  font-family: "ITC Franklin Gothic LT W01 BkC", Arial, sans-serif;
+}
+
+.block-page-title-block {
+  margin-bottom: 3em;
 }
 
 .region-footer {
@@ -12360,4 +12427,9 @@ ul.sf-menu.sf-style-white a, ul.sf-menu.sf-style-white a:visited, ul.sf-menu.sf-
 
 .block-superfish {
   width: 70%;
+}
+
+ul.sf-menu.sf-style-default {
+  float: left;
+  margin-bottom: 0em;
 }

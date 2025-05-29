@@ -7,6 +7,8 @@
   padding: 0 1rem;
 }
 
+
+
 // =========================
 // Branding Bar (Top Blue Bar)
 // =========================
@@ -136,6 +138,18 @@
       margin-left: 1rem;
     }
   }
+}
+
+
+// Main content
+
+h1{
+  font-size: 4rem;
+  font-family: variables.$font-primary;
+}
+
+.block-page-title-block{
+  margin-bottom: 3em;
 }
 
 // =========================
