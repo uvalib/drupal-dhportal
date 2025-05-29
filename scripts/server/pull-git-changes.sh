@@ -1,6 +1,6 @@
 #!/bin/sh
 cd /opt/drupal/util/drupal-dhportal
-git fetch
+git fetch -o StrictHostKeyChecking=accept-new
 changes=`git diff --name-only origin/main| wc -l`
 
 if [ $changes -gt 0 ]; then
