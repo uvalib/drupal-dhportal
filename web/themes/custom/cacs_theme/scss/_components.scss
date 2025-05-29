@@ -33,7 +33,7 @@
 .field--name-field-h1-title{
   font-size:3rem;
   color:variables.$primary-color;
-  font-family:variables.$font-headings;
+  font-family:variables.$font-primary;
   font-weight: 800;
 }
 
@@ -249,4 +249,5 @@ height:auto;
     color: #000;
     color: rgba(0, 0, 0, 0.65);
     margin-bottom: .75em;
+    font-size:1.2rem;
 }
