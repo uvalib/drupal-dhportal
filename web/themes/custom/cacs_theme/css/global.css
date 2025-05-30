@@ -12233,6 +12233,10 @@ ul.sf-menu.sf-style-white li, ul.sf-menu.sf-style-white.sf-navbar {
   margin: 0;
 }
 
+#search-block-form {
+  align-items: baseline;
+}
+
 .site-nav {
   background-color: white;
   border-bottom: 1px solid #ccc;
