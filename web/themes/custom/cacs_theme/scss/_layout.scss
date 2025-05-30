@@ -183,6 +183,20 @@
   }
 }
 
+.region-navigation {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: nowrap;
+    .block-page-title-block {
+    flex: 1;
+  }
+  #block-cacs-theme-views-block-page-banner-block-1 {
+    max-width: 300px;
+  }
+}
+
 
 // Main content
 

@@ -12309,6 +12309,20 @@ ul.sf-menu.sf-style-white li, ul.sf-menu.sf-style-white.sf-navbar {
   margin-left: 1rem;
 }
 
+.region-navigation {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: nowrap;
+}
+.region-navigation .block-page-title-block {
+  flex: 1;
+}
+.region-navigation #block-cacs-theme-views-block-page-banner-block-1 {
+  max-width: 300px;
+}
+
 h1 {
   font-size: 4rem;
   font-family: "ITC Franklin Gothic LT W01 BkC", Arial, sans-serif;
