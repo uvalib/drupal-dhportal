@@ -17,6 +17,7 @@ regions:
   sidebar_first: 'Sidebar First'
   sidebar_second: 'Sidebar Second'
   footer: 'Footer'
+  copyright_footer: 'Copyright Footer'
   page_bottom: 'Page Bottom'
   
 libraries:
