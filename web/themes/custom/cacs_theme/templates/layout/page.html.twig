@@ -70,6 +70,15 @@
   </footer>
 {% endif %}
 
+{# Copyright Footer #}
+{% if page.copyright_footer %}
+  <footer class="copyright-footer text-white py-4 mt-5" role="contentinfo">
+    <div class="{{ container }}">
+      {{ page.copyright_footer }}
+    </div>
+  </footer>
+{% endif %}
+
 {# Page Bottom #}
 {% if page.page_bottom %}
   <div id="page-bottom">

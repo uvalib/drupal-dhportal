@@ -12074,14 +12074,28 @@ ul.sf-menu.sf-style-white li, ul.sf-menu.sf-style-white.sf-navbar {
   font-size: 1rem;
 }
 
-#block-cacs-theme-generallinks {
-  background-color: #232D4B;
-  color: #fff;
-  font-size: 1rem;
-}
-
 #copyrightInfo {
   color: #fff;
+  flex-grow: 1;
+}
+
+.copyright-footer {
+  background-color: #284374;
+  padding: 1em 2em 0 2em;
+  margin-top: 0 !important;
+}
+
+#generalUVALinks a {
+  color: white;
+  text-decoration: none;
+  margin-left: 1em;
+}
+#generalUVALinks a:hover {
+  text-decoration: underline;
+}
+
+.copyright-footer .content .field--name-body {
+  display: flex;
 }
 
 #block-cacs-theme-aslogodark {
@@ -12231,6 +12245,10 @@ ul.sf-menu.sf-style-white li, ul.sf-menu.sf-style-white.sf-navbar {
   font-size: 1rem;
   color: #000000;
   margin: 0;
+}
+
+#search-block-form {
+  align-items: baseline;
 }
 
 .site-nav {
@@ -12445,6 +12463,8 @@ ul.sf-menu.sf-style-default {
   margin-bottom: 0rem 0px !important;
 }
 
-.block-superfish {
-  margin-top: 2em;
+#superfish-account .menuparent {
+  border-radius: 0.25rem;
+  background: white;
+  color: #232D4B;
 }
