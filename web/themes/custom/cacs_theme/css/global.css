@@ -12002,8 +12002,8 @@ ul.sf-menu.sf-style-white a, ul.sf-menu.sf-style-white a:visited, ul.sf-menu.sf-
 }
 
 .paragraph--type--four-column-links .four-wide .field--type-image img {
-  max-width: 200;
-  height: auto;
+  width: auto;
+  max-height: 300px;
 }
 
 .paragraph--type--four-column-links .four-wide div.group-one,
@@ -12283,6 +12283,10 @@ ul.sf-menu.sf-style-white li, ul.sf-menu.sf-style-white.sf-navbar {
   font-size: 1rem;
   color: #000000;
   margin: 0;
+}
+
+.region-branding-user {
+  float: right;
 }
 
 #search-block-form {
