@@ -13,6 +13,7 @@
 .paragraph--type--masthead-title-left-image-right, .paragraph--type--image-right-text-left{
     margin-left: calc(50% - 50vw);
     margin-right: calc(50% - 50vw);
+    border-bottom:8px solid variables.$primary-color;
 }
 
 .paragraph--type--masthead-title-left-image-right .two-wide{
@@ -22,7 +23,18 @@
 
 .paragraph--type--masthead-title-left-image-right .group-left{
   padding:1.75em;
+  max-width:49%;
 }
+
+.paragraph--type--masthead-title-left-image-right .group-right{
+  padding:1.75em;
+  max-width:49%;
+}
+
+.paragraph--type--masthead-title-left-image-right .group-right .field--name-field-right-image{
+
+}
+
 
 .field--name-field-full-width-banner-text p{
   width:70%;
@@ -32,13 +44,16 @@
 
 .field--name-field-h1-title{
   font-size:3rem;
+  line-height: 1.3;
   color:variables.$primary-color;
   font-family:variables.$font-primary;
   font-weight: 800;
+  margin-bottom:.4em;
 }
 
 .field--name-field-sub-title{
-  font-size:2rem;
+  font-size:1.5rem;
+  line-height:1.4;
   font-weight:bold;
   color:variables.$secondary-color;
   font-family:variables.$font-primary;
@@ -79,6 +94,7 @@ ul.sf-menu.sf-style-white a, ul.sf-menu.sf-style-white a:visited, ul.sf-menu.sf-
 
 .paragraph--type--image-right-text-left .field--name-field-title{
   font-size: 2em;
+  line-height: 1.3;
   margin-bottom:.75em;
   font-family:variables.$font-headings;
   font-weight: 600;
@@ -96,7 +112,7 @@ ul.sf-menu.sf-style-white a, ul.sf-menu.sf-style-white a:visited, ul.sf-menu.sf-
   font-weight: 600;
   font-style: italic;
   text-transform: uppercase;
-  line-height: 1.5;
+  line-height: 1.3;
 }
 
 .paragraph--type--four-column-links .field--name-field-title-fourlink{
@@ -263,11 +279,6 @@ height:auto;
     color: rgba(0, 0, 0, 0.65);
     margin-bottom: .75em;
     font-size:1.2rem;
-}
-
-.site-footer a{
-  font-size:1rem;
-  line-height: 1rem;;
 }
 
 

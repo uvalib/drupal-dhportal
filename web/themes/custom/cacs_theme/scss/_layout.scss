@@ -65,14 +65,36 @@
     font-weight: 700;
     color: variables.$primary-color;
   }
+@media (max-width: 1250px) {
+  .main-title{
+    font-size: 2rem;
+  }
+}
+
+@media (max-width: 720px) {
+  .main-title{
+    font-size: 1.5rem;
+  }
+}
 
 
 .site-name-slogan{
-      font-size: 1rem;
+    font-size: 1.7rem;
     font-family:variables.$font-caslon;
     font-weight: 700;
     color: variables.$secondary-color;
-    margin-left:.4em;
+}
+
+@media (max-width: 1250px) {
+.site-name-slogan{
+    font-size: 1.16rem;
+  }
+}
+
+@media (max-width: 720px) {
+.site-name-slogan{
+    font-size: 1rem;
+  }
 }
 
 
@@ -255,8 +277,8 @@ clear:both
   a {
     color: variables.$secondary-color;
     text-decoration: underline;
-    font-style: bold;
-    font-size: 1.4rem;
+    font-weight: 800;
+    font-size: 1.2rem;
 
 
     &:hover {
