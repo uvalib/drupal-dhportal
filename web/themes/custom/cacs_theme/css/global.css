@@ -11954,6 +11954,10 @@ ul.sf-menu.sf-style-white a, ul.sf-menu.sf-style-white a:visited, ul.sf-menu.sf-
   color: #fff;
 }
 
+.paragraph--type--image-right-text-left h2, .paragraph--type--image-right-text-left h3, .paragraph--type--image-right-text-left h4, .paragraph--type--image-right-text-left h5 {
+  color: #fff;
+}
+
 .paragraph--type--image-right-text-left .field--name-field-title {
   font-size: 2em;
   line-height: 1.3;
