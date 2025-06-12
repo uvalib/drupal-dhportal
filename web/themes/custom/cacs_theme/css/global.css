@@ -11899,7 +11899,7 @@ h1, h2, h3, h4, h5, h6 {
   max-width: 49%;
 }
 
-.field--name-field-full-width-banner-text p {
+.field--name-field-full-width-banner-text > * {
   width: 70%;
   margin-left: auto;
   margin-right: auto;
@@ -11955,6 +11955,10 @@ ul.sf-menu.sf-style-white a, ul.sf-menu.sf-style-white a:visited, ul.sf-menu.sf-
 }
 
 .paragraph--type--image-right-text-left h2, .paragraph--type--image-right-text-left h3, .paragraph--type--image-right-text-left h4, .paragraph--type--image-right-text-left h5 {
+  color: #fff;
+}
+
+.field--name-field-full-width-banner-text h2, .field--name-field-full-width-banner-text h3, .field--name-field-full-width-banner-text h4, .field--name-field-full-width-banner-text h5 {
   color: #fff;
 }
 
