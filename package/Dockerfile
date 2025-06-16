@@ -21,6 +21,7 @@ WORKDIR $APP_HOME
 # Move in necessary assets
 COPY package/data/container_bash_profile /root/.profile
 COPY package/data/files/opt/drupal/web/sites/default/settings.php /opt/drupal/web/sites/default/settings.php
+COPY package/data/files/usr/local/etc/php/php.ini-production /usr/local/etc/php/php.ini
 
 RUN mkdir -p /opt/drupal/dhportal && chown www-data:www-data /opt/drupal/dhportal
 
