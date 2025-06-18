@@ -12026,8 +12026,8 @@ ul.sf-menu.sf-style-white a, ul.sf-menu.sf-style-white a:visited, ul.sf-menu.sf-
 
 .paragraph--type--four-column-links .four-wide div.group-one .field--name-field-image-one-blurb,
 .paragraph--type--four-column-links .four-wide div.group-one .field--name-field-image-two-blurb,
-.paragraph--type--four-column-links .four-wide div.group-one .field--name-field-image-three-blurb,
-.paragraph--type--four-column-links .four-wide div.group-one .field--name-field-image-four-blurb {
+.paragraph--type--four-column-links .four-wide div.group-four .field--name-field-image-three-blurb,
+.paragraph--type--four-column-links .four-wide div.group-four .field--name-field-image-four-blurb {
   width: 90%;
 }
 
