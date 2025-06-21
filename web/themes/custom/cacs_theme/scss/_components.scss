@@ -16,10 +16,13 @@
     border-bottom:8px solid variables.$primary-color;
 }
 
+
 .paragraph--type--masthead-title-left-image-right .two-wide{
   display:flex;
   justify-content: space-between;
 }
+
+
 
 .paragraph--type--masthead-title-left-image-right .group-left{
   padding:1.75em;
@@ -29,10 +32,6 @@
 .paragraph--type--masthead-title-left-image-right .group-right{
   padding:1.75em;
   max-width:49%;
-}
-
-.paragraph--type--masthead-title-left-image-right .group-right .field--name-field-right-image{
-
 }
 
 
@@ -356,4 +355,48 @@ height:auto;
 .view-filters{
   margin-top:1em;
   margin-bottom: 3em;
+}
+
+
+@media (max-width: 900px) {
+
+
+
+  .paragraph--type--image-left-text-right .two-wide .group-left, 
+  .paragraph--type--image-left-text-right .two-wide .group-right,
+  .paragraph--type--image-right-text-left .two-wide .group-left,
+  .paragraph--type--image-right-text-left .two-wide .group-right{
+    width: 100%;
+}
+
+
+  .paragraph--type--masthead-title-left-image-right .two-wide,
+  .paragraph--type--image-left-text-right .two-wide,
+  .paragraph--type--image-right-text-left .two-wide {
+    display:block;
+    justify-content: none;
+
+  .field--type-image {
+        float: none;
+  }
+
+  }
+
+  .paragraph--type--masthead-title-left-image-right .group-left,
+  .paragraph--type--masthead-title-left-image-right .group-right{
+  padding:1.75em;
+  max-width:100%;
+}
+
+.site-header .main-title {
+    font-size: 1rem;
+}
+
+.site-header .navbar-brand img {
+    max-width: 200px;
+    float: none;
+    margin-right: 1em;
+
+
+}
 }
