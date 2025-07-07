@@ -49,6 +49,28 @@ $config = [
     'logging.handler' => 'file',
     'logging.logfile' => 'simplesamlphp.log',
 
+    // Additional required configuration
+    'debug' => [
+        'saml' => true,
+        'backtraces' => true,
+        'validatexml' => false,
+    ],
+
+    // Timezone
+    'timezone' => 'America/New_York',
+
+    // Statistics
+    'statistics.enable' => false,
+
+    // Session duration
+    'session.duration' => 28800, // 8 hours
+
+    // Trusted URLs
+    'trusted.url.domains' => ['drupal-dhportal.ddev.site', 'drupal-netbadge.ddev.site'],
+
+    // Proxy configuration
+    'proxy' => null,
+
     // Development settings
     'debug' => true,
     'showerrors' => true,
