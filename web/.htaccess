@@ -127,6 +127,7 @@ AddEncoding gzip svgz
   RewriteCond %{REQUEST_FILENAME} !-f
   RewriteCond %{REQUEST_FILENAME} !-d
   RewriteCond %{REQUEST_URI} !=/favicon.ico
+  RewriteCond %{REQUEST_URI} !^/simplesaml
   RewriteRule ^ index.php [L]
 
   # For security reasons, deny access to other PHP files on public sites.
