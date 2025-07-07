@@ -28,7 +28,11 @@ $config = [
     'timezone' => 'America/New_York',
 
     // Debug and errors
-    'debug' => true,
+    'debug' => [
+        'saml' => true,
+        'backtraces' => true,
+        'validatexml' => false,
+    ],
     'showerrors' => true,
     'errorreporting' => true,
 

@@ -42,19 +42,15 @@ $config = [
     ],
 
     // Store configuration
-    'store.type' => 'phpsession',
+    'store.type' => 'sql',
+    'store.sql.dsn' => 'mysql:host=db;dbname=db',
+    'store.sql.username' => 'db',
+    'store.sql.password' => 'db',
 
     // Logging
     'logging.level' => SimpleSAML\Logger::DEBUG,
     'logging.handler' => 'file',
     'logging.logfile' => 'simplesamlphp.log',
-
-    // Additional required configuration
-    'debug' => [
-        'saml' => true,
-        'backtraces' => true,
-        'validatexml' => false,
-    ],
 
     // Timezone
     'timezone' => 'America/New_York',
@@ -72,7 +68,7 @@ $config = [
     'proxy' => null,
 
     // Development settings
-    'debug' => true,
+    'debug' => [],
     'showerrors' => true,
     'errorreporting' => true,
 
