@@ -1,0 +1,8 @@
+name: 'DHPortal Account Menu'
+type: module
+description: 'Custom module to manage the account menu structure and hide core user menu items'
+core_version_requirement: ^9 || ^10
+package: Custom
+dependencies:
+  - drupal:menu_link_content
+  - drupal:user
