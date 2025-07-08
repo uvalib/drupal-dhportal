@@ -79,9 +79,17 @@ fi
 echo ""
 echo "🎉 SAML Integration Setup Complete!"
 echo ""
+
+# Get the project URL from DDEV
+PROJECT_URL=$(ddev describe -j 2>/dev/null | grep -o '"primary_url":"[^"]*"' | cut -d'"' -f4)
+if [ -z "$PROJECT_URL" ]; then
+    # Fallback if JSON parsing fails - extract from regular output
+    PROJECT_URL=$(ddev describe | grep -o 'https://[^,]*\.ddev\.site:[0-9]*' | head -1)
+fi
+
 echo "📋 Next Steps:"
-echo "1. Test SAML authentication at: https://$(ddev describe | grep "Primary URL" | awk '{print $3}' | sed 's|https://||')/test-saml-integration.php"
-echo "2. Access SimpleSAMLphp admin at: https://$(ddev describe | grep "Primary URL" | awk '{print $3}' | sed 's|https://||')/simplesaml/"
+echo "1. Test SAML authentication at: $PROJECT_URL/test-saml-integration.php"
+echo "2. Access SimpleSAMLphp admin at: $PROJECT_URL/simplesaml/"
 echo "3. Ensure drupal-netbadge IdP is running for testing"
 echo ""
 echo "🧪 Test Users (from drupal-netbadge):"
