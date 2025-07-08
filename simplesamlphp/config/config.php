@@ -11,6 +11,7 @@ $config = [
     'loggingdir' => 'log/',
     'datadir' => 'data/',
     'tempdir' => '/tmp/simplesamlphp',
+    'metadatadir' => '/var/www/html/simplesamlphp/metadata/',
 
     // Security settings
     'secretsalt' => 'dhportal-secret-salt-for-development-only',

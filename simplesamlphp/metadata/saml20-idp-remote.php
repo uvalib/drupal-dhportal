@@ -4,7 +4,7 @@
  * This defines the connection to the drupal-netbadge SAML IdP
  */
 
-$metadata['https://drupal-netbadge.ddev.site:8443/simplesaml/saml2/idp/metadata.php'] = [
+$metadata['__DEFAULT__'] = [
     'entityid' => 'https://drupal-netbadge.ddev.site:8443/simplesaml/saml2/idp/metadata.php',
     'name' => [
         'en' => 'NetBadge Authentication',
