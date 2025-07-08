@@ -9,7 +9,12 @@ $config = [
     'default-sp' => [
         'saml:SP',
         'entityID' => 'https://drupal-dhportal.ddev.site:8443',
-        'idp' => 'netbadge-idp',
+        'idp' => 'https://drupal-netbadge.ddev.site:8443/simplesaml/saml2/idp/metadata.php',
         'discoURL' => null,
+        
+        // Enable signature validation
+        'validate.response' => true,
+        'validate.assertion' => true,
+        'signature.algorithm' => 'http://www.w3.org/2001/04/xmldsig-more#rsa-sha256',
     ],
 ];

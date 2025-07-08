@@ -26,7 +26,7 @@ $config = [
     'session.cookie.name' => 'SimpleSAMLSessionID',
     'session.cookie.lifetime' => 0,
     'session.cookie.path' => '/',
-    'session.cookie.domain' => '.drupal-dhportal.ddev.site',
+    'session.cookie.domain' => '.ddev.site',
     'session.cookie.secure' => false,
 
     // Language settings
@@ -68,10 +68,7 @@ $config = [
     'proxy' => null,
 
     // Development settings
-    'debug' => [],
+    'debug' => null,
     'showerrors' => true,
     'errorreporting' => true,
-
-    // Timezone
-    'timezone' => 'America/New_York',
 ];
