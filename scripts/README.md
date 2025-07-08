@@ -2,6 +2,25 @@
 
 This directory contains the essential scripts for setting up SAML authentication and dual login menu functionality.
 
+## Quick Start with NPM
+
+**Recommended approach using NPM scripts:**
+
+```bash
+# Complete setup (both SAML and menu)
+npm run setup
+
+# Or run individually
+npm run setup:saml
+npm run setup:menu
+
+# Test the setup
+npm run test:menu
+npm run status
+```
+
+See the main [TESTING_GUIDE.md](../TESTING_GUIDE.md) for comprehensive testing procedures.
+
 ## Core Setup Scripts
 
 ### `setup-saml-integration.sh`

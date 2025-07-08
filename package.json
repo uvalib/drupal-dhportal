@@ -1,0 +1,52 @@
+{
+  "name": "drupal-dhportal",
+  "version": "1.0.0",
+  "description": "Drupal DHPortal with dual SAML/local authentication and custom account menu",
+  "scripts": {
+    "help": "node scripts/dev.js help",
+    "start": "echo '🚀 Starting DDEV...' && ddev start",
+    "stop": "echo '⏹️  Stopping DDEV...' && ddev stop",
+    "restart": "echo '🔄 Restarting DDEV...' && ddev restart",
+    "logs": "echo '📋 Showing DDEV logs...' && ddev logs",
+    "clean": "echo '🧹 Cleaning up...' && ddev delete -Oy && docker system prune -f",
+    "setup": "echo '⚙️  Running complete setup...' && npm run setup:saml && npm run setup:menu",
+    "setup:saml": "echo '🔐 Setting up SAML integration...' && ./scripts/setup-saml-integration.sh",
+    "setup:menu": "echo '🎯 Setting up account menu...' && ./scripts/setup-account-menu-complete.sh",
+    "test": "echo '🧪 Running tests...' && ddev exec 'cd /var/www/html && ./vendor/bin/phpunit'",
+    "test:menu": "node scripts/dev.js testMenu",
+    "drush": "echo '🔧 Opening Drush shell...' && ddev drush",
+    "admin": "echo '👤 Opening admin interface...' && echo 'URL: https://drupal-dhportal.ddev.site/admin' && echo 'Menu admin: https://drupal-dhportal.ddev.site/admin/structure/menu/manage/account'",
+    "status": "node scripts/dev.js status",
+    "reset": "echo '🔄 Resetting to fresh state...' && npm run clean && npm run start && npm run setup",
+    "dev:rebuild": "npm run clean && npm run start && npm run setup",
+    "config:export": "echo '📤 Exporting configuration...' && ddev drush cex",
+    "config:import": "echo '📥 Importing configuration...' && ddev drush cim",
+    "module:enable": "node scripts/dev.js enableModule",
+    "module:disable": "node scripts/dev.js disableModule",
+    "menu:validate": "node scripts/dev.js validateMenu",
+    "menu:rebuild": "echo '🔨 Rebuilding menu cache...' && ddev drush cr && ddev drush menu-rebuild",
+    "postinstall": "echo '🎉 Setup complete! Run \"npm run help\" to see available commands.'"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/your-org/drupal-dhportal.git"
+  },
+  "keywords": [
+    "drupal",
+    "dhportal",
+    "saml",
+    "netbadge",
+    "dual-authentication",
+    "account-menu",
+    "ddev"
+  ],
+  "author": "DHPortal Team",
+  "license": "MIT",
+  "devDependencies": {
+    "cross-env": "^7.0.3"
+  },
+  "engines": {
+    "node": ">=16.0.0",
+    "npm": ">=8.0.0"
+  }
+}
