@@ -1,8 +1,43 @@
-# Scripts Directory
+# Scripts Directory - Complete Developer Guide
 
-This directory contains the essential scripts for setting up SAML authentication and dual login menu functionality.
+**This directory contains the essential scripts for setting up SAML authentication and dual login menu functionality.**
 
-## Quick Start with NPM
+## 🎯 Script Architecture & Context
+
+### Purpose of This Directory
+
+These scripts solve the complex problem of setting up a **dual authentication system** in Drupal 10 with:
+- **NetBadge SAML authentication** for university users  
+- **Local Drupal authentication** for partner users
+- **Clean account menu structure** without core menu conflicts
+
+### Why Scripts Are Needed
+
+**Without these scripts**, setting up the system would require:
+1. Manual module installation and configuration (20+ steps)
+2. Complex SAML configuration with external IdP coordination  
+3. Manual menu item creation with specific UUID management
+4. Custom module enabling and cache clearing
+5. Troubleshooting numerous Drupal menu caching issues
+
+**With these scripts**: 2-command setup that works reliably on fresh installations.
+
+### Script Dependencies
+
+```
+Script Execution Order & Dependencies:
+├── 1. setup-saml-integration.sh
+│   ├── Installs: simplesamlphp_auth, externalauth modules
+│   ├── Configures: SAML authentication sources
+│   └── Enables: SimpleSAMLphp integration
+└── 2. setup-account-menu-complete.sh  
+    ├── Depends: SAML modules from script 1
+    ├── Creates: Complete menu structure
+    ├── Enables: dhportal_account_menu module
+    └── Validates: Final configuration
+```
+
+## 🚀 Quick Start with NPM (Recommended)
 
 **Recommended approach using NPM scripts:**
 

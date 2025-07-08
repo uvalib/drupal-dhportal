@@ -2,6 +2,51 @@
 
 A Drupal 10 installation with dual login capabilities: NetBadge SAML authentication for university users and local Drupal authentication for partner users. Features a custom account menu structure and automated setup scripts.
 
+## 🎯 Project Context & Architecture
+
+### Problem Statement
+This project solves the challenge of providing **two distinct authentication methods** in a single Drupal installation:
+1. **NetBadge SAML** - For university users with institutional credentials
+2. **Local Drupal** - For external partner users without institutional access
+
+### Technical Challenge Solved
+**Core Issue**: Drupal's default user module automatically adds conflicting menu items ("My account", "Log in") that interfere with a clean dual login interface.
+
+**Solution**: Custom menu structure with a `dhportal_account_menu` module that:
+- Hides core user menu items using Drupal hooks
+- Provides a clean "My Profile" dropdown with context-aware children
+- Maintains separate login paths for different user types
+
+### Key Architecture Decisions
+
+#### 1. Menu Structure Design
+```
+My Profile (visible to all, <nolink> route)
+├── Anonymous Users See:
+│   ├── NetBadge Login → /saml_login (SAML authentication)
+│   └── Partner Login → /user/login (local Drupal)
+└── Authenticated Users See:
+    ├── View Profile → /user (user profile page)
+    └── Logout → /user/logout (sign out)
+```
+
+#### 2. Module Dependencies
+- **SimpleSAMLphp Auth** (`simplesamlphp_auth`) - SAML 2.0 integration
+- **External Auth** (`externalauth`) - Maps SAML users to Drupal accounts  
+- **Custom Module** (`dhportal_account_menu`) - Menu conflict prevention
+
+#### 3. Authentication Flow
+```
+University User:    Anonymous → NetBadge Login → SAML IdP → Auto-provisioned Drupal Account
+Partner User:       Anonymous → Partner Login → Local Drupal Login → Existing Account
+```
+
+#### 4. Development Tooling
+- **DDEV**: Local development environment (Drupal 10 + PHP 8.3 + MariaDB 10.11)
+- **NPM Scripts**: Cross-platform development commands with emoji-rich output
+- **Automated Setup**: 2-command installation with dynamic UUID handling
+- **Testing Framework**: Comprehensive validation of menu structure and module status
+
 ## Quick Start
 
 ### Prerequisites
@@ -279,3 +324,155 @@ ddev drush sql-drop -y && ddev drush sql-cli < backup.sql
 ---
 
 This project demonstrates a clean approach to dual authentication in Drupal while maintaining a user-friendly interface and robust automated setup process.
+
+## 🤖 GitHub Copilot Context & Developer Onboarding
+
+### For Future AI-Assisted Development Sessions
+
+**This section provides comprehensive context for GitHub Copilot and future developers working on this codebase.**
+
+### Project Architecture Summary
+
+**This is a Drupal 10 dual authentication system with:**
+- **Primary Challenge**: Providing both SAML (NetBadge) and local Drupal authentication in one interface
+- **Core Solution**: Custom account menu structure with automated setup scripts
+- **Key Innovation**: `dhportal_account_menu` module prevents core menu conflicts
+- **Development Approach**: NPM-based cross-platform tooling with comprehensive testing
+
+### Critical File Locations & Their Purposes
+
+```
+Project Structure for AI Context:
+├── README.md                                    # Complete project overview (this file)
+├── TESTING_GUIDE.md                            # Comprehensive testing procedures  
+├── package.json                                # NPM development scripts
+├── scripts/
+│   ├── dev.js                                  # Cross-platform development utilities
+│   ├── setup-saml-integration.sh              # SAML/SimpleSAMLphp setup
+│   ├── setup-account-menu-complete.sh         # Menu structure creation
+│   └── README.md                               # Script documentation
+└── web/modules/custom/dhportal_account_menu/
+    ├── dhportal_account_menu.module            # Core menu conflict prevention
+    ├── dhportal_account_menu.info.yml          # Module definition
+    └── MODULE_README_COMPLETE.md               # Complete module documentation
+```
+
+### Key Technical Concepts
+
+#### 1. The Menu Conflict Problem
+**Issue**: Drupal automatically adds "My account" and "Log in" menu items to the account menu
+**Solution**: Custom module with 3 hooks (`hook_menu_links_discovered_alter`, `hook_menu_local_actions_alter`, `hook_preprocess_menu`)
+**Result**: Clean "My Profile" dropdown with only custom items
+
+#### 2. Dual Authentication Architecture  
+**NetBadge Flow**: Anonymous → "NetBadge Login" → SAML IdP → Auto-provisioned Account
+**Partner Flow**: Anonymous → "Partner Login" → Local Drupal → Existing Account
+**Menu Adaptation**: Same menu shows different options based on authentication state
+
+#### 3. NPM Development Tooling
+**Why NPM**: Cross-platform compatibility (Windows/Mac/Linux)
+**Key Commands**: `npm run setup`, `npm run test:menu`, `npm run status`
+**Architecture**: Node.js scripts call Drush/DDEV commands with enhanced UX
+
+### Development Workflow for AI Assistance
+
+#### When Working on Menu Issues:
+1. **Test current state**: `npm run test:menu`
+2. **Check module status**: `npm run status`  
+3. **Review menu structure**: Navigate to `/admin/structure/menu/manage/account`
+4. **Clear caches**: `npm run menu:rebuild`
+5. **Validate changes**: `npm run menu:validate`
+
+#### When Working on Authentication:
+1. **Check SAML status**: `ddev drush pm:list --filter=simplesamlphp_auth`
+2. **Test authentication flow**: Use test users from drupal-netbadge project
+3. **Review SAML config**: Check `saml-config/` directory
+4. **Debug auth issues**: Check DDEV logs with `npm run logs`
+
+#### When Working on Scripts:
+1. **Test on fresh install**: `npm run reset` then `npm run setup`
+2. **Validate script output**: Each script should provide success/failure feedback
+3. **Check UUID handling**: Scripts must detect UUIDs dynamically, never hardcode
+4. **Cross-platform testing**: Test on Windows/Mac/Linux environments
+
+### Common AI-Assisted Tasks & Context
+
+#### Task: "Fix menu items not showing"
+**Likely causes**: 
+- `dhportal_account_menu` module not enabled
+- Menu cache issues  
+- Parent menu item missing `<nolink>` route
+**Debugging approach**: `npm run test:menu` then `npm run status`
+
+#### Task: "SAML authentication not working"  
+**Dependencies**: 
+- drupal-netbadge project running as IdP
+- SimpleSAMLphp modules enabled
+- Certificates properly configured
+**Debugging approach**: Check `ddev logs` and SAML module status
+
+#### Task: "Setup scripts failing"
+**Common issues**:
+- DDEV not running (`ddev start`)
+- Database not accessible
+- Missing dependencies
+**Recovery approach**: `npm run reset` for complete rebuild
+
+#### Task: "Add new menu item"
+**Process**:
+1. Add to `setup-account-menu-complete.sh` script
+2. Test with `npm run setup:menu`
+3. Validate with `npm run test:menu`
+4. Update expected items in `scripts/dev.js` validation
+
+### Integration Points & Dependencies
+
+#### External Dependencies:
+- **drupal-netbadge**: Separate project providing SimpleSAMLphp IdP for testing
+- **DDEV**: Required for local development environment
+- **Node.js**: Required for NPM development scripts
+
+#### Internal Dependencies:
+- **Menu structure** depends on **custom module** being enabled
+- **SAML auth** depends on **external IdP** being available  
+- **Testing scripts** depend on **DDEV** being operational
+
+### Code Quality & Testing Standards
+
+#### Before Committing Changes:
+```bash
+# Always run these before committing
+npm run test:menu     # Validate menu structure
+npm run status        # Check system health  
+npm run setup         # Test fresh installation
+```
+
+#### Documentation Standards:
+- **All new scripts** must have usage examples and error handling
+- **Module changes** must update MODULE_README_COMPLETE.md
+- **Menu changes** must update TESTING_GUIDE.md procedures
+
+### Troubleshooting Context for AI
+
+#### "Menu items appearing twice"
+**Root cause**: Core module override or caching issue
+**Solution path**: Check custom module status → Clear caches → Rebuild menu
+
+#### "NPM scripts not working"  
+**Root cause**: Node.js version incompatibility or missing dependencies
+**Solution path**: Check Node.js version → `npm install` → Verify DDEV status
+
+#### "Authentication redirecting to wrong page"
+**Root cause**: SAML configuration or route mapping issue
+**Solution path**: Check SimpleSAMLphp config → Verify external auth mapping → Test IdP connectivity
+
+### Future Enhancement Context
+
+**When adding new features, consider:**
+1. **Cross-platform compatibility** - Test on Windows/Mac/Linux
+2. **Fresh installation compatibility** - Must work with `npm run reset && npm run setup`
+3. **Menu structure preservation** - Don't break existing dual-login interface
+4. **Testing integration** - Add validation to `scripts/dev.js` testing functions
+5. **Documentation updates** - Update relevant README files
+
+This context enables GitHub Copilot and future developers to understand the complete system architecture, common issues, and development workflow for effective code assistance.

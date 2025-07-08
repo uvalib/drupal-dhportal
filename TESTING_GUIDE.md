@@ -1,8 +1,47 @@
 # DHPortal Account Menu Testing Guide
 
-This guide provides comprehensive testing procedures for the DHPortal dual authentication system and custom account menu structure.
+**Complete testing procedures for the DHPortal dual authentication system and custom account menu structure.**
 
-## Quick Testing Commands
+## 🎯 Testing Context & Architecture
+
+### What This Testing Guide Covers
+
+This guide provides comprehensive testing for:
+
+1. **Dual Authentication System** - NetBadge SAML + Local Drupal login
+2. **Custom Account Menu Structure** - Clean "My Profile" dropdown interface  
+3. **Core Menu Conflict Prevention** - Ensuring Drupal's default menu items don't interfere
+4. **Custom Module Functionality** - `dhportal_account_menu` module behavior
+5. **Cross-Platform Development Tools** - NPM-based testing scripts
+
+### System Architecture Being Tested
+
+```
+DHPortal System Components:
+├── Authentication Layer
+│   ├── SimpleSAMLphp (SAML 2.0 for NetBadge)
+│   ├── External Auth (User mapping)
+│   └── Drupal User System (Local accounts)
+├── Menu Management Layer  
+│   ├── Custom Menu Structure (My Profile dropdown)
+│   ├── dhportal_account_menu Module (Hides core items)
+│   └── Access Control (Context-aware menu items)
+└── Development/Testing Layer
+    ├── DDEV (Local environment)
+    ├── NPM Scripts (Cross-platform tools)
+    └── Automated Validation (Menu structure testing)
+```
+
+### Key Testing Scenarios
+
+**Primary Use Cases Tested:**
+1. **Anonymous User Experience** - Should see NetBadge/Partner login options
+2. **Authenticated User Experience** - Should see Profile/Logout options  
+3. **Menu Conflict Detection** - No duplicate or core menu items visible
+4. **Module Integration** - All dependencies working together correctly
+5. **Fresh Installation** - Setup scripts work on clean database
+
+## 🛠️ Testing Tools & Commands
 
 ```bash
 # Test the complete menu structure
