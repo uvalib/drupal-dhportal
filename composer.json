@@ -36,7 +36,8 @@
         "drupal/superfish": "^1.12",
         "drupal/tamper": "^1.0@beta",
         "drupal/token": "^1.15",
-        "drupal/views_data_export": "^1.5"
+        "drupal/views_data_export": "^1.5",
+        "simplesamlphp/simplesamlphp": "^2.4"
     },
     "conflict": {
         "drupal/drupal": "*"
