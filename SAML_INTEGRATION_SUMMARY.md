@@ -427,7 +427,7 @@ ddev restart
 ```bash
 # Check if Drupal SimpleSAMLphp module is compatible
 composer show drupal/simplesamlphp_auth
-# May need to update: composer update drupal/simplesamlphp_auth
+# May need to update: composer update drupal/ssimplesamlphp_auth
 ```
 
 **API Changes:**
@@ -496,3 +496,79 @@ ddev restart
 - Drupal SimpleSAMLphp module
 - PHP version and dependencies
 - Web server configuration
+
+## Automated Deployment Process
+
+### 🚀 **Container Build Automation**
+
+The SAML integration now includes automated setup that runs every time the container starts:
+
+#### **Web Container Entrypoint Script**
+**Location**: `.ddev/web-entrypoint.d/simplesamlphp-permissions.sh`
+
+**What it does automatically:**
+- ✅ Fixes SimpleSAMLphp vendor file permissions (755)
+- ✅ Ensures all PHP files are executable 
+- ✅ Creates/maintains the `/simplesaml` symlink
+- ✅ Validates symlink integrity on every container start
+
+**When it runs:** Every time the web container starts (no manual intervention needed)
+
+#### **Post-Database Import Setup Script**
+**Location**: `scripts/setup-saml-integration.sh`
+
+**Usage after database import:**
+```bash
+./scripts/setup-saml-integration.sh
+```
+
+**What it does:**
+- 📦 Enables SimpleSAMLphp auth and external auth modules
+- ⚙️ Configures SAML authentication settings
+- 🔒 Fixes any permission issues
+- 🔗 Ensures symlinks are properly created
+- 📄 Validates .htaccess rewrite rules
+- 🧪 Tests SimpleSAMLphp accessibility
+- 📋 Provides status report and next steps
+
+### 🔄 **Updated Deployment Process**
+
+The deployment process issues have been resolved with automation:
+
+```bash
+# 1. Clean start
+ddev delete --yes
+
+# 2. Start DDEV (composer install happens automatically)
+ddev start
+
+# 3. Import database from remote
+./scripts/fetch-db-from-remote.sh -i
+
+# 4. Run automated SAML setup (NEW!)
+./scripts/setup-saml-integration.sh
+
+# 5. Test the integration
+# Visit: https://drupal-dhportal.ddev.site:8443/test-saml-integration.php
+```
+
+### 🛠️ **Problems Solved**
+
+| Issue | Solution | Automation Level |
+|-------|----------|-----------------|
+| **File Permissions** | Web entrypoint script fixes on every start | ✅ Fully Automated |
+| **Missing Symlink** | Web entrypoint script creates/maintains | ✅ Fully Automated |
+| **Module Enablement** | Post-import setup script handles | 🔧 One-command |
+| **SAML Configuration** | Post-import setup script configures | 🔧 One-command |
+| **.htaccess Rules** | Setup script validates and reports | 🔧 Validated |
+| **Status Validation** | Setup script provides comprehensive report | 🔧 Automated Check |
+
+### 🎯 **No More Manual Steps**
+
+The following manual steps are **no longer required:**
+- ❌ ~~Manual `chmod 755` on SimpleSAMLphp files~~
+- ❌ ~~Manual symlink creation~~
+- ❌ ~~Manual module enablement~~
+- ❌ ~~Manual SAML configuration~~
+
+**Everything is now handled by the automated scripts!**
