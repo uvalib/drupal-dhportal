@@ -68,7 +68,15 @@ echo "   - config.php: $CONFIG_STATUS"
 echo "   - authsources.php: $AUTHSOURCES_STATUS"
 echo "   - saml20-idp-remote.php: $METADATA_STATUS"
 
-echo "7. 🌐 Testing SimpleSAMLphp access..."
+echo "7. 🔐 Checking IdP certificate in metadata..."
+if ddev exec "grep -q 'X509Certificate.*MII' /var/www/html/simplesamlphp/metadata/saml20-idp-remote.php"; then
+    echo "   ✅ IdP certificate found in metadata"
+else
+    echo "   ⚠️  IdP certificate missing or invalid in metadata"
+    echo "   💡 You may need to update the certificate from drupal-netbadge"
+fi
+
+echo "8. 🌐 Testing SimpleSAMLphp access..."
 RESPONSE=$(ddev exec "curl -s -o /dev/null -w '%{http_code}' http://localhost/simplesaml/" 2>/dev/null || echo "000")
 if [ "$RESPONSE" = "200" ] || [ "$RESPONSE" = "302" ] || [ "$RESPONSE" = "303" ]; then
     echo "   ✅ SimpleSAMLphp is accessible (HTTP $RESPONSE)"
