@@ -1,0 +1,57 @@
+<?php
+
+/**
+ * @file
+ * DHPortal Account Menu module.
+ * 
+ * This module customizes the account menu to hide core user menu items
+ * and manage the dual login structure.
+ */
+
+use Drupal\Core\Menu\MenuTreeParameters;
+
+/**
+ * Implements hook_menu_links_discovered_alter().
+ */
+function dhportal_account_menu_menu_links_discovered_alter(&$links) {
+  // Hide core user menu items from the account menu
+  if (isset($links['user.page'])) {
+    // Remove from account menu by changing menu_name or disabling
+    unset($links['user.page']);
+  }
+  
+  if (isset($links['user.logout'])) {
+    // Remove from account menu by changing menu_name or disabling  
+    unset($links['user.logout']);
+  }
+}
+
+/**
+ * Implements hook_menu_local_actions_alter().
+ */
+function dhportal_account_menu_menu_local_actions_alter(&$local_actions) {
+  // Additional safety check for any user-related local actions
+  foreach ($local_actions as $key => $action) {
+    if (strpos($key, 'user.') === 0) {
+      unset($local_actions[$key]);
+    }
+  }
+}
+
+/**
+ * Implements hook_preprocess_menu().
+ */
+function dhportal_account_menu_preprocess_menu(&$variables) {
+  // Ensure core user menu items don't appear in the account menu
+  if ($variables['menu_name'] == 'account') {
+    // Remove any core user menu items that might still appear
+    foreach ($variables['items'] as $key => $item) {
+      if (isset($item['url']) && $item['url']->getRouteName() == 'user.page') {
+        unset($variables['items'][$key]);
+      }
+      if (isset($item['url']) && $item['url']->getRouteName() == 'user.logout') {
+        unset($variables['items'][$key]);
+      }
+    }
+  }
+}

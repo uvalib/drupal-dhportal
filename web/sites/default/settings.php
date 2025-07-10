@@ -893,6 +893,18 @@ $settings['migrate_node_migrate_type_classic'] = FALSE;
 #   include $app_root . '/' . $site_path . '/settings.local.php';
 # }
 
+/**
+ * SimpleSAMLphp configuration.
+ *
+ * Set the path to the SimpleSAMLphp library directory.
+ * Keep pointing to vendor for the library code.
+ */
+$settings['simplesamlphp_dir'] = DRUPAL_ROOT . '/../vendor/simplesamlphp/simplesamlphp';
+
+// Set custom config directory for SimpleSAMLphp
+// This separates our configuration from the vendor distribution files
+putenv('SIMPLESAMLPHP_CONFIG_DIR=' . DRUPAL_ROOT . '/../simplesamlphp/config');
+
 // Automatically generated include for settings managed by ddev.
 $ddev_settings = __DIR__ . '/settings.ddev.php';
 if (getenv('IS_DDEV_PROJECT') == 'true' && is_readable($ddev_settings)) {

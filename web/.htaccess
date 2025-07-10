@@ -122,6 +122,8 @@ AddEncoding gzip svgz
   # Rewrite install.php during installation to see if mod_rewrite is working
   RewriteRule ^core/install\.php core/install.php?rewrite=ok [QSA,L]
 
+  # SimpleSAMLphp exception - allow direct access to SimpleSAMLphp files
+  RewriteCond %{REQUEST_URI} !^/simplesaml
   # Pass all requests not referring directly to files in the filesystem to
   # index.php.
   RewriteCond %{REQUEST_FILENAME} !-f
