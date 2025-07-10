@@ -244,6 +244,35 @@ This ensures **development-production parity** by using the same container in bo
 - **URL determination**: Container scripts use environment variables or Drupal config for base URL
 - **Path handling**: Container scripts use absolute paths appropriate for container filesystem
 
+#### SAML Certificate Management
+
+**Certificate Management Script**
+
+```bash
+./scripts/manage-saml-certificates.sh
+```
+
+**Usage Examples:**
+
+```bash
+# Development environment (self-signed)
+./scripts/manage-saml-certificates.sh setup -e dev -d localhost
+
+# Production environment (trusted CA)
+./scripts/manage-saml-certificates.sh setup -e prod -d dhportal.library.virginia.edu
+
+# Validate existing certificates
+./scripts/manage-saml-certificates.sh validate
+```
+
+**Certificate Strategy by Environment:**
+
+- **DDEV/Container (`/var/www/html`)**: Self-signed certificates for development
+- **Server (`/opt/drupal`)**: Production certificates from trusted CA or Let's Encrypt
+- **AWS ECS**: Certificates from AWS Certificate Manager or mounted volumes
+
+See [CERTIFICATE_MANAGEMENT.md](CERTIFICATE_MANAGEMENT.md) for detailed certificate management strategy.
+
 ## 🔐 Security & Configuration
 
 ### Environment-Driven Configuration
