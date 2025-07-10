@@ -204,6 +204,26 @@ npm run test    # Validate container functionality
 
 This ensures **development-production parity** by using the same container in both environments.
 
+### SAML Integration Scripts
+
+**drupal-dhportal** provides two SAML setup scripts for different environments:
+
+#### DDEV Environment
+```bash
+./scripts/setup-saml-integration.sh
+```
+
+#### Container Environment (Production/AWS)
+```bash
+./scripts/setup-saml-integration-container.sh
+```
+
+**Key Differences:**
+- **DDEV script**: Uses `ddev drush` and `ddev exec` commands
+- **Container script**: Uses direct `drush` commands and filesystem access
+- **Environment detection**: Container script checks for Drupal installation and Drush availability
+- **URL determination**: Container script uses environment variables or Drupal config for base URL
+
 ## 🔐 Security & Configuration
 
 ### Environment-Driven Configuration
