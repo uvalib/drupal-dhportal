@@ -1,68 +1,104 @@
 #!/bin/bash
 
-# SAML Integration Setup Script (In-Container Version)
+# SAML Integration Setup Script (Container Version)
 # This script handles all SAML-related configuration after database import
-# Run inside the container with: ./scripts/setup-saml-integration-container.sh
+# Designed to run INSIDE the container, not through DDEV
+# Supports both server (/opt/drupal) and container (/var/www/html) environments
+# Run with: ./scripts/setup-saml-integration-container.sh
 
 set -e
 
 echo "🔧 SAML Integration Setup Starting (Container Mode)..."
 
-# Check if we're in a container environment (look for typical container indicators)
-if [ ! -f "/var/www/html/web/index.php" ]; then
-    echo "❌ Not in a Drupal container environment. This script must be run inside the Drupal container."
+# Detect Drupal root directory (server vs container environments)
+DRUPAL_ROOT=""
+if [ -f "/opt/drupal/web/index.php" ]; then
+    DRUPAL_ROOT="/opt/drupal"
+    echo "   🖥️  Detected server environment: /opt/drupal"
+elif [ -f "/var/www/html/web/index.php" ]; then
+    DRUPAL_ROOT="/var/www/html"
+    echo "   🐳 Detected container environment: /var/www/html"
+else
+    echo "❌ Not in a recognized Drupal environment. Expected to find web/index.php in /opt/drupal or /var/www/html"
     exit 1
 fi
+
+WEB_ROOT="$DRUPAL_ROOT/web"
+VENDOR_ROOT="$DRUPAL_ROOT/vendor"
+SIMPLESAML_ROOT="$DRUPAL_ROOT/simplesamlphp"
 
 # Check if Drush is available
 if ! command -v drush &> /dev/null; then
-    echo "❌ Drush not found. This script requires Drush to be available in the container."
-    exit 1
+    # Try vendor/bin/drush
+    if [ -f "$VENDOR_ROOT/bin/drush" ]; then
+        DRUSH="$VENDOR_ROOT/bin/drush"
+        echo "   📦 Using vendor drush: $VENDOR_ROOT/bin/drush"
+    else
+        echo "❌ Drush not found. Cannot configure Drupal."
+        exit 1
+    fi
+else
+    DRUSH="drush"
+    echo "   🔧 Using system drush"
 fi
 
 # Set the working directory to Drupal root
-cd /var/www/html
+cd "$DRUPAL_ROOT"
 
 echo "1. 📦 Enabling SAML modules..."
-drush en simplesamlphp_auth externalauth -y
+$DRUSH en simplesamlphp_auth externalauth -y
 
 echo "2. ⚙️ Configuring SimpleSAMLphp auth module..."
-drush config:set simplesamlphp_auth.settings authsource default-sp -y
-drush config:set simplesamlphp_auth.settings activate 1 -y
+$DRUSH config:set simplesamlphp_auth.settings authsource default-sp -y
+$DRUSH config:set simplesamlphp_auth.settings activate 1 -y
 
 echo "3. 🔒 Fixing SimpleSAMLphp permissions..."
-chmod -R 755 /var/www/html/vendor/simplesamlphp/simplesamlphp/public
+if [ -d "$VENDOR_ROOT/simplesamlphp/simplesamlphp/public" ]; then
+    chmod -R 755 "$VENDOR_ROOT/simplesamlphp/simplesamlphp/public"
+    echo "   ✅ SimpleSAMLphp permissions fixed"
+else
+    echo "   ⚠️  SimpleSAMLphp public directory not found at expected location"
+fi
 
 echo "4. 🔗 Ensuring SimpleSAMLphp symlink exists..."
-if [ ! -L "/var/www/html/web/simplesaml" ]; then
+SIMPLESAML_LINK="$WEB_ROOT/simplesaml"
+SIMPLESAML_TARGET="../vendor/simplesamlphp/simplesamlphp/public"
+
+if [ ! -L "$SIMPLESAML_LINK" ]; then
     echo "   Creating SimpleSAMLphp symlink..."
-    ln -sf ../vendor/simplesamlphp/simplesamlphp/public /var/www/html/web/simplesaml
+    ln -sf "$SIMPLESAML_TARGET" "$SIMPLESAML_LINK"
+    echo "   ✅ SimpleSAMLphp symlink created"
 else
     echo "   ✅ SimpleSAMLphp symlink already exists"
 fi
 
 echo "5. 📄 Checking .htaccess for SimpleSAMLphp rules..."
-if ! grep -q "simplesaml" /var/www/html/web/.htaccess; then
-    echo "   ⚠️  SimpleSAMLphp rewrite rules missing from .htaccess"
-    echo "   Please ensure the following rule is present before the main Drupal routing:"
-    echo "   RewriteCond %{REQUEST_URI} !^/simplesaml"
+HTACCESS_FILE="$WEB_ROOT/.htaccess"
+if [ -f "$HTACCESS_FILE" ]; then
+    if ! grep -q "simplesaml" "$HTACCESS_FILE"; then
+        echo "   ⚠️  SimpleSAMLphp rewrite rules missing from .htaccess"
+        echo "   Please ensure the following rule is present before the main Drupal routing:"
+        echo "   RewriteCond %{REQUEST_URI} !^/simplesaml"
+    else
+        echo "   ✅ SimpleSAMLphp rewrite rules found in .htaccess"
+    fi
 else
-    echo "   ✅ SimpleSAMLphp rewrite rules found in .htaccess"
+    echo "   ⚠️  .htaccess file not found at $HTACCESS_FILE"
 fi
 
 echo "6. 🧪 Checking SimpleSAMLphp configuration..."
 CONFIG_STATUS="❌"
-if [ -f "/var/www/html/simplesamlphp/config/config.php" ]; then
+if [ -f "$SIMPLESAML_ROOT/config/config.php" ]; then
     CONFIG_STATUS="✅"
 fi
 
 AUTHSOURCES_STATUS="❌"
-if [ -f "/var/www/html/simplesamlphp/config/authsources.php" ]; then
+if [ -f "$SIMPLESAML_ROOT/config/authsources.php" ]; then
     AUTHSOURCES_STATUS="✅"
 fi
 
 METADATA_STATUS="❌"
-if [ -f "/var/www/html/simplesamlphp/metadata/saml20-idp-remote.php" ]; then
+if [ -f "$SIMPLESAML_ROOT/metadata/saml20-idp-remote.php" ]; then
     METADATA_STATUS="✅"
 fi
 
@@ -72,11 +108,16 @@ echo "   - authsources.php: $AUTHSOURCES_STATUS"
 echo "   - saml20-idp-remote.php: $METADATA_STATUS"
 
 echo "7. 🔐 Checking IdP certificate in metadata..."
-if grep -q 'X509Certificate.*MII' /var/www/html/simplesamlphp/metadata/saml20-idp-remote.php 2>/dev/null; then
-    echo "   ✅ IdP certificate found in metadata"
+METADATA_FILE="$SIMPLESAML_ROOT/metadata/saml20-idp-remote.php"
+if [ -f "$METADATA_FILE" ]; then
+    if grep -q 'X509Certificate.*MII' "$METADATA_FILE"; then
+        echo "   ✅ IdP certificate found in metadata"
+    else
+        echo "   ⚠️  IdP certificate missing or invalid in metadata"
+        echo "   💡 You may need to update the certificate from drupal-netbadge"
+    fi
 else
-    echo "   ⚠️  IdP certificate missing or invalid in metadata"
-    echo "   💡 You may need to update the certificate from drupal-netbadge"
+    echo "   ⚠️  Metadata file not found: $METADATA_FILE"
 fi
 
 echo "8. 🌐 Testing SimpleSAMLphp access..."
@@ -103,7 +144,7 @@ elif [ -n "$VIRTUAL_HOST" ]; then
     PROJECT_URL="https://$VIRTUAL_HOST"
 else
     # Try to get the URL from Drupal configuration
-    PROJECT_URL=$(drush config:get system.site.url 2>/dev/null | grep -o 'https\?://[^[:space:]]*' || echo "")
+    PROJECT_URL=$($DRUSH config:get system.site.url 2>/dev/null | grep -o 'https\?://[^[:space:]]*' || echo "")
     
     # Fallback to localhost if nothing else works
     if [ -z "$PROJECT_URL" ]; then
@@ -122,6 +163,6 @@ echo "   - Staff: username=staff, password=staffpass"
 echo "   - Faculty: username=faculty, password=facultypass"
 echo ""
 echo "💡 Container Environment Tips:"
-echo "   - Run this script inside the Drupal container"
+echo "   - Run this script inside the Drupal container (detected: $DRUPAL_ROOT)"
 echo "   - Ensure the database is accessible and imported"
 echo "   - Make sure SimpleSAMLphp configuration files are mounted/copied"

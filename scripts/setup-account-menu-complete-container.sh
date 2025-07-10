@@ -3,9 +3,14 @@
 # Complete Account Menu Setup Script (Container Version)
 # This script sets up the entire dual login account menu structure from scratch
 # Designed to run INSIDE the container, not through DDEV
+# Supports both server (/opt/drupal) and container (/var/www/html) environments
 # Run with: ./scripts/setup-account-menu-complete-container.sh
 
-set -euo pipefail
+set -echo "💡 Container Environment Notes:"
+echo "  - This script runs inside the Drupal container (detected: $DRUPAL_ROOT)"
+echo "  - Uses direct drush commands instead of 'ddev drush'"
+echo "  - Paths are adapted for container filesystem structure"
+echo "  - Replace hardcoded URLs with environment-appropriate values"ipefail
 
 # Colors for output
 RED='\033[0;31m'
@@ -30,29 +35,37 @@ info() {
     echo -e "${BLUE}[$(date +'%Y-%m-%d %H:%M:%S')] INFO: $1${NC}"
 }
 
-# Set up environment - assume we're in /var/www/html inside container
-DRUPAL_ROOT="/var/www/html"
+# Set up environment - detect Drupal root directory (server vs container environments)
+DRUPAL_ROOT=""
+if [ -f "/opt/drupal/web/index.php" ]; then
+    DRUPAL_ROOT="/opt/drupal"
+    echo "   🖥️  Detected server environment: /opt/drupal"
+elif [ -f "/var/www/html/web/index.php" ]; then
+    DRUPAL_ROOT="/var/www/html"
+    echo "   🐳 Detected container environment: /var/www/html"
+else
+    error "Not in a recognized Drupal environment. Expected to find web/index.php in /opt/drupal or /var/www/html"
+    exit 1
+fi
+
 WEB_ROOT="$DRUPAL_ROOT/web"
 VENDOR_ROOT="$DRUPAL_ROOT/vendor"
 
 # Check if we're in the right directory structure
 check_container_environment() {
-    if [ ! -d "$WEB_ROOT" ] || [ ! -f "$DRUPAL_ROOT/composer.json" ]; then
-        error "Not in a Drupal container environment. Expected to find $WEB_ROOT and composer.json"
-        exit 1
-    fi
-
     # Check if drush is available
     if ! command -v drush &> /dev/null; then
         # Try vendor/bin/drush
         if [ -f "$VENDOR_ROOT/bin/drush" ]; then
             DRUSH="$VENDOR_ROOT/bin/drush"
+            info "Using vendor drush: $VENDOR_ROOT/bin/drush"
         else
             error "Drush not found. Cannot configure Drupal."
             exit 1
         fi
     else
         DRUSH="drush"
+        info "Using system drush"
     fi
 }
 
