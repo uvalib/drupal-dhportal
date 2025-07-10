@@ -204,25 +204,45 @@ npm run test    # Validate container functionality
 
 This ensures **development-production parity** by using the same container in both environments.
 
-### SAML Integration Scripts
+### Database Configuration Scripts
 
-**drupal-dhportal** provides two SAML setup scripts for different environments:
+**drupal-dhportal** provides setup scripts for different environments to configure both SAML integration and account menus:
 
-#### DDEV Environment
+#### SAML Integration Scripts
+
+##### SAML DDEV Environment
+
 ```bash
 ./scripts/setup-saml-integration.sh
 ```
 
-#### Container Environment (Production/AWS)
+##### SAML Container Environment (Production/AWS)
+
 ```bash
 ./scripts/setup-saml-integration-container.sh
 ```
 
-**Key Differences:**
-- **DDEV script**: Uses `ddev drush` and `ddev exec` commands
-- **Container script**: Uses direct `drush` commands and filesystem access
-- **Environment detection**: Container script checks for Drupal installation and Drush availability
-- **URL determination**: Container script uses environment variables or Drupal config for base URL
+#### Account Menu Setup Scripts
+
+##### Menu DDEV Environment
+
+```bash
+./scripts/setup-account-menu-complete.sh
+```
+
+##### Menu Container Environment (Production/AWS)
+
+```bash
+./scripts/setup-account-menu-complete-container.sh
+```
+
+##### Key Differences
+
+- **DDEV scripts**: Use `ddev drush` and `ddev exec` commands
+- **Container scripts**: Use direct `drush` commands and filesystem access
+- **Environment detection**: Container scripts check for Drupal installation and Drush availability
+- **URL determination**: Container scripts use environment variables or Drupal config for base URL
+- **Path handling**: Container scripts use absolute paths appropriate for container filesystem
 
 ## 🔐 Security & Configuration
 
