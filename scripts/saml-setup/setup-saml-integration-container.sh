@@ -1,9 +1,11 @@
 #!/bin/bash
 
-# SAML Integration Setup Script (Container Version)
+# SAML Integration Setup Script (Universal Version)
 # This script handles all SAML configuration after database import
-# Designed to run INSIDE the container, not through DDEV
-# Supports both server (/opt/drupal) and container (/var/www/html) environments
+# Automatically detects and supports multiple environments:
+# - DDEV development environment (uses 'ddev' commands)
+# - Direct container execution (uses direct commands)
+# - Server/production environments (uses direct commands)
 # Run with: ./scripts/saml-setup/setup-saml-integration-container.sh [--test-only]
 
 set -e
@@ -14,7 +16,7 @@ if [ "$1" = "--test-only" ] || [ "$1" = "-t" ]; then
     TEST_ONLY=true
     echo "🧪 Running in test-only mode - will only generate test configurations"
 elif [ "$1" = "--help" ] || [ "$1" = "-h" ]; then
-    echo "SAML Integration Setup Script (Container Version)"
+    echo "SAML Integration Setup Script (Universal Version)"
     echo ""
     echo "Usage: $0 [OPTIONS]"
     echo ""
@@ -26,14 +28,18 @@ elif [ "$1" = "--help" ] || [ "$1" = "-h" ]; then
     echo "  Normal mode:       Sets up SAML integration in the current environment"
     echo "  Test-only mode:    Generates test configurations in test-output/ directory"
     echo ""
+    echo "ENVIRONMENTS:"
+    echo "  - DDEV development environment (auto-detected)"
+    echo "  - Direct container execution (auto-detected)" 
+    echo "  - Server/production environments (auto-detected)"
+    echo ""
     echo "REQUIREMENTS:"
-    echo "  - Must be run inside a Drupal container or server environment"
     echo "  - Requires drush and envsubst to be available"
     echo "  - Templates must be present in scripts/saml-setup/templates/ directory"
     exit 0
 fi
 
-echo "🔧 SAML Integration Setup Starting (Container Mode)..."
+echo "🔧 SAML Integration Setup Starting (Universal Mode)..."
 
 # Define logging functions
 info() {
@@ -46,6 +52,80 @@ warn() {
 
 log() {
     echo "   📝 $1"
+}
+
+# Detect execution environment
+EXECUTION_MODE=""
+USE_DDEV=false
+
+# Check if we're in a DDEV environment and it's available
+if command -v ddev &> /dev/null && ddev describe &> /dev/null 2>&1; then
+    EXECUTION_MODE="ddev"
+    USE_DDEV=true
+    echo "   🏠 Detected DDEV development environment"
+elif [ -f "/opt/drupal/web/index.php" ]; then
+    EXECUTION_MODE="server"
+    echo "   🖥️  Detected server environment: /opt/drupal"
+elif [ -f "/var/www/html/web/index.php" ]; then
+    EXECUTION_MODE="container"
+    echo "   🐳 Detected container environment: /var/www/html"
+else
+    # In test-only mode, we can work without a full environment
+    if [ "$TEST_ONLY" = true ]; then
+        EXECUTION_MODE="test"
+        echo "   🧪 Test-only mode: Using current directory"
+    else
+        echo "❌ No recognized environment found."
+        echo "   Expected: DDEV project, /opt/drupal, or /var/www/html"
+        echo "   💡 Use --test-only flag to generate test configurations"
+        exit 1
+    fi
+fi
+
+# Environment-aware command execution
+exec_cmd() {
+    local cmd="$1"
+    if [ "$USE_DDEV" = true ]; then
+        if [[ "$cmd" == drush* ]]; then
+            ddev $cmd
+        else
+            ddev exec "$cmd"
+        fi
+    else
+        if [[ "$cmd" == drush* ]] && command -v $cmd &> /dev/null; then
+            $cmd
+        elif [[ "$cmd" == drush* ]]; then
+            # Try vendor/bin/drush if system drush not available
+            if [ -f "$VENDOR_ROOT/bin/drush" ]; then
+                $VENDOR_ROOT/bin/$cmd
+            else
+                echo "❌ Drush not found. Cannot configure Drupal."
+                exit 1
+            fi
+        else
+            eval $cmd
+        fi
+    fi
+}
+
+# Environment-aware file check
+file_exists() {
+    local file_path="$1"
+    if [ "$USE_DDEV" = true ]; then
+        ddev exec "[ -f $file_path ]" 2>/dev/null
+    else
+        [ -f "$file_path" ]
+    fi
+}
+
+# Environment-aware directory check  
+dir_exists() {
+    local dir_path="$1"
+    if [ "$USE_DDEV" = true ]; then
+        ddev exec "[ -d $dir_path ]" 2>/dev/null
+    else
+        [ -d "$dir_path" ]
+    fi
 }
 
 # Template configuration variables
@@ -255,30 +335,38 @@ EOF
     info "📋 Review the generated files in $base_test_dir before deployment"
 }
 
-# Detect Drupal root directory (server vs container environments)
+# Detect Drupal root directory based on execution environment
 DRUPAL_ROOT=""
-if [ -f "/opt/drupal/web/index.php" ]; then
-    DRUPAL_ROOT="/opt/drupal"
-    echo "   🖥️  Detected server environment: /opt/drupal"
-elif [ -f "/var/www/html/web/index.php" ]; then
-    DRUPAL_ROOT="/var/www/html"
-    echo "   🐳 Detected container environment: /var/www/html"
-else
-    # In test-only mode, we can work without a full Drupal environment
-    if [ "$TEST_ONLY" = true ]; then
-        # Use current directory as fallback for test generation
-        DRUPAL_ROOT="$(pwd)"
-        echo "   🧪 Test-only mode: Using current directory: $DRUPAL_ROOT"
-    else
-        echo "❌ Not in a recognized Drupal environment. Expected to find web/index.php in /opt/drupal or /var/www/html"
-        echo "   💡 Use --test-only flag to generate test configurations without a full Drupal environment"
-        exit 1
-    fi
-fi
+WEB_ROOT=""
+VENDOR_ROOT=""
+SIMPLESAML_ROOT=""
 
-WEB_ROOT="$DRUPAL_ROOT/web"
-VENDOR_ROOT="$DRUPAL_ROOT/vendor"
-SIMPLESAML_ROOT="$DRUPAL_ROOT/simplesamlphp"
+case "$EXECUTION_MODE" in
+    "ddev")
+        DRUPAL_ROOT="/var/www/html"
+        WEB_ROOT="$DRUPAL_ROOT/web"
+        VENDOR_ROOT="$DRUPAL_ROOT/vendor"
+        SIMPLESAML_ROOT="$DRUPAL_ROOT/simplesamlphp"
+        ;;
+    "server")
+        DRUPAL_ROOT="/opt/drupal"
+        WEB_ROOT="$DRUPAL_ROOT/web"
+        VENDOR_ROOT="$DRUPAL_ROOT/vendor"
+        SIMPLESAML_ROOT="$DRUPAL_ROOT/simplesamlphp"
+        ;;
+    "container")
+        DRUPAL_ROOT="/var/www/html"
+        WEB_ROOT="$DRUPAL_ROOT/web"
+        VENDOR_ROOT="$DRUPAL_ROOT/vendor"
+        SIMPLESAML_ROOT="$DRUPAL_ROOT/simplesamlphp"
+        ;;
+    "test")
+        DRUPAL_ROOT="$(pwd)"
+        WEB_ROOT="$DRUPAL_ROOT/web"
+        VENDOR_ROOT="$DRUPAL_ROOT/vendor"
+        SIMPLESAML_ROOT="$DRUPAL_ROOT/simplesamlphp"
+        ;;
+esac
 
 # If running in test-only mode, generate test configs and exit
 if [ "$TEST_ONLY" = true ]; then
@@ -292,40 +380,27 @@ if [ "$TEST_ONLY" = true ]; then
     exit 0
 fi
 
-# Check if Drush is available
-if ! command -v drush &> /dev/null; then
-    # Try vendor/bin/drush
-    if [ -f "$VENDOR_ROOT/bin/drush" ]; then
-        DRUSH="$VENDOR_ROOT/bin/drush"
-        echo "   📦 Using vendor drush: $VENDOR_ROOT/bin/drush"
-    else
-        echo "❌ Drush not found. Cannot configure Drupal."
-        exit 1
-    fi
-else
-    DRUSH="drush"
-    echo "   🔧 Using system drush"
+# Set the working directory to Drupal root (only if not using DDEV)
+if [ "$USE_DDEV" = false ]; then
+    cd "$DRUPAL_ROOT"
 fi
 
-# Set the working directory to Drupal root
-cd "$DRUPAL_ROOT"
-
 echo "1. 📦 Enabling SAML modules..."
-$DRUSH en simplesamlphp_auth externalauth -y
+exec_cmd "drush en simplesamlphp_auth externalauth -y"
 
 echo "2. ⚙️ Configuring SimpleSAMLphp auth module..."
-$DRUSH config:set simplesamlphp_auth.settings authsource default-sp -y
-$DRUSH config:set simplesamlphp_auth.settings activate 1 -y
+exec_cmd "drush config:set simplesamlphp_auth.settings authsource default-sp -y"
+exec_cmd "drush config:set simplesamlphp_auth.settings activate 1 -y"
 
 # Configure UVA NetBadge attribute mapping per ITS specifications
 echo "   🔗 Configuring UVA NetBadge attribute mapping..."
-$DRUSH config:set simplesamlphp_auth.settings user_name uid -y
-$DRUSH config:set simplesamlphp_auth.settings mail_attr mail -y
-$DRUSH config:set simplesamlphp_auth.settings unique_id uid -y
+exec_cmd "drush config:set simplesamlphp_auth.settings user_name uid -y"
+exec_cmd "drush config:set simplesamlphp_auth.settings mail_attr mail -y"
+exec_cmd "drush config:set simplesamlphp_auth.settings unique_id uid -y"
 
 # Configure role mapping based on eduPersonAffiliation
-$DRUSH config:set simplesamlphp_auth.settings role.population '1' -y
-$DRUSH config:set simplesamlphp_auth.settings role.eval_every_time 1 -y
+exec_cmd "drush config:set simplesamlphp_auth.settings role.population '1' -y"
+exec_cmd "drush config:set simplesamlphp_auth.settings role.eval_every_time 1 -y"
 
 echo "   ✅ Configured Drupal SAML settings for UVA NetBadge"
 

@@ -1,13 +1,15 @@
 # SAML Setup Scripts
 
-This directory contains all scripts and templates related to SAML/NetBadge integration for the drupal-dhportal project.
+This directory contains all scripts and templates related to SAML/NetBadge integration and account menu configuration for the drupal-dhportal project.
 
 ## Scripts
 
-### `setup-saml-integration-container.sh`
-Main SAML integration setup script designed to run inside containers or server environments.
+### `setup-saml-integration-container.sh` (Universal)
+
+Main SAML integration setup script with environment auto-detection.
 
 **Usage:**
+
 ```bash
 # Normal mode - performs full SAML setup
 ./scripts/saml-setup/setup-saml-integration-container.sh
@@ -20,22 +22,52 @@ Main SAML integration setup script designed to run inside containers or server e
 ```
 
 **Features:**
+
+- Environment auto-detection (DDEV, container, server)
 - Template-based configuration generation using `envsubst`
 - Multi-environment support (dev/container/production)
 - Test generation mode for safe configuration validation
 - Automatic certificate management integration
 - Comprehensive error handling and logging
 
-### `setup-saml-integration.sh`
-DDEV-specific SAML integration setup script.
+### `setup-account-menu-complete-container.sh` (Universal)
+
+Account menu setup script for dual-login functionality with environment auto-detection.
 
 **Usage:**
+
 ```bash
-./scripts/saml-setup/setup-saml-integration.sh
+# Setup dual-login account menu
+./scripts/saml-setup/setup-account-menu-complete-container.sh
+
+# Help
+./scripts/saml-setup/setup-account-menu-complete-container.sh --help
 ```
 
+**Features:**
+
+- Environment auto-detection (DDEV, container, server)
+- Creates "My Profile" parent menu with SAML and local login options
+- Configures user dashboard, settings, and logout for authenticated users
+- Integrates with `dhportal_account_menu` module to hide core menu items
+
+### `setup-saml-integration.sh` (Legacy)
+
+DDEV-specific SAML integration setup script (deprecated - use universal version).
+
+### `setup-account-menu-complete-ddev-legacy.sh` (Legacy)
+
+DDEV-specific account menu setup script (deprecated - use universal version).
+
 ### `manage-saml-certificates.sh`
+
 Certificate management utilities for SAML integration.
+
+**Features:**
+
+- Self-signed certificate generation for development
+- Production certificate management
+- Certificate validation and renewal
 
 **Features:**
 - Self-signed certificate generation for development
