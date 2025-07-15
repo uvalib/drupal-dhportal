@@ -130,6 +130,29 @@ Each directory includes:
 - Production-grade security settings
 - Requires ITS registration
 
+## Documentation
+
+The following comprehensive documentation is available in this directory:
+
+### Implementation Guides
+
+- **`SAML_INTEGRATION_SUMMARY.md`** - Complete overview of SAML implementation architecture and setup
+- **`UVA_NETBADGE_IMPLEMENTATION.md`** - Detailed UVA NetBadge compliance implementation guide
+- **`CERTIFICATE_MANAGEMENT.md`** - Certificate management strategy across all environments
+
+### Post-Authentication Setup
+
+- **`ACCOUNT_MENU_FINAL_SUMMARY.md`** - Dual-login account menu implementation for SAML and local authentication
+
+### Configuration and Testing
+
+- **`SAML_CONFIGURATION_FILES.md`** - Overview of SimpleSAMLphp configuration files structure
+- **`SAML_TESTING_SUITE.md`** - Comprehensive SAML testing procedures and utilities
+
+### Maintenance and Analysis
+
+- **`SCRIPTS_CONSISTENCY_ANALYSIS.md`** - Scripts organization and redundancy elimination analysis
+
 ## UVA NetBadge Integration
 
 This system is designed for integration with the University of Virginia's NetBadge authentication system:
