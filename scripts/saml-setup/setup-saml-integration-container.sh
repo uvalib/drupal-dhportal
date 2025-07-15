@@ -4,7 +4,7 @@
 # This script handles all SAML configuration after database import
 # Designed to run INSIDE the container, not through DDEV
 # Supports both server (/opt/drupal) and container (/var/www/html) environments
-# Run with: ./scripts/setup-saml-integration-container.sh [--test-only]
+# Run with: ./scripts/saml-setup/setup-saml-integration-container.sh [--test-only]
 
 set -e
 
@@ -29,7 +29,7 @@ elif [ "$1" = "--help" ] || [ "$1" = "-h" ]; then
     echo "REQUIREMENTS:"
     echo "  - Must be run inside a Drupal container or server environment"
     echo "  - Requires drush and envsubst to be available"
-    echo "  - Templates must be present in scripts/templates/ directory"
+    echo "  - Templates must be present in scripts/saml-setup/templates/ directory"
     exit 0
 fi
 
@@ -128,7 +128,7 @@ setup_template_vars() {
 generate_from_template() {
     local template_file="$1"
     local output_file="$2"
-    local template_dir="${DRUPAL_ROOT}/scripts/templates"
+    local template_dir="${DRUPAL_ROOT}/scripts/saml-setup/templates"
     
     if [ ! -f "$template_dir/$template_file" ]; then
         warn "Template file not found: $template_dir/$template_file"
@@ -233,7 +233,7 @@ This directory contains test configurations for all supported environments:
 $(for env in "${test_environments[@]}"; do echo "- **$env/**: Configuration for $env environment"; done)
 
 ## Template System:
-The configuration files are generated from templates in \`scripts/templates/\`:
+The configuration files are generated from templates in \`scripts/saml-setup/templates/\`:
 - \`config.php.template\` - Main SimpleSAMLphp configuration template
 - \`authsources.php.template\` - Authentication sources template  
 - \`saml20-idp-remote.php.template\` - IdP metadata template
@@ -335,8 +335,8 @@ if [ ! -f "$SIMPLESAML_ROOT/cert/server.crt" ] || [ ! -f "$SIMPLESAML_ROOT/cert/
     echo "   📜 SAML certificates not found, generating..."
     
     # Source the certificate management script
-    if [ -f "$DRUPAL_ROOT/scripts/manage-saml-certificates.sh" ]; then
-        source "$DRUPAL_ROOT/scripts/manage-saml-certificates.sh"
+    if [ -f "$DRUPAL_ROOT/scripts/saml-setup/manage-saml-certificates.sh" ]; then
+        source "$DRUPAL_ROOT/scripts/saml-setup/manage-saml-certificates.sh"
         
         # Determine certificate mode based on environment
         if [ "$DRUPAL_ROOT" = "/opt/drupal" ]; then
@@ -538,7 +538,7 @@ echo "   - Paths are adapted for container filesystem structure"
 echo "   - Replace hardcoded URLs with environment-appropriate values"
 echo ""
 echo "🔧 Template System:"
-echo "   - Configuration files generated from templates in scripts/templates/"
+echo "   - Configuration files generated from templates in scripts/saml-setup/templates/"
 echo "   - Uses envsubst for variable substitution"
 echo "   - Run with --test-only flag to generate test configurations"
 echo "   - Templates support multiple environments (dev/container/production)"
