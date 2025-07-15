@@ -4,9 +4,34 @@
 # This script handles all SAML configuration after database import
 # Designed to run INSIDE the container, not through DDEV
 # Supports both server (/opt/drupal) and container (/var/www/html) environments
-# Run with: ./scripts/setup-saml-integration-container.sh
+# Run with: ./scripts/setup-saml-integration-container.sh [--test-only]
 
 set -e
+
+# Parse command line arguments
+TEST_ONLY=false
+if [ "$1" = "--test-only" ] || [ "$1" = "-t" ]; then
+    TEST_ONLY=true
+    echo "🧪 Running in test-only mode - will only generate test configurations"
+elif [ "$1" = "--help" ] || [ "$1" = "-h" ]; then
+    echo "SAML Integration Setup Script (Container Version)"
+    echo ""
+    echo "Usage: $0 [OPTIONS]"
+    echo ""
+    echo "OPTIONS:"
+    echo "  --test-only, -t    Generate test configurations only (no system changes)"
+    echo "  --help, -h         Show this help message"
+    echo ""
+    echo "MODES:"
+    echo "  Normal mode:       Sets up SAML integration in the current environment"
+    echo "  Test-only mode:    Generates test configurations in test-output/ directory"
+    echo ""
+    echo "REQUIREMENTS:"
+    echo "  - Must be run inside a Drupal container or server environment"
+    echo "  - Requires drush and envsubst to be available"
+    echo "  - Templates must be present in scripts/templates/ directory"
+    exit 0
+fi
 
 echo "🔧 SAML Integration Setup Starting (Container Mode)..."
 
@@ -23,6 +48,213 @@ log() {
     echo "   📝 $1"
 }
 
+# Template configuration variables
+setup_template_vars() {
+    local domain="$1"
+    local environment="$2"
+    local output_dir="${3:-$SIMPLESAML_ROOT}"
+    
+    # Set generation date
+    export GENERATION_DATE="$(date)"
+    export ENVIRONMENT="$environment"
+    
+    # Configure environment-specific variables
+    case "$environment" in
+        "server"|"production")
+            export SECRET_SALT="\${SAML_SECRET_SALT:-\$(openssl rand -hex 32)}"
+            export ADMIN_PASSWORD="\${SAML_ADMIN_PASSWORD:-\$(openssl rand -hex 16)}"
+            export COOKIE_DOMAIN=""
+            export COOKIE_SECURE="true"
+            export TECH_EMAIL="\${TECH_CONTACT_EMAIL:-admin@$(echo $domain | sed 's/https\?:\/\///')}"
+            export DB_CONFIG="'store.sql.dsn' => 'mysql:host=\\\${DB_HOST:-localhost};dbname=\\\${DB_NAME:-drupal}',
+    'store.sql.username' => '\\\${DB_USER:-drupal}',
+    'store.sql.password' => '\\\${DB_PASSWORD:-drupal}',"
+            
+            # Production SP and IdP configuration
+            export SP_ENTITY_ID="$domain/shibboleth"
+            export IDP_ENTITY_ID="urn:mace:incommon:virginia.edu"
+            export IDP_SSO_URL="https://shibidp.its.virginia.edu/idp/profile/SAML2/Redirect/SSO"
+            export IDP_SLO_URL="https://shibidp.its.virginia.edu/idp/profile/SAML2/Redirect/SLO"
+            export IDP_METADATA_URL="https://shibidp.its.virginia.edu/idp/shibboleth/uva-idp-metadata.xml"
+            export IDP_DESCRIPTION="Official UVA NetBadge Identity Provider"
+            export IDP_CERTIFICATE="// CERTIFICATE_PLACEHOLDER
+            // This will be automatically populated from: $IDP_METADATA_URL
+            // For production: Contact ITS to register this SP and obtain certificate"
+            ;;
+        "container")
+            export SECRET_SALT="dhportal-container-salt-$(date +%s)"
+            export ADMIN_PASSWORD="admin123"
+            export COOKIE_DOMAIN=""
+            export COOKIE_SECURE="false"
+            export TECH_EMAIL="dev@localhost"
+            export DB_CONFIG="'store.sql.dsn' => 'mysql:host=db;dbname=db',
+    'store.sql.username' => 'db',
+    'store.sql.password' => 'db',"
+            
+            # Development SP and IdP configuration
+            export SP_ENTITY_ID="https://drupal-dhportal.ddev.site/shibboleth"
+            export IDP_ENTITY_ID="https://drupal-netbadge.ddev.site/simplesaml/saml2/idp/metadata.php"
+            export IDP_SSO_URL="https://drupal-netbadge.ddev.site/simplesaml/saml2/idp/SSOService.php"
+            export IDP_SLO_URL="https://drupal-netbadge.ddev.site/simplesaml/saml2/idp/SingleLogoutService.php"
+            export IDP_METADATA_URL="https://drupal-netbadge.ddev.site/simplesaml/saml2/idp/metadata.php"
+            export IDP_DESCRIPTION="Development NetBadge Identity Provider (drupal-netbadge container)"
+            export IDP_CERTIFICATE="// CERTIFICATE_PLACEHOLDER
+            // For development: Certificate from drupal-netbadge container"
+            ;;
+        *)
+            export SECRET_SALT="dhportal-dev-salt-$(date +%s)"
+            export ADMIN_PASSWORD="admin123"
+            export COOKIE_DOMAIN=".ddev.site"
+            export COOKIE_SECURE="false"
+            export TECH_EMAIL="dev@localhost"
+            export DB_CONFIG="'store.sql.dsn' => 'mysql:host=db;dbname=db',
+    'store.sql.username' => 'db',
+    'store.sql.password' => 'db',"
+            
+            # Default development configuration
+            export SP_ENTITY_ID="https://drupal-dhportal.ddev.site/shibboleth"
+            export IDP_ENTITY_ID="https://drupal-netbadge.ddev.site/simplesaml/saml2/idp/metadata.php"
+            export IDP_SSO_URL="https://drupal-netbadge.ddev.site/simplesaml/saml2/idp/SSOService.php"
+            export IDP_SLO_URL="https://drupal-netbadge.ddev.site/simplesaml/saml2/idp/SingleLogoutService.php"
+            export IDP_METADATA_URL="https://drupal-netbadge.ddev.site/simplesaml/saml2/idp/metadata.php"
+            export IDP_DESCRIPTION="Development NetBadge Identity Provider (drupal-netbadge container)"
+            export IDP_CERTIFICATE="// CERTIFICATE_PLACEHOLDER
+            // For development: Certificate from drupal-netbadge container"
+            ;;
+    esac
+}
+
+# Generate configuration files from templates
+generate_from_template() {
+    local template_file="$1"
+    local output_file="$2"
+    local template_dir="${DRUPAL_ROOT}/scripts/templates"
+    
+    if [ ! -f "$template_dir/$template_file" ]; then
+        warn "Template file not found: $template_dir/$template_file"
+        return 1
+    fi
+    
+    # Ensure output directory exists
+    mkdir -p "$(dirname "$output_file")"
+    
+    # Use envsubst to process the template
+    envsubst < "$template_dir/$template_file" > "$output_file"
+    
+    if [ $? -eq 0 ]; then
+        info "✅ Generated $output_file from template"
+        return 0
+    else
+        warn "❌ Failed to generate $output_file from template"
+        return 1
+    fi
+}
+
+# Function to generate SimpleSAMLphp configuration files
+generate_simplesaml_config() {
+    local domain="$1"
+    local environment="$2"
+    local output_dir="${3:-$SIMPLESAML_ROOT}"
+    
+    log "📝 Generating SimpleSAMLphp configuration files from templates..."
+    
+    # Setup template variables
+    setup_template_vars "$domain" "$environment" "$output_dir"
+    
+    # Ensure config and metadata directories exist
+    mkdir -p "$output_dir/config"
+    mkdir -p "$output_dir/metadata"
+    
+    # Generate configuration files from templates
+    generate_from_template "config.php.template" "$output_dir/config/config.php"
+    generate_from_template "authsources.php.template" "$output_dir/config/authsources.php"
+    generate_from_template "saml20-idp-remote.php.template" "$output_dir/metadata/saml20-idp-remote.php"
+    
+    log "✅ SimpleSAMLphp configuration files generated successfully"
+}
+
+# Test generation function - generates configs in test-output directory
+generate_test_configs() {
+    local test_environments=("dev" "container" "production")
+    local test_domains=("https://drupal-dhportal.ddev.site" "https://drupal-dhportal.ddev.site" "https://dhportal.example.com")
+    local base_test_dir="${DRUPAL_ROOT}/test-output"
+    
+    log "🧪 Generating test configuration files..."
+    
+    # Clean and create test output directory
+    rm -rf "$base_test_dir"
+    mkdir -p "$base_test_dir"
+    
+    for i in "${!test_environments[@]}"; do
+        local env="${test_environments[$i]}"
+        local domain="${test_domains[$i]}"
+        local test_dir="$base_test_dir/$env"
+        
+        info "Generating test configs for environment: $env"
+        
+        # Generate configs for this environment
+        generate_simplesaml_config "$domain" "$env" "$test_dir"
+        
+        # Create a summary file for this environment
+        cat > "$test_dir/README.md" << EOF
+# Test Configuration: $env
+
+Generated: $(date)
+Domain: $domain
+Environment: $env
+
+## Files Generated:
+- \`config/config.php\` - Main SimpleSAMLphp configuration
+- \`config/authsources.php\` - Authentication sources (SP configuration)
+- \`metadata/saml20-idp-remote.php\` - IdP metadata configuration
+
+## Environment Variables Used:
+- ENVIRONMENT: $env
+- SP_ENTITY_ID: $(echo "$domain/shibboleth" | envsubst)
+- IDP_ENTITY_ID: $([ "$env" = "production" ] && echo "urn:mace:incommon:virginia.edu" || echo "https://drupal-netbadge.ddev.site/simplesaml/saml2/idp/metadata.php")
+
+## Usage:
+These files can be reviewed and copied to the appropriate SimpleSAMLphp directories:
+\`\`\`bash
+cp config/* \$SIMPLESAML_ROOT/config/
+cp metadata/* \$SIMPLESAML_ROOT/metadata/
+\`\`\`
+EOF
+    done
+    
+    # Create overall test summary
+    cat > "$base_test_dir/README.md" << EOF
+# SAML Configuration Test Generation
+
+Generated: $(date)
+
+This directory contains test configurations for all supported environments:
+
+$(for env in "${test_environments[@]}"; do echo "- **$env/**: Configuration for $env environment"; done)
+
+## Template System:
+The configuration files are generated from templates in \`scripts/templates/\`:
+- \`config.php.template\` - Main SimpleSAMLphp configuration template
+- \`authsources.php.template\` - Authentication sources template  
+- \`saml20-idp-remote.php.template\` - IdP metadata template
+
+## Environment Variables:
+Templates use envsubst for variable substitution. Key variables include:
+- \`ENVIRONMENT\` - Target environment (dev/container/production)
+- \`SP_ENTITY_ID\` - Service Provider entity ID
+- \`IDP_ENTITY_ID\` - Identity Provider entity ID
+- \`SECRET_SALT\` - SimpleSAMLphp secret salt
+- \`ADMIN_PASSWORD\` - Admin interface password
+
+## Validation:
+Each environment directory contains a README.md with specific configuration details.
+Review generated files before deploying to ensure they match your requirements.
+EOF
+    
+    log "✅ Test configurations generated in: $base_test_dir"
+    info "📋 Review the generated files in $base_test_dir before deployment"
+}
+
 # Detect Drupal root directory (server vs container environments)
 DRUPAL_ROOT=""
 if [ -f "/opt/drupal/web/index.php" ]; then
@@ -32,13 +264,33 @@ elif [ -f "/var/www/html/web/index.php" ]; then
     DRUPAL_ROOT="/var/www/html"
     echo "   🐳 Detected container environment: /var/www/html"
 else
-    echo "❌ Not in a recognized Drupal environment. Expected to find web/index.php in /opt/drupal or /var/www/html"
-    exit 1
+    # In test-only mode, we can work without a full Drupal environment
+    if [ "$TEST_ONLY" = true ]; then
+        # Use current directory as fallback for test generation
+        DRUPAL_ROOT="$(pwd)"
+        echo "   🧪 Test-only mode: Using current directory: $DRUPAL_ROOT"
+    else
+        echo "❌ Not in a recognized Drupal environment. Expected to find web/index.php in /opt/drupal or /var/www/html"
+        echo "   💡 Use --test-only flag to generate test configurations without a full Drupal environment"
+        exit 1
+    fi
 fi
 
 WEB_ROOT="$DRUPAL_ROOT/web"
 VENDOR_ROOT="$DRUPAL_ROOT/vendor"
 SIMPLESAML_ROOT="$DRUPAL_ROOT/simplesamlphp"
+
+# If running in test-only mode, generate test configs and exit
+if [ "$TEST_ONLY" = true ]; then
+    echo ""
+    echo "🧪 Generating test configurations..."
+    generate_test_configs
+    echo ""
+    echo "✅ Test configuration generation complete!"
+    echo "📋 Review the generated files in $DRUPAL_ROOT/test-output/ before deployment"
+    echo "💡 To run the full setup, use: $0 (without --test-only flag)"
+    exit 0
+fi
 
 # Check if Drush is available
 if ! command -v drush &> /dev/null; then
@@ -284,344 +536,9 @@ echo "   - This script runs inside the Drupal container (detected: $DRUPAL_ROOT)
 echo "   - Uses direct drush commands instead of 'ddev drush'"
 echo "   - Paths are adapted for container filesystem structure"
 echo "   - Replace hardcoded URLs with environment-appropriate values"
-
-# Function to generate SimpleSAMLphp configuration files
-generate_simplesaml_config() {
-    local domain="$1"
-    local environment="$2"
-    
-    log "📝 Generating SimpleSAMLphp configuration files..."
-    
-    # Ensure config and metadata directories exist
-    mkdir -p "$SIMPLESAML_ROOT/config"
-    mkdir -p "$SIMPLESAML_ROOT/metadata"
-    
-    # Generate config.php
-    generate_config_php "$domain" "$environment"
-    
-    # Generate authsources.php
-    generate_authsources_php "$domain" "$environment"
-    
-    # Generate IdP metadata
-    generate_idp_metadata "$domain" "$environment"
-}
-
-# Generate main SimpleSAMLphp configuration
-generate_config_php() {
-    local domain="$1"
-    local environment="$2"
-    
-    info "Creating config.php for environment: $environment"
-    
-    # Environment-specific settings
-    local secret_salt=""
-    local admin_password=""
-    local cookie_domain=""
-    local cookie_secure="false"
-    local tech_email=""
-    local db_config=""
-    
-    case "$environment" in
-        "server"|"production")
-            secret_salt="\${SAML_SECRET_SALT:-\$(openssl rand -hex 32)}"
-            admin_password="\${SAML_ADMIN_PASSWORD:-\$(openssl rand -hex 16)}"
-            cookie_domain=""
-            cookie_secure="true"
-            tech_email="\${TECH_CONTACT_EMAIL:-admin@\$(echo $domain | sed 's/https\\?:\\/\\///')}"
-            db_config="'store.sql.dsn' => 'mysql:host=\\\${DB_HOST:-localhost};dbname=\\\${DB_NAME:-drupal}',
-    'store.sql.username' => '\\\${DB_USER:-drupal}',
-    'store.sql.password' => '\\\${DB_PASSWORD:-drupal}',"
-            ;;
-        "container")
-            secret_salt="dhportal-container-salt-\$(date +%s)"
-            admin_password="admin123"
-            cookie_domain=""
-            cookie_secure="false"
-            tech_email="dev@localhost"
-            db_config="'store.sql.dsn' => 'mysql:host=db;dbname=db',
-    'store.sql.username' => 'db',
-    'store.sql.password' => 'db',"
-            ;;
-        *)
-            secret_salt="dhportal-dev-salt-\$(date +%s)"
-            admin_password="admin123"
-            cookie_domain=".ddev.site"
-            cookie_secure="false"
-            tech_email="dev@localhost"
-            db_config="'store.sql.dsn' => 'mysql:host=db;dbname=db',
-    'store.sql.username' => 'db',
-    'store.sql.password' => 'db',"
-            ;;
-    esac
-    
-    cat > "$SIMPLESAML_ROOT/config/config.php" << EOF
-<?php
-/**
- * SimpleSAMLphp configuration for drupal-dhportal (Service Provider)
- * Generated automatically by setup-saml-integration-container.sh
- * Environment: $environment
- * Generated: \$(date)
- */
-
-\\$config = [
-    // Basic configuration
-    'baseurlpath' => '/simplesaml/',
-    'certdir' => 'cert/',
-    'loggingdir' => 'log/',
-    'datadir' => 'data/',
-    'tempdir' => '/tmp/simplesamlphp',
-
-    // Security settings
-    'secretsalt' => '$secret_salt',
-    'auth.adminpassword' => '$admin_password',
-    'admin.protectindexpage' => false,
-    'admin.protectmetadata' => false,
-
-    // Technical contact
-    'technicalcontact_name' => 'DH Portal Administrator',
-    'technicalcontact_email' => '$tech_email',
-
-    // Session configuration
-    'session.cookie.name' => 'SimpleSAMLSessionID',
-    'session.cookie.lifetime' => 0,
-    'session.cookie.path' => '/',
-    'session.cookie.domain' => '$cookie_domain',
-    'session.cookie.secure' => $cookie_secure,
-
-    // Language settings
-    'language.available' => ['en'],
-    'language.rtl' => [],
-    'language.default' => 'en',
-
-    // Module configuration
-    'module.enable' => [
-        'core' => true,
-        'admin' => true,
-        'saml' => true,
-    ],
-
-    // Store configuration
-    'store.type' => 'sql',
-    $db_config
-
-    // Logging
-    'logging.level' => SimpleSAML\\Logger::INFO,
-    'logging.handler' => 'file',
-
-    // Error handling
-    'errors.reporting' => true,
-    'errors.show_errors' => false,
-];
-EOF
-
-    info "✅ Generated config.php"
-}
-
-# Generate authsources configuration
-generate_authsources_php() {
-    local domain="$1"
-    local environment="$2"
-    
-    info "Creating authsources.php for domain: $domain"
-    
-    # Determine SP entity ID based on environment - must match virtual host name per UVA requirements
-    local sp_entity_id=""
-    local idp_entity_id=""
-    
-    case "$environment" in
-        "server"|"production")
-            # Production uses official UVA NetBadge IdP
-            sp_entity_id="$domain/shibboleth"
-            idp_entity_id="urn:mace:incommon:virginia.edu"
-            ;;
-        *)
-            # Development uses local drupal-netbadge container
-            sp_entity_id="https://drupal-dhportal.ddev.site/shibboleth"
-            idp_entity_id="https://drupal-netbadge.ddev.site/simplesaml/saml2/idp/metadata.php"
-            ;;
-    esac
-    
-    cat > "$SIMPLESAML_ROOT/config/authsources.php" << EOF
-<?php
-/**
- * Authentication sources configuration for drupal-dhportal
- * Generated automatically by setup-saml-integration-container.sh
- * Configured for UVA NetBadge integration per ITS specifications
- * Environment: $environment
- * Generated: \$(date)
- */
-
-\\$config = [
-    // Default SP configuration - connects to UVA NetBadge IdP
-    'default-sp' => [
-        'saml:SP',
-        
-        // Entity ID must match virtual host name per UVA requirements
-        'entityID' => '$sp_entity_id',
-        
-        // Point to UVA NetBadge IdP
-        'idp' => '$idp_entity_id',
-        'discoURL' => null,
-        
-        // Enable signature validation for security
-        'validate.response' => true,
-        'validate.assertion' => true,
-        'signature.algorithm' => 'http://www.w3.org/2001/04/xmldsig-more#rsa-sha256',
-        
-        // Certificate configuration
-        'privatekey' => 'server.key',
-        'certificate' => 'server.crt',
-        
-        // UVA NetBadge attribute mapping per ITS documentation
-        // uid = NetBadge computing ID, eduPersonPrincipalName = uid@virginia.edu
-        'attributes' => [
-            'uid',                          // Required: NetBadge computing ID
-            'eduPersonPrincipalName',       // Required: uid@virginia.edu 
-            'eduPersonAffiliation',         // Default release: user affiliation
-            'eduPersonScopedAffiliation',   // Default release: scoped affiliation
-            'displayName',                  // Optional: display name
-            'cn',                          // Optional: common name
-            'mail',                        // Optional: email address
-        ],
-        
-        // NameID format - use persistent for consistent user identification
-        'NameIDFormat' => 'urn:oasis:names:tc:SAML:2.0:nameid-format:persistent',
-        
-        // Assertion Consumer Service - where SAML responses are posted
-        'AssertionConsumerService' => [
-            [
-                'Binding' => 'urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST',
-                'Location' => '$sp_entity_id/../simplesaml/module.php/saml/sp/saml2-acs.php/default-sp',
-                'index' => 0,
-            ],
-        ],
-        
-        // Single Logout Service - for proper logout handling
-        'SingleLogoutService' => [
-            [
-                'Binding' => 'urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect',
-                'Location' => '$sp_entity_id/../simplesaml/module.php/saml/sp/saml2-logout.php/default-sp',
-            ],
-        ],
-        
-        // Additional security settings
-        'saml20.sign.response' => false,
-        'saml20.sign.assertion' => true,
-    ],
-];
-EOF
-
-    info "✅ Generated authsources.php"
-}
-
-# Generate IdP metadata configuration
-generate_idp_metadata() {
-    local domain="$1"
-    local environment="$2"
-    
-    info "Creating IdP metadata configuration..."
-    
-    # Configure IdP endpoints per UVA NetBadge specifications
-    local idp_entity_id=""
-    local idp_sso_url=""
-    local idp_slo_url=""
-    local idp_metadata_url=""
-    local idp_description=""
-    
-    case "$environment" in
-        "server"|"production")
-            # Official UVA NetBadge production endpoints
-            idp_entity_id="urn:mace:incommon:virginia.edu"
-            idp_sso_url="https://shibidp.its.virginia.edu/idp/profile/SAML2/Redirect/SSO"
-            idp_slo_url="https://shibidp.its.virginia.edu/idp/profile/SAML2/Redirect/SLO"
-            idp_metadata_url="https://shibidp.its.virginia.edu/idp/shibboleth/uva-idp-metadata.xml"
-            idp_description="Official UVA NetBadge Identity Provider"
-            ;;
-        *)
-            # Development uses local drupal-netbadge container
-            idp_entity_id="https://drupal-netbadge.ddev.site/simplesaml/saml2/idp/metadata.php"
-            idp_sso_url="https://drupal-netbadge.ddev.site/simplesaml/saml2/idp/SSOService.php"
-            idp_slo_url="https://drupal-netbadge.ddev.site/simplesaml/saml2/idp/SingleLogoutService.php"
-            idp_metadata_url="https://drupal-netbadge.ddev.site/simplesaml/saml2/idp/metadata.php"
-            idp_description="Development NetBadge Identity Provider (drupal-netbadge container)"
-            ;;
-    esac
-    
-    cat > "$SIMPLESAML_ROOT/metadata/saml20-idp-remote.php" << EOF
-<?php
-/**
- * SAML 2.0 remote IdP metadata for drupal-dhportal
- * Generated automatically by setup-saml-integration-container.sh
- * Configured for UVA NetBadge integration per ITS specifications
- * Environment: $environment
- * Generated: \$(date)
- */
-
-// UVA NetBadge Identity Provider Configuration
-\\$metadata['$idp_entity_id'] = [
-    'entityid' => '$idp_entity_id',
-    'name' => [
-        'en' => 'UVA NetBadge Authentication',
-    ],
-    'description' => [
-        'en' => '$idp_description',
-    ],
-    
-    // Single Sign-On Service endpoint
-    'SingleSignOnService' => [
-        [
-            'Binding' => 'urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect',
-            'Location' => '$idp_sso_url',
-        ],
-    ],
-    
-    // Single Logout Service endpoint
-    'SingleLogoutService' => [
-        [
-            'Binding' => 'urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect',
-            'Location' => '$idp_slo_url',
-        ],
-    ],
-    
-    // NameID formats supported
-    'NameIDFormats' => [
-        'urn:oasis:names:tc:SAML:2.0:nameid-format:persistent',
-        'urn:oasis:names:tc:SAML:2.0:nameid-format:transient',
-    ],
-    
-    // Certificate configuration - will be populated automatically if available
-    'keys' => [
-        [
-            'encryption' => false,
-            'signing' => true,
-            'type' => 'X509Certificate',
-            'X509Certificate' => '// CERTIFICATE_PLACEHOLDER
-            // This will be automatically populated from: $idp_metadata_url
-            // For production: Contact ITS to register this SP and obtain certificate
-            // For development: Certificate from drupal-netbadge container',
-        ],
-    ],
-    
-    // UVA NetBadge attributes - as specified in ITS documentation
-    'attributes' => [
-        'uid',                          // NetBadge computing ID (required)
-        'eduPersonPrincipalName',       // uid@virginia.edu (required)
-        'eduPersonAffiliation',         // User affiliation (default release)
-        'eduPersonScopedAffiliation',   // Scoped affiliation (default release)
-        'displayName',                  // Display name
-        'cn',                          // Common name
-        'mail',                        // Email address
-    ],
-    
-    // Attribute name format
-    'attributes.NameFormat' => 'urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified',
-];
-
-// For development environment, also configure local drupal-netbadge
-EOF
-
-    info "✅ Generated IdP metadata template"
-    
-    # Note: Certificate will be populated by the certificate management functions
-    info "💡 IdP certificate will be populated automatically when certificate management functions are available"
-}
+echo ""
+echo "🔧 Template System:"
+echo "   - Configuration files generated from templates in scripts/templates/"
+echo "   - Uses envsubst for variable substitution"
+echo "   - Run with --test-only flag to generate test configurations"
+echo "   - Templates support multiple environments (dev/container/production)"

@@ -1,0 +1,67 @@
+<?php
+/**
+ * SAML 2.0 remote IdP metadata for drupal-dhportal
+ * Generated automatically by setup-saml-integration-container.sh
+ * Configured for UVA NetBadge integration per ITS specifications
+ * Environment: ${ENVIRONMENT}
+ * Generated: ${GENERATION_DATE}
+ */
+
+// UVA NetBadge Identity Provider Configuration
+$metadata['${IDP_ENTITY_ID}'] = [
+    'entityid' => '${IDP_ENTITY_ID}',
+    'name' => [
+        'en' => 'UVA NetBadge Authentication',
+    ],
+    'description' => [
+        'en' => '${IDP_DESCRIPTION}',
+    ],
+    
+    // Single Sign-On Service endpoint
+    'SingleSignOnService' => [
+        [
+            'Binding' => 'urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect',
+            'Location' => '${IDP_SSO_URL}',
+        ],
+    ],
+    
+    // Single Logout Service endpoint
+    'SingleLogoutService' => [
+        [
+            'Binding' => 'urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect',
+            'Location' => '${IDP_SLO_URL}',
+        ],
+    ],
+    
+    // NameID formats supported
+    'NameIDFormats' => [
+        'urn:oasis:names:tc:SAML:2.0:nameid-format:persistent',
+        'urn:oasis:names:tc:SAML:2.0:nameid-format:transient',
+    ],
+    
+    // Certificate configuration - will be populated automatically if available
+    'keys' => [
+        [
+            'encryption' => false,
+            'signing' => true,
+            'type' => 'X509Certificate',
+            'X509Certificate' => '${IDP_CERTIFICATE}',
+        ],
+    ],
+    
+    // UVA NetBadge attributes - as specified in ITS documentation
+    'attributes' => [
+        'uid',                          // NetBadge computing ID (required)
+        'eduPersonPrincipalName',       // uid@virginia.edu (required)
+        'eduPersonAffiliation',         // User affiliation (default release)
+        'eduPersonScopedAffiliation',   // Scoped affiliation (default release)
+        'displayName',                  // Display name
+        'cn',                          // Common name
+        'mail',                        // Email address
+    ],
+    
+    // Attribute name format
+    'attributes.NameFormat' => 'urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified',
+];
+
+// For development environment, also configure local drupal-netbadge
