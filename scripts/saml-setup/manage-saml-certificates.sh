@@ -29,6 +29,95 @@ info() {
     echo -e "${BLUE}[$(date +'%Y-%m-%d %H:%M:%S')] INFO: $1${NC}"
 }
 
+# Check for required dependencies
+check_dependencies() {
+    local missing_deps=()
+    local install_commands=()
+    
+    # Check for openssl (required for certificate generation)
+    if ! command -v openssl &> /dev/null; then
+        missing_deps+=("openssl")
+        case "$(uname -s)" in
+            Linux*)
+                if command -v apt-get &> /dev/null; then
+                    install_commands+=("sudo apt-get update && sudo apt-get install -y openssl")
+                elif command -v yum &> /dev/null; then
+                    install_commands+=("sudo yum install -y openssl")
+                elif command -v dnf &> /dev/null; then
+                    install_commands+=("sudo dnf install -y openssl")
+                elif command -v apk &> /dev/null; then
+                    install_commands+=("sudo apk add openssl")
+                else
+                    install_commands+=("Install openssl package using your system's package manager")
+                fi
+                ;;
+            Darwin*)
+                if command -v brew &> /dev/null; then
+                    install_commands+=("brew install openssl")
+                else
+                    install_commands+=("Install Homebrew, then run: brew install openssl")
+                fi
+                ;;
+            *)
+                install_commands+=("Install openssl package")
+                ;;
+        esac
+    fi
+    
+    # Check for jq (required for AWS Secrets Manager JSON parsing)
+    if [ -n "$AWS_SECRET_NAME" ]; then
+        if ! command -v jq &> /dev/null; then
+            missing_deps+=("jq")
+            case "$(uname -s)" in
+                Linux*)
+                    if command -v apt-get &> /dev/null; then
+                        install_commands+=("sudo apt-get update && sudo apt-get install -y jq")
+                    elif command -v yum &> /dev/null; then
+                        install_commands+=("sudo yum install -y jq")
+                    elif command -v dnf &> /dev/null; then
+                        install_commands+=("sudo dnf install -y jq")
+                    elif command -v apk &> /dev/null; then
+                        install_commands+=("sudo apk add jq")
+                    else
+                        install_commands+=("Install jq package using your system's package manager")
+                    fi
+                    ;;
+                Darwin*)
+                    if command -v brew &> /dev/null; then
+                        install_commands+=("brew install jq")
+                    else
+                        install_commands+=("Install Homebrew, then run: brew install jq")
+                    fi
+                    ;;
+                *)
+                    install_commands+=("Install jq package")
+                    ;;
+            esac
+        fi
+        
+        # Check for aws CLI (optional, but needed for AWS integration)
+        if ! command -v aws &> /dev/null; then
+            missing_deps+=("aws")
+            install_commands+=("Install AWS CLI: https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html")
+        fi
+    fi
+    
+    # Report missing dependencies
+    if [ ${#missing_deps[@]} -gt 0 ]; then
+        error "Missing required dependencies: ${missing_deps[*]}"
+        echo ""
+        echo "🔧 Installation instructions:"
+        for i in "${!missing_deps[@]}"; do
+            echo "   ${missing_deps[$i]}: ${install_commands[$i]}"
+        done
+        echo ""
+        echo "💡 After installing dependencies, re-run this script."
+        return 1
+    fi
+    
+    return 0
+}
+
 # Detect environment and set variables
 detect_environment() {
     DRUPAL_ROOT=""
@@ -195,6 +284,14 @@ setup_certificates() {
     local cert_name="${3:-server}"
     
     detect_environment
+    
+    # Check dependencies before proceeding
+    info "Checking required dependencies..."
+    if ! check_dependencies; then
+        exit 1
+    fi
+    info "✅ All dependencies are available"
+    
     setup_cert_directory
     
     case "$mode" in

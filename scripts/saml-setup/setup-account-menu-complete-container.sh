@@ -32,7 +32,8 @@ if [ "$1" = "--help" ] || [ "$1" = "-h" ]; then
     echo "  - Server/production environments (auto-detected)"
     echo ""
     echo "REQUIREMENTS:"
-    echo "  - Requires drush to be available"
+    echo "  - Auto-checks and guides installation of required dependencies:"
+    echo "    * drush - for Drupal configuration (when not using DDEV)"
     echo "  - 'dhportal_account_menu' module must be available"
     exit 0
 fi
@@ -77,6 +78,35 @@ else
     exit 1
 fi
 
+# Check for required dependencies
+check_dependencies() {
+    local missing_deps=()
+    local install_commands=()
+    
+    # Check for drush (only if not in DDEV mode)
+    if [ "$USE_DDEV" = false ]; then
+        if ! command -v drush &> /dev/null && [ ! -f "$VENDOR_ROOT/bin/drush" ]; then
+            missing_deps+=("drush")
+            install_commands+=("Install Drush: composer global require drush/drush OR use vendor/bin/drush")
+        fi
+    fi
+    
+    # Report missing dependencies
+    if [ ${#missing_deps[@]} -gt 0 ]; then
+        echo "❌ Missing required dependencies: ${missing_deps[*]}"
+        echo ""
+        echo "🔧 Installation instructions:"
+        for i in "${!missing_deps[@]}"; do
+            echo "   ${missing_deps[$i]}: ${install_commands[$i]}"
+        done
+        echo ""
+        echo "💡 After installing dependencies, re-run this script."
+        return 1
+    fi
+    
+    return 0
+}
+
 # Environment-aware command execution
 exec_cmd() {
     local cmd="$1"
@@ -117,6 +147,13 @@ VENDOR_ROOT="$DRUPAL_ROOT/vendor"
 
 log "Environment: $EXECUTION_MODE"
 log "Drupal root: $DRUPAL_ROOT"
+
+# Check dependencies before proceeding
+log "Checking required dependencies..."
+if ! check_dependencies; then
+    exit 1
+fi
+log "✅ All dependencies are available"
 
 # Set the working directory to Drupal root (only if not using DDEV)
 if [ "$USE_DDEV" = false ]; then

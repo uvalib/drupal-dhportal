@@ -4,6 +4,10 @@ This directory contains all scripts, templates, and documentation for SAML/NetBa
 
 ## 🚀 Quick Start
 
+### Automatic Dependency Checking
+
+All scripts automatically check for required dependencies and provide platform-specific installation guidance if anything is missing.
+
 For a complete SAML setup, run these universal scripts:
 
 ```bash

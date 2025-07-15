@@ -38,9 +38,25 @@ This implementation supports three environments with automatic detection:
 | **Container** | Direct container execution | Uses direct `drush` commands inside container |
 | **Server** | Production server deployment | Adapts paths and uses production settings |
 
-## 🔧 Implementation Components
+## � Quick Start
 
-### 1. Core Scripts
+### 1. Automatic Dependency Checking
+
+All scripts automatically check for required dependencies and provide installation guidance:
+
+**Common Dependencies:**
+
+- `envsubst` (from gettext package) - Template processing
+- `drush` - Drupal configuration (auto-detected in DDEV)
+- `openssl` - Certificate generation
+- `jq` - JSON processing (AWS integration only)
+- `aws` CLI - AWS Secrets Manager (optional)
+
+**Installation Guidance:**
+
+Scripts provide platform-specific installation commands for missing dependencies.
+
+### 2. Core Scripts
 
 - **`setup-saml-integration-container.sh`** - Main SAML setup (universal)
 - **`setup-account-menu-complete-container.sh`** - Account menu setup (universal)  

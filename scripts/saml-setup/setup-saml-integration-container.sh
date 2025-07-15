@@ -34,7 +34,9 @@ elif [ "$1" = "--help" ] || [ "$1" = "-h" ]; then
     echo "  - Server/production environments (auto-detected)"
     echo ""
     echo "REQUIREMENTS:"
-    echo "  - Requires drush and envsubst to be available"
+    echo "  - Auto-checks and guides installation of required dependencies:"
+    echo "    * envsubst (from gettext package) - for template processing"
+    echo "    * drush - for Drupal configuration (when not using DDEV)"
     echo "  - Templates must be present in scripts/saml-setup/templates/ directory"
     exit 0
 fi
@@ -81,6 +83,65 @@ else
         exit 1
     fi
 fi
+
+# Check for required dependencies
+check_dependencies() {
+    local missing_deps=()
+    local install_commands=()
+    
+    # Check for envsubst (required for template processing)
+    if ! command -v envsubst &> /dev/null; then
+        missing_deps+=("envsubst")
+        case "$(uname -s)" in
+            Linux*)
+                if command -v apt-get &> /dev/null; then
+                    install_commands+=("sudo apt-get update && sudo apt-get install -y gettext-base")
+                elif command -v yum &> /dev/null; then
+                    install_commands+=("sudo yum install -y gettext")
+                elif command -v dnf &> /dev/null; then
+                    install_commands+=("sudo dnf install -y gettext")
+                elif command -v apk &> /dev/null; then
+                    install_commands+=("sudo apk add gettext")
+                else
+                    install_commands+=("Install gettext package using your system's package manager")
+                fi
+                ;;
+            Darwin*)
+                if command -v brew &> /dev/null; then
+                    install_commands+=("brew install gettext")
+                else
+                    install_commands+=("Install Homebrew, then run: brew install gettext")
+                fi
+                ;;
+            *)
+                install_commands+=("Install gettext package (provides envsubst)")
+                ;;
+        esac
+    fi
+    
+    # Check for drush (only if not in DDEV mode and not test-only)
+    if [ "$USE_DDEV" = false ] && [ "$TEST_ONLY" != true ]; then
+        if ! command -v drush &> /dev/null && [ ! -f "$VENDOR_ROOT/bin/drush" ]; then
+            missing_deps+=("drush")
+            install_commands+=("Install Drush: composer global require drush/drush OR use vendor/bin/drush")
+        fi
+    fi
+    
+    # Report missing dependencies
+    if [ ${#missing_deps[@]} -gt 0 ]; then
+        echo "❌ Missing required dependencies: ${missing_deps[*]}"
+        echo ""
+        echo "🔧 Installation instructions:"
+        for i in "${!missing_deps[@]}"; do
+            echo "   ${missing_deps[$i]}: ${install_commands[$i]}"
+        done
+        echo ""
+        echo "💡 After installing dependencies, re-run this script."
+        return 1
+    fi
+    
+    return 0
+}
 
 # Environment-aware command execution
 exec_cmd() {
@@ -367,6 +428,13 @@ case "$EXECUTION_MODE" in
         SIMPLESAML_ROOT="$DRUPAL_ROOT/simplesamlphp"
         ;;
 esac
+
+# Check dependencies before proceeding
+info "Checking required dependencies..."
+if ! check_dependencies; then
+    exit 1
+fi
+info "✅ All dependencies are available"
 
 # If running in test-only mode, generate test configs and exit
 if [ "$TEST_ONLY" = true ]; then
