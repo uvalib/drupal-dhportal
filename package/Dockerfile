@@ -34,7 +34,8 @@ RUN 	mkdir /opt/drupal/util \
 	&& rm -rf /opt/drupal/web/modules/custom \
   	&& ln -sf /opt/drupal/util/drupal-dhportal/web/modules/custom /opt/drupal/web/modules/custom \
 	&& rm -rf /opt/drupal/web/themes/custom \
-        && ln -sf /opt/drupal/util/drupal-dhportal/web/themes/custom /opt/drupal/web/themes/custom
+        && ln -sf /opt/drupal/util/drupal-dhportal/web/themes/custom /opt/drupal/web/themes/custom \
+	&& ln -sf /opt/drupal/util/drupal-dhportal/scripts /opt/drupal/scripts
 
 # install other dependancies
 RUN pecl install apcu-5.1.22 && docker-php-ext-enable apcu
