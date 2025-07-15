@@ -8,7 +8,8 @@ RUN apt-get -y update && \
 	apt-get -y upgrade && \
 	apt-get -y install git less vim && \
 	apt-get -y install default-mysql-client sqlite3 && \
-	apt-get -y install rsync
+	apt-get -y install rsync && \
+	apt-get -y install gettext-base
 
 # set the timezone appropriatly
 ENV TZ=America/New_York
