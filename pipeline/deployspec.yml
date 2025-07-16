@@ -48,6 +48,24 @@ phases:
       - PRIVATE_KEY=${CODEBUILD_SRC_DIR}/terraform-infrastructure/${PRIVATE_KEY_NAME}
       - ${CODEBUILD_SRC_DIR}/terraform-infrastructure/scripts/decrypt-key.ksh ${PRIVATE_KEY}.cpt ${PRIVATE_KEY_NAME}
       - chmod 600 ${PRIVATE_KEY}
+      # decrypt the SAML private key (environment-specific)
+      - |
+        if [ "$DEPLOYMENT_ENVIRONMENT" = "production" ]; then
+          SAML_KEY_NAME=dh.library.virginia.edu/production/keys/dh-drupal-production-saml.pem
+        else
+          SAML_KEY_NAME=dh.library.virginia.edu/staging/keys/dh-drupal-staging-saml.pem
+        fi
+      - SAML_PRIVATE_KEY=${CODEBUILD_SRC_DIR}/terraform-infrastructure/${SAML_KEY_NAME}
+      - |
+        if [ -f "${SAML_PRIVATE_KEY}.cpt" ]; then
+          echo "Decrypting SAML private key for $DEPLOYMENT_ENVIRONMENT..."
+          ${CODEBUILD_SRC_DIR}/terraform-infrastructure/scripts/decrypt-key.ksh ${SAML_PRIVATE_KEY}.cpt ${SAML_KEY_NAME}
+          chmod 600 ${SAML_PRIVATE_KEY}
+          echo "SAML_KEY_AVAILABLE=true" >> /tmp/env
+        else
+          echo "SAML private key not found: ${SAML_PRIVATE_KEY}.cpt"
+          echo "SAML_KEY_AVAILABLE=false" >> /tmp/env
+        fi
       - echo "Detecting changed files!"
       - echo source version = $CODEBUILD_RESOLVED_SOURCE_VERSION
       - CHANGED_FILES=$(curl -s  https://api.github.com/repos/uvalib/drupal-dhportal/compare/$CODEBUILD_RESOLVED_SOURCE_VERSION^1...$CODEBUILD_RESOLVED_SOURCE_VERSION | jq -r '.files[].filename' )
@@ -87,8 +105,16 @@ phases:
           echo "Setup SAML certificates using decrypted infrastructure keys"
           echo "Setting up SAML certificates for $DEPLOYMENT_ENVIRONMENT environment..."
           # Make terraform infrastructure available for container certificate setup
-          echo "TERRAFORM_INFRA_DIR=${CODEBUILD_SRC_DIR}/terraform-infrastructure" >> /tmp/env
+          echo "TERRAFORM_REPO_PATH=${CODEBUILD_SRC_DIR}/terraform-infrastructure" >> /tmp/env
           echo "DEPLOYMENT_ENVIRONMENT=${DEPLOYMENT_ENVIRONMENT}" >> /tmp/env
+          # Deploy SAML certificates if available
+          if [ "$SAML_KEY_AVAILABLE" = "true" ]; then
+            echo "Deploying SAML certificates for $DEPLOYMENT_ENVIRONMENT..."
+            cd ${CODEBUILD_SRC_DIR}
+            ./scripts/manage-saml-certificates-terraform.sh deploy $DEPLOYMENT_ENVIRONMENT
+          else
+            echo "SAML certificates not available - skipping SAML setup"
+          fi
           ansible-playbook ${ansible_debug} deploy_backend_1.yml
         fi
 
