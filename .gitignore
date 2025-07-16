@@ -54,6 +54,7 @@ test-output/
 # Ignore SAML certificate temporary files and private keys
 saml-config/temp/           # Temporary generation files
 saml-config/dev/            # Development certificates (disposable)
+saml-config/dev/*           # All files in dev directory
 *.key                       # Private keys (never commit)
 *.pem                       # Private keys in PEM format (never commit)
 *.csr                       # Certificate signing requests (temporary)
@@ -92,3 +93,7 @@ settings.local.php          # Local Drupal settings (contains secrets)
 # But ensure SimpleSAMLphp cert directory private keys are still ignored
 simplesamlphp/cert/*.key
 simplesamlphp/cert/*.pem
+
+# Explicit patterns for dev SAML files
+saml-config/dev/*.crt
+saml-config/dev/*.key
