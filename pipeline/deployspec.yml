@@ -114,6 +114,8 @@ phases:
             echo "Deploying SAML certificates for $DEPLOYMENT_ENVIRONMENT..."
             cd ${CODEBUILD_SRC_DIR}
             ./scripts/manage-saml-certificates-terraform.sh deploy $DEPLOYMENT_ENVIRONMENT
+            # Return to ansible directory for playbook execution
+            cd ${CODEBUILD_SRC_DIR}/terraform-infrastructure/dh.library.virginia.edu/staging/ansible
           else
             echo "SAML certificates not available - skipping SAML setup"
           fi
