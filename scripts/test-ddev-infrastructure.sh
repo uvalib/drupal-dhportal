@@ -33,7 +33,7 @@ setup_mock_terraform() {
     
     mkdir -p "$MOCK_TERRAFORM_DIR/scripts"
     mkdir -p "$MOCK_TERRAFORM_DIR/dh.library.virginia.edu/staging/keys"
-    mkdir -p "$MOCK_TERRAFORM_DIR/dh.library.virginia.edu/production/keys"
+    mkdir -p "$MOCK_TERRAFORM_DIR/dh.library.virginia.edu/production.new/keys"
     
     # Create mock add-secret.ksh
     cat > "$MOCK_TERRAFORM_DIR/scripts/add-secret.ksh" << 'EOF'

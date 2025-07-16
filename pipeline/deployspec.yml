@@ -41,7 +41,7 @@ phases:
       # decrypt the instance private key (environment-specific)
       - |
         if [ "$DEPLOYMENT_ENVIRONMENT" = "production" ]; then
-          PRIVATE_KEY_NAME=dh.library.virginia.edu/production/keys/dh-drupal-production.pem
+          PRIVATE_KEY_NAME=dh.library.virginia.edu/production.new/keys/dh-drupal-production.pem
         else
           PRIVATE_KEY_NAME=dh.library.virginia.edu/staging/keys/dh-drupal-staging.pem
         fi
@@ -51,7 +51,7 @@ phases:
       # decrypt the SAML private key (environment-specific)
       - |
         if [ "$DEPLOYMENT_ENVIRONMENT" = "production" ]; then
-          SAML_KEY_NAME=dh.library.virginia.edu/production/keys/dh-drupal-production-saml.pem
+          SAML_KEY_NAME=dh.library.virginia.edu/production.new/keys/dh-drupal-production-saml.pem
           SAML_SECRET_NAME=dh.library.virginia.edu/production/keys/dh-drupal-production-saml.pem
         else
           SAML_KEY_NAME=dh.library.virginia.edu/staging/keys/dh-drupal-staging-saml.pem

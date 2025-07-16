@@ -51,10 +51,10 @@ get_key_paths() {
             SECRET_NAME="dh.library.virginia.edu/staging/keys/dh-drupal-staging-saml.pem"
             ;;
         "production")
-            TERRAFORM_KEY_PATH="dh.library.virginia.edu/production/keys/dh-drupal-production-saml.pem"
+            TERRAFORM_KEY_PATH="dh.library.virginia.edu/production.new/keys/dh-drupal-production-saml.pem"
             CERT_PATH="$SAML_CERT_DIR/production/saml-sp.crt"
             DEFAULT_DOMAIN="dh.library.virginia.edu"
-            SECRET_NAME="dh.library.virginia.edu/production/keys/dh-drupal-production-saml.pem"
+            SECRET_NAME="dh.library.virginia.edu/production.new/keys/dh-drupal-production-saml.pem"
             ;;
         "dev")
             # Development uses local keys, not terraform

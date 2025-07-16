@@ -44,11 +44,10 @@ echo "--------------------------------------------"
 
 info "Setting up SAML key variables (from deployspec.yml lines 48-58)"
 
-# Extract exact logic from deployspec.yml
-if [ "$DEPLOYMENT_ENVIRONMENT" = "production" ]; then
-    SAML_KEY_NAME=dh.library.virginia.edu/production/keys/dh-drupal-production-saml.pem
-    SAML_SECRET_NAME=dh.library.virginia.edu/production/keys/dh-drupal-production-saml.pem
-else
+# Extract exact logic from deployspec.yml  if [ "$DEPLOYMENT_ENVIRONMENT" = "production" ]; then
+    SAML_KEY_NAME=dh.library.virginia.edu/production.new/keys/dh-drupal-production-saml.pem
+    SAML_SECRET_NAME=dh.library.virginia.edu/production.new/keys/dh-drupal-production-saml.pem
+  else
     SAML_KEY_NAME=dh.library.virginia.edu/staging/keys/dh-drupal-staging-saml.pem
     SAML_SECRET_NAME=dh.library.virginia.edu/staging/keys/dh-drupal-staging-saml.pem
 fi

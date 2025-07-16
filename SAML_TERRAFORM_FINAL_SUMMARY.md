@@ -63,7 +63,7 @@ cd /path/to/terraform-infrastructure
 
 # Add encrypted keys
 git add dh.library.virginia.edu/staging/keys/dh-drupal-staging-saml.pem.cpt
-git add dh.library.virginia.edu/production/keys/dh-drupal-production-saml.pem.cpt
+git add dh.library.virginia.edu/production.new/keys/dh-drupal-production-saml.pem.cpt
 git commit -m "Add encrypted SAML private keys for drupal-dhportal"
 ```
 
