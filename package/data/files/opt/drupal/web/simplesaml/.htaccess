@@ -1,0 +1,52 @@
+# SimpleSAMLphp web interface .htaccess
+# Ensure proper access control and routing
+
+# Enable rewrite engine
+RewriteEngine On
+
+# Prevent access to include files
+<Files "_include.php">
+    Require all denied
+</Files>
+
+# Prevent access to configuration files
+<FilesMatch "\.(yml|yaml)$">
+    Require all denied
+</FilesMatch>
+
+# Set proper content types
+<FilesMatch "\.php$">
+    SetHandler application/x-httpd-php
+</FilesMatch>
+
+# Security headers
+Header always set X-Frame-Options DENY
+Header always set X-Content-Type-Options nosniff
+Header always set X-XSS-Protection "1; mode=block"
+
+# Allow access to main interface files
+<Files "index.php">
+    Require all granted
+</Files>
+
+<Files "admin.php">
+    Require all granted
+</Files>
+
+<Files "status.php">
+    Require all granted
+</Files>
+
+<Files "saml2-metadata.php">
+    Require all granted
+</Files>
+
+# Default deny for other files
+<Files "*">
+    Require all denied
+</Files>
+
+# Override for CSS, JS, and image files if they exist
+<FilesMatch "\.(css|js|png|jpg|jpeg|gif|ico)$">
+    Require all granted
+</FilesMatch>

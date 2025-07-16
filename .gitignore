@@ -69,6 +69,7 @@ simplesamlphp/data/         # SimpleSAMLphp data directory
 # Ignore development/debug files
 web/saml-debug.php          # SAML diagnostic script (development only)
 web/test-saml*.php          # SAML test files (development only)
+web/test-*.php              # All test scripts (development only)
 debug-config.php            # Debug configuration files
 /tmp/                       # Temporary ecosystem files
 

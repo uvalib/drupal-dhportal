@@ -305,7 +305,39 @@ cleanup_dev_certificates() {
 
 # Run if executed directly
 if [ "${BASH_SOURCE[0]}" = "${0}" ]; then
-    case "$1" in
+    # Parse command line arguments
+    COMMAND=""
+    OUTPUT_DIR=""
+    FORCE_FLAG=""
+    
+    while [[ $# -gt 0 ]]; do
+        case $1 in
+            --dev)
+                COMMAND="dev"
+                shift
+                ;;
+            --output-dir)
+                OUTPUT_DIR="$2"
+                shift 2
+                ;;
+            --force)
+                FORCE_FLAG="--force"
+                shift
+                ;;
+            dev|staging|production|cleanup|cleanup-dev)
+                COMMAND="$1"
+                shift
+                ;;
+            *)
+                if [ -z "$COMMAND" ]; then
+                    COMMAND="$1"
+                fi
+                shift
+                ;;
+        esac
+    done
+    
+    case "$COMMAND" in
         "cleanup")
             cleanup_private_keys
             ;;
@@ -313,10 +345,21 @@ if [ "${BASH_SOURCE[0]}" = "${0}" ]; then
             cleanup_dev_certificates
             ;;
         "dev"|"staging"|"production")
-            main "$1"
+            # If output directory is specified (for testing), use it
+            if [ -n "$OUTPUT_DIR" ]; then
+                # For testing, generate simple SP certificates to output directory
+                if [ "$COMMAND" = "dev" ]; then
+                    mkdir -p "$OUTPUT_DIR"
+                    openssl req -x509 -newkey rsa:2048 -keyout "$OUTPUT_DIR/sp.key" -out "$OUTPUT_DIR/sp.crt" -days 365 -nodes -subj "/CN=test-sp/O=Test/C=US" 2>/dev/null
+                    log "Test certificates generated in $OUTPUT_DIR"
+                    exit 0
+                fi
+            fi
+            
+            main "$COMMAND"
             
             # Offer cleanup option if running on server (for staging/production)
-            if [ "$1" != "dev" ] && ([ -n "$SSH_CONNECTION" ] || [ -n "$SSH_CLIENT" ]); then
+            if [ "$COMMAND" != "dev" ] && ([ -n "$SSH_CONNECTION" ] || [ -n "$SSH_CLIENT" ]); then
                 echo
                 warn "🚨 Server environment detected!"
                 echo "Run './scripts/generate-saml-certificates.sh cleanup' to remove private keys"
@@ -333,8 +376,8 @@ if [ "${BASH_SOURCE[0]}" = "${0}" ]; then
             fi
             ;;
         *)
-            error "Unknown command: $1"
-            echo "Usage: $0 [dev|staging|production|cleanup|cleanup-dev]"
+            error "Unknown command: $COMMAND"
+            echo "Usage: $0 [dev|staging|production|cleanup|cleanup-dev] [--dev --output-dir DIR --force]"
             echo
             echo "Commands:"
             echo "  dev          Generate disposable development certificates"
@@ -343,6 +386,11 @@ if [ "${BASH_SOURCE[0]}" = "${0}" ]; then
             echo "  cleanup      Remove staging/production private keys from server"
             echo "  cleanup-dev  Remove all development certificates"
             echo "  (no args)    Generate both staging and production"
+            echo
+            echo "Options:"
+            echo "  --dev        Same as 'dev' command"
+            echo "  --output-dir DIR  Generate certificates in specified directory (testing only)"
+            echo "  --force      Force overwrite existing files"
             exit 1
             ;;
     esac
