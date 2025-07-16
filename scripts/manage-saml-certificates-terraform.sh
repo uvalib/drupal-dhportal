@@ -10,7 +10,7 @@
 #   ./manage-saml-certificates-terraform.sh [command] [environment] [domain]
 #
 # COMMANDS:
-#   generate-keys     Generate new encrypted private keys for terraform storage
+#   generate-keys     Generate new encrypted private keys and self-signed certificates
 #   bootstrap-secrets Bootstrap AWS secrets for key encryption passphrases  
 #   deploy           Deploy certificates using terraform-decrypted keys
 #   encrypt-existing Encrypt existing private keys for terraform storage
@@ -48,13 +48,13 @@ get_key_paths() {
             TERRAFORM_KEY_PATH="dh.library.virginia.edu/staging/keys/dh-drupal-staging-saml.pem"
             CERT_PATH="$SAML_CERT_DIR/staging/saml-sp.crt"
             DEFAULT_DOMAIN="dh-staging.library.virginia.edu"
-            SECRET_NAME="dh-drupal-staging-saml-passphrase"
+            SECRET_NAME="dh.library.virginia.edu/staging/keys/dh-drupal-staging-saml.pem"
             ;;
         "production")
             TERRAFORM_KEY_PATH="dh.library.virginia.edu/production/keys/dh-drupal-production-saml.pem"
             CERT_PATH="$SAML_CERT_DIR/production/saml-sp.crt"
             DEFAULT_DOMAIN="dh.library.virginia.edu"
-            SECRET_NAME="dh-drupal-production-saml-passphrase"
+            SECRET_NAME="dh.library.virginia.edu/production/keys/dh-drupal-production-saml.pem"
             ;;
         "dev")
             # Development uses local keys, not terraform
@@ -83,6 +83,38 @@ bootstrap_secrets() {
     
     info "Bootstrapping AWS secrets for $env environment"
     
+    # IDEMPOTENCY CHECK: Verify secret doesn't already exist
+    info "Checking if AWS secret already exists: $SECRET_NAME"
+    if aws secretsmanager describe-secret --secret-id "$SECRET_NAME" >/dev/null 2>&1; then
+        warn "⚠️  AWS secret already exists: $SECRET_NAME"
+        info "Verifying secret accessibility..."
+        
+        if SECRET_VALUE=$(aws secretsmanager get-secret-value --secret-id "$SECRET_NAME" --query 'SecretString' --output text 2>/dev/null); then
+            SECRET_LENGTH=${#SECRET_VALUE}
+            log "✅ Existing secret is accessible (length: $SECRET_LENGTH characters)"
+            
+            if [ "$SECRET_LENGTH" -eq 32 ]; then
+                log "✅ Existing secret format appears correct (32-character passphrase)"
+            else
+                warn "⚠️  Existing secret format may be incorrect (expected 32 characters)"
+            fi
+            
+            echo
+            warn "IDEMPOTENCY: AWS secret bootstrap complete (using existing secret)"
+            echo "Secret name: $SECRET_NAME"
+            echo "Status: Already exists and accessible"
+            echo
+            echo "Next steps:"
+            echo "1. Generate SAML keys: $0 generate-keys $env"
+            echo "2. The key generation will use the existing secret for encryption"
+            return 0
+        else
+            error "❌ Existing secret is not accessible"
+            error "This may indicate a permissions issue or corrupted secret"
+            return 1
+        fi
+    fi
+    
     # Check if terraform infrastructure is available
     if [ ! -d "$TERRAFORM_REPO_PATH" ]; then
         error "Terraform infrastructure not found at: $TERRAFORM_REPO_PATH"
@@ -97,7 +129,7 @@ bootstrap_secrets() {
         return 1
     fi
     
-    info "Creating AWS secret for SAML key encryption passphrase..."
+    info "Creating NEW AWS secret for SAML key encryption passphrase..."
     log "Secret name: $SECRET_NAME"
     
     # Create the secret using terraform infrastructure script
@@ -125,6 +157,7 @@ bootstrap_secrets() {
 generate_keys_for_terraform() {
     local env="$1"
     local domain="${2:-}"
+    local force_regenerate="${3:-false}"
     
     get_key_paths "$env"
     
@@ -135,18 +168,101 @@ generate_keys_for_terraform() {
     
     domain="${domain:-$DEFAULT_DOMAIN}"
     
-    info "Generating new SAML private key for $env environment"
+    info "Generating SAML private key and certificate for $env environment"
+    
+    # IDEMPOTENCY CHECKS: Verify what already exists
+    local encrypted_key_file="$TERRAFORM_REPO_PATH/${TERRAFORM_KEY_PATH}.cpt"
+    local certificate_file="$CERT_PATH"
+    
+    info "Performing idempotency checks..."
+    
+    # Check if encrypted key already exists
+    if [ -f "$encrypted_key_file" ]; then
+        warn "⚠️  Encrypted SAML key already exists: ${TERRAFORM_KEY_PATH}.cpt"
+        
+        # Verify the encrypted key is valid by trying to get its info
+        local key_size=$(stat -f%z "$encrypted_key_file" 2>/dev/null || stat -c%s "$encrypted_key_file")
+        info "Existing encrypted key size: $key_size bytes"
+        
+        if [ "$key_size" -gt 1000 ]; then
+            log "✅ Existing encrypted key appears valid (reasonable size)"
+        else
+            warn "⚠️  Existing encrypted key appears small (may be corrupted)"
+        fi
+    fi
+    
+    # Check if certificate already exists
+    if [ -f "$certificate_file" ]; then
+        warn "⚠️  SAML certificate already exists: $certificate_file"
+        
+        # Verify the certificate is valid
+        if openssl x509 -in "$certificate_file" -noout -subject >/dev/null 2>&1; then
+            log "✅ Existing certificate is valid"
+            info "Certificate details:"
+            openssl x509 -in "$certificate_file" -noout -subject -dates | sed 's/^/   /'
+        else
+            warn "⚠️  Existing certificate appears corrupted"
+        fi
+    fi
+    
+    # Check if AWS secret exists
+    info "Checking AWS secret accessibility: $SECRET_NAME"
+    if ! aws secretsmanager get-secret-value --secret-id "$SECRET_NAME" >/dev/null 2>&1; then
+        error "❌ AWS secret not accessible: $SECRET_NAME"
+        error "Run first: $0 bootstrap-secrets $env"
+        return 1
+    fi
+    log "✅ AWS secret is accessible"
+    
+    # IDEMPOTENCY DECISION: Both key and certificate exist
+    if [ -f "$encrypted_key_file" ] && [ -f "$certificate_file" ] && [ "$force_regenerate" != "true" ]; then
+        echo
+        warn "IDEMPOTENCY: SAML key and certificate already exist for $env"
+        echo "Encrypted key: ${TERRAFORM_KEY_PATH}.cpt"
+        echo "Certificate:   $certificate_file"
+        echo
+        info "To regenerate (DESTRUCTIVE), run with --force:"
+        echo "$0 generate-keys $env $domain --force"
+        echo
+        warn "⚠️  WARNING: Regeneration will invalidate existing NetBadge registrations"
+        echo "Only regenerate if you coordinate with NetBadge admin to update SP metadata"
+        echo
+        log "✅ Key generation complete (using existing assets)"
+        return 0
+    fi
+    
+    # Check for partial state
+    if [ -f "$encrypted_key_file" ] || [ -f "$certificate_file" ]; then
+        if [ "$force_regenerate" != "true" ]; then
+            warn "⚠️  PARTIAL STATE DETECTED:"
+            [ -f "$encrypted_key_file" ] && echo "   ✓ Encrypted key exists: ${TERRAFORM_KEY_PATH}.cpt"
+            [ ! -f "$encrypted_key_file" ] && echo "   ✗ Encrypted key missing"
+            [ -f "$certificate_file" ] && echo "   ✓ Certificate exists: $certificate_file"
+            [ ! -f "$certificate_file" ] && echo "   ✗ Certificate missing"
+            echo
+            warn "Partial state detected. Use --force to complete/regenerate:"
+            echo "$0 generate-keys $env $domain --force"
+            return 1
+        else
+            warn "⚠️  FORCE MODE: Regenerating existing keys/certificates"
+        fi
+    fi
+    
+    # Proceed with generation
+    info "Proceeding with SAML key and certificate generation..."
     
     # Create temporary directory for key generation
     local temp_dir=$(mktemp -d)
     local temp_key="$temp_dir/saml-sp.key"
-    local temp_csr="$temp_dir/saml-sp.csr"
+    local temp_cert="$temp_dir/saml-sp.crt"
     
     # Generate private key
+    info "Generating 2048-bit RSA private key..."
     openssl genrsa -out "$temp_key" 2048
     
-    # Generate CSR
-    openssl req -new -key "$temp_key" -out "$temp_csr" \
+    # Generate self-signed certificate (SAML2 doesn't require CA-signed certificates)
+    info "Generating self-signed certificate (10-year validity)..."
+    openssl req -new -x509 -key "$temp_key" -out "$temp_cert" -days 3650 \
         -subj "/CN=$domain/O=University of Virginia Library/OU=Digital Humanities/L=Charlottesville/ST=Virginia/C=US"
     
     # Check if terraform infrastructure is available
@@ -175,29 +291,48 @@ generate_keys_for_terraform() {
     # Encrypt the key using terraform infrastructure script
     log "Encrypting private key using terraform infrastructure..."
     cd "$TERRAFORM_REPO_PATH"
-    ./scripts/crypt-key.ksh "$TERRAFORM_KEY_PATH"
+    if ./scripts/crypt-key.ksh "$TERRAFORM_KEY_PATH" "$SECRET_NAME"; then
+        log "✅ Private key encrypted successfully"
+    else
+        error "❌ Private key encryption failed"
+        rm -rf "$temp_dir"
+        rm -f "$TERRAFORM_REPO_PATH/$TERRAFORM_KEY_PATH"
+        return 1
+    fi
     
     # Remove unencrypted key
     rm -f "$TERRAFORM_REPO_PATH/$TERRAFORM_KEY_PATH"
     
-    # Copy CSR for submission to CA
-    local csr_output="$PROJECT_ROOT/saml-config/csr/${env}-saml-sp.csr"
-    mkdir -p "$(dirname "$csr_output")"
-    cp "$temp_csr" "$csr_output"
+    # Copy self-signed certificate to git repository
+    mkdir -p "$(dirname "$CERT_PATH")"
+    cp "$temp_cert" "$CERT_PATH"
     
     # Cleanup
     rm -rf "$temp_dir"
     
-    log "✅ Key generation complete:"
-    log "   Encrypted key: $TERRAFORM_REPO_PATH/${TERRAFORM_KEY_PATH}.cpt"
-    log "   CSR for CA:    $csr_output"
-    
-    echo
-    warn "NEXT STEPS:"
-    echo "1. Commit encrypted key to terraform-infrastructure repository"
-    echo "2. Submit CSR to UVA Certificate Authority: $csr_output"
-    echo "3. Store signed certificate in git: $CERT_PATH"
-    echo "4. Deploy using: $0 deploy $env"
+    # Verify final state
+    if [ -f "$encrypted_key_file" ] && [ -f "$certificate_file" ]; then
+        log "✅ Key generation complete:"
+        log "   Encrypted key: $TERRAFORM_REPO_PATH/${TERRAFORM_KEY_PATH}.cpt"
+        log "   Certificate:   $CERT_PATH"
+        
+        # Verify certificate details
+        info "Generated certificate details:"
+        openssl x509 -in "$certificate_file" -noout -subject -dates | sed 's/^/   /'
+        
+        echo
+        warn "NEXT STEPS:"
+        echo "1. Commit encrypted key to terraform-infrastructure repository"
+        echo "2. Commit self-signed certificate to git: $CERT_PATH"
+        echo "3. Register SP metadata (including certificate) with NetBadge admin"
+        echo "4. Deploy using: $0 deploy $env"
+        echo
+        warn "⚠️  IMPORTANT: If regenerating, coordinate with NetBadge admin"
+        echo "The new certificate must be registered before SAML authentication will work"
+    else
+        error "❌ Key generation verification failed"
+        return 1
+    fi
 }
 
 # Deploy certificates using terraform-decrypted keys (during deployment)
@@ -215,9 +350,40 @@ deploy_certificates() {
     
     info "Deploying SAML certificates for $env environment"
     
-    # In deployment environment, terraform has already decrypted the key
+    # IDEMPOTENCY CHECK: Verify deployment prerequisites
     local decrypted_key="$TERRAFORM_REPO_PATH/$TERRAFORM_KEY_PATH"
+    local simplesaml_cert_dir="$PROJECT_ROOT/simplesamlphp/cert"
+    local deployed_cert="$simplesaml_cert_dir/server.crt"
+    local deployed_key="$simplesaml_cert_dir/server.key"
     
+    # Check if already deployed and valid
+    if [ -f "$deployed_cert" ] && [ -f "$deployed_key" ]; then
+        info "SAML certificates already deployed, validating..."
+        
+        # Verify deployed certificates are valid and matching
+        if openssl x509 -in "$deployed_cert" -noout >/dev/null 2>&1 && \
+           openssl rsa -in "$deployed_key" -check -noout >/dev/null 2>&1; then
+            
+            # Check if they match
+            local deployed_cert_pubkey=$(openssl x509 -in "$deployed_cert" -pubkey -noout 2>/dev/null)
+            local deployed_key_pubkey=$(openssl rsa -in "$deployed_key" -pubout 2>/dev/null)
+            
+            if [ "$deployed_cert_pubkey" = "$deployed_key_pubkey" ]; then
+                log "✅ SAML certificates already deployed and valid"
+                info "Certificate details:"
+                openssl x509 -in "$deployed_cert" -noout -subject -dates | sed 's/^/   /'
+                
+                log "✅ SAML certificate deployment complete (idempotent)"
+                return 0
+            else
+                warn "⚠️  Deployed certificate and key do not match - redeploying"
+            fi
+        else
+            warn "⚠️  Deployed certificates are invalid - redeploying"
+        fi
+    fi
+    
+    # Verify deployment prerequisites exist
     if [ ! -f "$decrypted_key" ]; then
         error "Decrypted private key not found: $decrypted_key"
         error "Ensure terraform infrastructure has decrypted the key during deployment"
@@ -230,11 +396,35 @@ deploy_certificates() {
         return 1
     fi
     
+    # Validate source certificate and key before deployment
+    info "Validating source certificate and key before deployment..."
+    if ! openssl x509 -in "$CERT_PATH" -noout >/dev/null 2>&1; then
+        error "Source certificate is invalid: $CERT_PATH"
+        return 1
+    fi
+    
+    if ! openssl rsa -in "$decrypted_key" -check -noout >/dev/null 2>&1; then
+        error "Source private key is invalid: $decrypted_key"
+        return 1
+    fi
+    
+    # Verify source certificate and key match
+    local source_cert_pubkey=$(openssl x509 -in "$CERT_PATH" -pubkey -noout 2>/dev/null)
+    local source_key_pubkey=$(openssl rsa -in "$decrypted_key" -pubout 2>/dev/null)
+    
+    if [ "$source_cert_pubkey" != "$source_key_pubkey" ]; then
+        error "Source certificate and private key do not match"
+        error "This indicates a serious configuration error"
+        return 1
+    fi
+    
+    log "✅ Source certificate and private key validated"
+    
     # Create SimpleSAMLphp certificate directory
-    local simplesaml_cert_dir="$PROJECT_ROOT/simplesamlphp/cert"
     mkdir -p "$simplesaml_cert_dir"
     
-    # Copy certificate and key for SimpleSAMLphp
+    # Deploy certificate and key for SimpleSAMLphp
+    info "Deploying certificates to SimpleSAMLphp directory..."
     cp "$CERT_PATH" "$simplesaml_cert_dir/server.crt"
     cp "$decrypted_key" "$simplesaml_cert_dir/server.key"
     
@@ -289,7 +479,7 @@ encrypt_existing_key() {
     # Encrypt the key
     log "Encrypting existing private key..."
     cd "$TERRAFORM_REPO_PATH"
-    ./scripts/crypt-key.ksh "$TERRAFORM_KEY_PATH"
+    ./scripts/crypt-key.ksh "$TERRAFORM_KEY_PATH" "$SECRET_NAME"
     
     # Remove unencrypted key
     rm -f "$TERRAFORM_REPO_PATH/$TERRAFORM_KEY_PATH"
@@ -409,7 +599,21 @@ case "$1" in
             error "Environment required: staging or production"
             exit 1
         fi
-        generate_keys_for_terraform "$2" "$3"
+        
+        # Check for --force flag
+        force_flag="false"
+        if [ "$4" = "--force" ] || [ "$3" = "--force" ]; then
+            force_flag="true"
+            warn "⚠️  FORCE MODE ENABLED: Will regenerate existing keys/certificates"
+        fi
+        
+        # Handle domain parameter (may be before or after --force)
+        domain=""
+        if [ -n "$3" ] && [ "$3" != "--force" ]; then
+            domain="$3"
+        fi
+        
+        generate_keys_for_terraform "$2" "$domain" "$force_flag"
         ;;
     "deploy")
         if [ -z "$2" ]; then
@@ -436,7 +640,7 @@ case "$1" in
         echo
         echo "Commands:"
         echo "  bootstrap-secrets [env]         Bootstrap AWS secrets for key encryption passphrases"
-        echo "  generate-keys [env] [domain]    Generate new encrypted private keys for terraform"
+        echo "  generate-keys [env] [domain] [--force]  Generate encrypted private keys (idempotent)"
         echo "  deploy [env] [domain]           Deploy certificates using terraform-decrypted keys"
         echo "  encrypt-existing [env] [key]    Encrypt existing private key for terraform storage"
         echo "  info [env]                      Show certificate information"
@@ -462,10 +666,17 @@ case "$1" in
         echo
         echo "Typical Workflow:"
         echo "  1. $0 bootstrap-secrets staging    # Create AWS secret for passphrase"
-        echo "  2. $0 generate-keys staging        # Generate encrypted private key"  
-        echo "  3. Submit CSR to UVA CA for signing"
-        echo "  4. Store signed certificate in git"
-        echo "  5. $0 deploy staging               # Deploy during CI/CD"
+        echo "  2. $0 generate-keys staging        # Generate encrypted private key & self-signed cert"  
+        echo "  3. Commit certificate to git and register with NetBadge"
+        echo "  4. $0 deploy staging               # Deploy during CI/CD"
+        echo
+        echo "Idempotency and Safety:"
+        echo "  - All commands are idempotent and safe to run multiple times"
+        echo "  - bootstrap-secrets: Will not overwrite existing AWS secrets"
+        echo "  - generate-keys: Will not overwrite existing keys/certificates without --force"
+        echo "  - Use --force flag with generate-keys to regenerate existing keys (DESTRUCTIVE)"
+        echo "  - Always coordinate with NetBadge admin before regenerating certificates"
+        echo
         exit 1
         ;;
 esac

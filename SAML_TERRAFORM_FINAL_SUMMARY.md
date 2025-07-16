@@ -95,6 +95,75 @@ Next deployment will automatically:
 ✅ **Seamless Integration**: No changes to existing deployment security practices  
 ✅ **Environment Isolation**: Separate encrypted keys for staging and production  
 
+## 🧪 **Comprehensive Test Suite**
+
+We've implemented a complete test suite to validate the SAML certificate integration:
+
+### **Test Scripts Available:**
+
+1. **`scripts/test-aws-infrastructure.sh`** - Full AWS/terraform lifecycle test
+   - Tests AWS CLI authentication and access
+   - Validates terraform infrastructure scripts integration
+   - Tests AWS Secrets Manager integration (add-secret.ksh)
+   - Tests private key encryption (crypt-key.ksh) and decryption (decrypt-key.ksh)
+   - Validates certificate and key matching
+   - Includes staging environment validation tests
+
+2. **`scripts/test-staging-saml-validation.sh`** - Focused staging environment test
+   - Validates staging AWS secret accessibility
+   - Tests staging encrypted key file integrity
+   - Simulates exact deployspec.yml decryption logic
+   - Validates certificate and private key matching
+   - Tests deployment script integration
+   - Checks git repository status for security
+
+3. **`scripts/test-deployspec-saml-simulation.sh`** - Exact deployspec.yml simulation
+   - Simulates CodeBuild environment variables
+   - Runs exact conditional logic from deployspec.yml
+   - Tests complete pre_build and build phase SAML logic
+   - Validates SimpleSAMLphp certificate deployment
+   - Performs security cleanup validation
+
+4. **`scripts/test-ddev-infrastructure.sh`** - Local DDEV mock testing
+   - Tests local development certificate workflow
+   - Validates DDEV environment setup
+
+### **Running the Tests:**
+
+```bash
+# Run comprehensive AWS infrastructure test
+./scripts/test-aws-infrastructure.sh
+
+# Run focused staging validation
+./scripts/test-staging-saml-validation.sh
+
+# Run deployspec.yml simulation
+./scripts/test-deployspec-saml-simulation.sh
+
+# Run local DDEV test
+./scripts/test-ddev-infrastructure.sh
+```
+
+### **Test Coverage:**
+
+✅ AWS CLI authentication and permissions  
+✅ AWS Secrets Manager integration  
+✅ Terraform infrastructure script compatibility  
+✅ Private key encryption/decryption workflow  
+✅ Certificate and key validation and matching  
+✅ Deployspec.yml conditional logic simulation  
+✅ SimpleSAMLphp deployment integration  
+✅ Git repository security validation  
+✅ Environment-specific configuration  
+✅ Security cleanup procedures  
+
+### **Current Test Status:**
+
+- **All staging tests PASSING** ✅
+- **AWS infrastructure validated** ✅
+- **Deployspec.yml simulation successful** ✅
+- **Ready for CI/CD pipeline deployment** 🚀
+
 ## 📞 **Ready for Implementation**
 
 Your SAML certificate management now perfectly aligns with your existing terraform infrastructure security practices. The implementation reuses your battle-tested `crypt-key.ksh` and `decrypt-key.ksh` scripts, ensuring consistency and security across all certificate management operations.
