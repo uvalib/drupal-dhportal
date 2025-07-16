@@ -3,13 +3,15 @@
 # Enhanced SAML Certificate Management with Terraform Infrastructure Integration
 # 
 # This script integrates with your existing terraform-infrastructure encryption/decryption
-# to securely manage SAML private keys while storing public certificates in git.
+# and AWS secrets management to securely manage SAML private keys while storing public 
+# certificates in git.
 #
 # USAGE:
 #   ./manage-saml-certificates-terraform.sh [command] [environment] [domain]
 #
 # COMMANDS:
 #   generate-keys     Generate new encrypted private keys for terraform storage
+#   bootstrap-secrets Bootstrap AWS secrets for key encryption passphrases  
 #   deploy           Deploy certificates using terraform-decrypted keys
 #   encrypt-existing Encrypt existing private keys for terraform storage
 #   info            Show certificate information
@@ -46,23 +48,77 @@ get_key_paths() {
             TERRAFORM_KEY_PATH="dh.library.virginia.edu/staging/keys/dh-drupal-staging-saml.pem"
             CERT_PATH="$SAML_CERT_DIR/staging/saml-sp.crt"
             DEFAULT_DOMAIN="dh-staging.library.virginia.edu"
+            SECRET_NAME="dh-drupal-staging-saml-passphrase"
             ;;
         "production")
             TERRAFORM_KEY_PATH="dh.library.virginia.edu/production/keys/dh-drupal-production-saml.pem"
             CERT_PATH="$SAML_CERT_DIR/production/saml-sp.crt"
             DEFAULT_DOMAIN="dh.library.virginia.edu"
+            SECRET_NAME="dh-drupal-production-saml-passphrase"
             ;;
         "dev")
             # Development uses local keys, not terraform
             TERRAFORM_KEY_PATH=""
             CERT_PATH="$SAML_CERT_DIR/dev/saml-sp.crt"
             DEFAULT_DOMAIN="drupal-dhportal.ddev.site"
+            SECRET_NAME=""
             ;;
         *)
             error "Unknown environment: $env"
             exit 1
             ;;
     esac
+}
+
+# Bootstrap AWS secrets for SAML key encryption passphrases
+bootstrap_secrets() {
+    local env="$1"
+    
+    if [ "$env" = "dev" ]; then
+        error "Development environment doesn't use AWS secrets"
+        return 1
+    fi
+    
+    get_key_paths "$env"
+    
+    info "Bootstrapping AWS secrets for $env environment"
+    
+    # Check if terraform infrastructure is available
+    if [ ! -d "$TERRAFORM_REPO_PATH" ]; then
+        error "Terraform infrastructure not found at: $TERRAFORM_REPO_PATH"
+        error "Please clone the terraform-infrastructure repository or set TERRAFORM_REPO_PATH"
+        return 1
+    fi
+    
+    # Check if add-secret script exists
+    local add_secret_script="$TERRAFORM_REPO_PATH/scripts/add-secret.ksh"
+    if [ ! -f "$add_secret_script" ]; then
+        error "AWS secrets script not found: $add_secret_script"
+        return 1
+    fi
+    
+    info "Creating AWS secret for SAML key encryption passphrase..."
+    log "Secret name: $SECRET_NAME"
+    
+    # Create the secret using terraform infrastructure script
+    cd "$TERRAFORM_REPO_PATH"
+    if ./scripts/add-secret.ksh "$SECRET_NAME" "SAML private key encryption passphrase for $env environment"; then
+        log "✅ AWS secret created successfully: $SECRET_NAME"
+        
+        echo
+        warn "IMPORTANT: Remember this secret for key encryption!"
+        echo "The secret '$SECRET_NAME' has been created in AWS Secrets Manager."
+        echo "This passphrase will be used to encrypt the SAML private key."
+        echo
+        echo "Next steps:"
+        echo "1. Note the secret name: $SECRET_NAME"
+        echo "2. Generate SAML keys: $0 generate-keys $env"
+        echo "3. The key generation will use this secret for encryption"
+        
+    else
+        error "Failed to create AWS secret: $SECRET_NAME"
+        return 1
+    fi
 }
 
 # Generate new private key and encrypted version for terraform storage
@@ -341,6 +397,13 @@ show_certificate_info() {
 
 # Main script logic
 case "$1" in
+    "bootstrap-secrets")
+        if [ -z "$2" ]; then
+            error "Environment required: staging or production"
+            exit 1
+        fi
+        bootstrap_secrets "$2"
+        ;;
     "generate-keys")
         if [ -z "$2" ]; then
             error "Environment required: staging or production"
@@ -372,6 +435,7 @@ case "$1" in
         echo "Usage: $0 [command] [environment] [domain]"
         echo
         echo "Commands:"
+        echo "  bootstrap-secrets [env]         Bootstrap AWS secrets for key encryption passphrases"
         echo "  generate-keys [env] [domain]    Generate new encrypted private keys for terraform"
         echo "  deploy [env] [domain]           Deploy certificates using terraform-decrypted keys"
         echo "  encrypt-existing [env] [key]    Encrypt existing private key for terraform storage"
@@ -380,6 +444,7 @@ case "$1" in
         echo "Environments: dev, staging, production"
         echo
         echo "Examples:"
+        echo "  $0 bootstrap-secrets staging"
         echo "  $0 generate-keys staging dh-staging.library.virginia.edu"
         echo "  $0 deploy production"
         echo "  $0 encrypt-existing staging ./existing-key.pem"
@@ -388,11 +453,19 @@ case "$1" in
         echo "Environment Variables:"
         echo "  TERRAFORM_REPO_PATH     Path to terraform-infrastructure repo (default: ../terraform-infrastructure)"
         echo
-        echo "Terraform Integration:"
+        echo "AWS Secrets & Terraform Integration:"
+        echo "  - AWS secrets store encryption passphrases using terraform-infrastructure/scripts/add-secret.ksh"
         echo "  - Private keys are encrypted using terraform-infrastructure/scripts/crypt-key.ksh"
         echo "  - Encrypted keys are stored in terraform-infrastructure repository"
         echo "  - Deployment uses terraform-infrastructure/scripts/decrypt-key.ksh"
         echo "  - Public certificates are stored in git repository (safe)"
+        echo
+        echo "Typical Workflow:"
+        echo "  1. $0 bootstrap-secrets staging    # Create AWS secret for passphrase"
+        echo "  2. $0 generate-keys staging        # Generate encrypted private key"  
+        echo "  3. Submit CSR to UVA CA for signing"
+        echo "  4. Store signed certificate in git"
+        echo "  5. $0 deploy staging               # Deploy during CI/CD"
         exit 1
         ;;
 esac
