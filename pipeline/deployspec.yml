@@ -107,8 +107,8 @@ phases:
           echo "Setup SAML certificates using decrypted infrastructure keys"
           echo "Setting up SAML certificates for $DEPLOYMENT_ENVIRONMENT environment..."
           # Make terraform infrastructure available for container certificate setup
-          echo "TERRAFORM_REPO_PATH=${CODEBUILD_SRC_DIR}/terraform-infrastructure" >> /tmp/env
-          echo "DEPLOYMENT_ENVIRONMENT=${DEPLOYMENT_ENVIRONMENT}" >> /tmp/env
+          export TERRAFORM_REPO_PATH="${CODEBUILD_SRC_DIR}/terraform-infrastructure"
+          export DEPLOYMENT_ENVIRONMENT="${DEPLOYMENT_ENVIRONMENT}"
           # Deploy SAML certificates if available
           if [ "$SAML_KEY_AVAILABLE" = "true" ]; then
             echo "Deploying SAML certificates for $DEPLOYMENT_ENVIRONMENT..."
