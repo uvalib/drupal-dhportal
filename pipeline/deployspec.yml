@@ -11,6 +11,8 @@ env:
     target_host_key: aws_deploy
     target_command: "sudo docker exec drupal-0 /opt/drupal/util/drupal-dhportal/scripts/server/pull-git-changes.sh"
     terraform_version: 1.11.1
+    # Determine environment based on branch or parameter
+    DEPLOYMENT_ENVIRONMENT: staging  # This should be set to 'production' for prod deployments
     #ansible_debug: -vvvv
 
 phases:
@@ -36,8 +38,13 @@ phases:
       - BASTION_KEY_NAME=staging/bastion/keys/bastion_staging.pem
       - BASTION_KEY=${CODEBUILD_SRC_DIR}/terraform-infrastructure/${BASTION_KEY_NAME}
       - ${CODEBUILD_SRC_DIR}/terraform-infrastructure/scripts/decrypt-key.ksh ${BASTION_KEY}.cpt ${BASTION_KEY_NAME}
-      # decrypt the instance private key
-      - PRIVATE_KEY_NAME=dh.library.virginia.edu/staging/keys/dh-drupal-staging.pem
+      # decrypt the instance private key (environment-specific)
+      - |
+        if [ "$DEPLOYMENT_ENVIRONMENT" = "production" ]; then
+          PRIVATE_KEY_NAME=dh.library.virginia.edu/production/keys/dh-drupal-production.pem
+        else
+          PRIVATE_KEY_NAME=dh.library.virginia.edu/staging/keys/dh-drupal-staging.pem
+        fi
       - PRIVATE_KEY=${CODEBUILD_SRC_DIR}/terraform-infrastructure/${PRIVATE_KEY_NAME}
       - ${CODEBUILD_SRC_DIR}/terraform-infrastructure/scripts/decrypt-key.ksh ${PRIVATE_KEY}.cpt ${PRIVATE_KEY_NAME}
       - chmod 600 ${PRIVATE_KEY}
@@ -77,6 +84,11 @@ phases:
           # ssh -oStrictHostKeyChecking=accept-new -i ${HOST_PRIVATE_KEY} aws_deploy@dh-drupal-dev-1.internal.lib.virginia.edu docker exec drupal-0 /opt/drupal/util/drupal-dhportal/scripts/server/pull-git-changes.sh
         else
           echo "DEBUG: Running full rebuild and deploy..."
+          echo "Setup SAML certificates using decrypted infrastructure keys"
+          echo "Setting up SAML certificates for $DEPLOYMENT_ENVIRONMENT environment..."
+          # Make terraform infrastructure available for container certificate setup
+          echo "TERRAFORM_INFRA_DIR=${CODEBUILD_SRC_DIR}/terraform-infrastructure" >> /tmp/env
+          echo "DEPLOYMENT_ENVIRONMENT=${DEPLOYMENT_ENVIRONMENT}" >> /tmp/env
           ansible-playbook ${ansible_debug} deploy_backend_1.yml
         fi
 

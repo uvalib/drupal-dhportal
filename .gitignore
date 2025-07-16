@@ -50,3 +50,44 @@ node_modules/
 dist/
 build/
 test-output/
+
+# Ignore SAML certificate temporary files and private keys
+saml-config/temp/           # Temporary generation files
+saml-config/dev/            # Development certificates (disposable)
+*.key                       # Private keys (never commit)
+*.pem                       # Private keys in PEM format (never commit)
+*.csr                       # Certificate signing requests (temporary)
+*.p12                       # PKCS#12 files
+*.pfx                       # Personal exchange format files
+
+# Ignore SimpleSAMLphp runtime files
+simplesamlphp/log/          # SimpleSAMLphp log files
+simplesamlphp/tmp/          # SimpleSAMLphp temporary files
+simplesamlphp/cache/        # SimpleSAMLphp cache files
+simplesamlphp/data/         # SimpleSAMLphp data directory
+
+# Ignore development/debug files
+web/saml-debug.php          # SAML diagnostic script (development only)
+web/test-saml*.php          # SAML test files (development only)
+debug-config.php            # Debug configuration files
+/tmp/                       # Temporary ecosystem files
+
+# Ignore environment and secrets files
+.env                        # Environment files with secrets
+.env.local                  # Local environment overrides
+.env.*.local                # Environment-specific local files
+settings.local.php          # Local Drupal settings (contains secrets)
+
+# Ignore database dumps and backups
+*.sql                       # SQL dump files
+*.sql.gz                    # Compressed SQL dumps
+*.dump                      # Database dump files
+/backups/                   # Backup directory
+
+# Allow SAML public certificates (these are safe and needed for deployment)
+!saml-config/certificates/**/*.crt
+!saml-config/certificates/**/*.pem
+
+# But ensure SimpleSAMLphp cert directory private keys are still ignored
+simplesamlphp/cert/*.key
+simplesamlphp/cert/*.pem

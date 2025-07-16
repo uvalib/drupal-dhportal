@@ -9,14 +9,15 @@ RUN apt-get -y update && \
 	apt-get -y install git less vim && \
 	apt-get -y install default-mysql-client sqlite3 && \
 	apt-get -y install rsync && \
-	apt-get -y install gettext-base
+	apt-get -y install gettext-base && \
+	apt-get -y install openssl jq
 
 # set the timezone appropriatly
 ENV TZ=America/New_York
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
 # Specify home
-ENV APP_HOME /drupal-dhportal
+ENV APP_HOME=/drupal-dhportal
 WORKDIR $APP_HOME
 
 # Move in necessary assets
@@ -35,7 +36,16 @@ RUN 	mkdir /opt/drupal/util \
   	&& ln -sf /opt/drupal/util/drupal-dhportal/web/modules/custom /opt/drupal/web/modules/custom \
 	&& rm -rf /opt/drupal/web/themes/custom \
         && ln -sf /opt/drupal/util/drupal-dhportal/web/themes/custom /opt/drupal/web/themes/custom \
-	&& ln -sf /opt/drupal/util/drupal-dhportal/scripts /opt/drupal/scripts
+	&& ln -sf /opt/drupal/util/drupal-dhportal/scripts /opt/drupal/scripts \
+	&& ln -sf /opt/drupal/util/drupal-dhportal/simplesamlphp /opt/drupal/simplesamlphp
+
+# Copy SimpleSAMLphp production configuration files (overrides development config)
+COPY package/data/files/opt/drupal/simplesamlphp/ /opt/drupal/simplesamlphp/
+COPY package/data/files/opt/drupal/web/simplesaml/ /opt/drupal/web/simplesaml/
+COPY package/data/files/opt/drupal/entrypoint-saml.sh /opt/drupal/entrypoint-saml.sh
+
+# Make entrypoint executable
+RUN chmod +x /opt/drupal/entrypoint-saml.sh
 
 # install other dependancies
 RUN pecl install apcu-5.1.22 && docker-php-ext-enable apcu
@@ -48,7 +58,37 @@ RUN pecl install apcu-5.1.22 && docker-php-ext-enable apcu
 WORKDIR /opt/drupal
 RUN mkdir -p /opt/drupal/web/modules/contrib && chmod 755 /opt/drupal/web/modules/contrib
 RUN mkdir -p /opt/drupal/config/sync && chown www-data:www-data /opt/drupal/config/sync && chmod 2775 /opt/drupal/config/sync
+
+# Set up SimpleSAMLphp configuration directory structure and permissions
+RUN mkdir -p /opt/drupal/simplesamlphp/config \
+    && mkdir -p /opt/drupal/simplesamlphp/metadata \
+    && mkdir -p /opt/drupal/simplesamlphp/cert \
+    && mkdir -p /opt/drupal/simplesamlphp/log \
+    && mkdir -p /opt/drupal/simplesamlphp/tmp \
+    && mkdir -p /opt/drupal/simplesamlphp/cache \
+    && mkdir -p /opt/drupal/simplesamlphp/data \
+    && mkdir -p /opt/drupal/web/simplesaml \
+    && chown -R www-data:www-data /opt/drupal/simplesamlphp \
+    && chown -R www-data:www-data /opt/drupal/web/simplesaml \
+    && chmod -R 755 /opt/drupal/simplesamlphp \
+    && chmod -R 755 /opt/drupal/web/simplesaml \
+    && chmod -R 775 /opt/drupal/simplesamlphp/log \
+    && chmod -R 775 /opt/drupal/simplesamlphp/tmp \
+    && chmod -R 775 /opt/drupal/simplesamlphp/cache \
+    && chmod -R 775 /opt/drupal/simplesamlphp/data
+
 RUN composer install
+
+# Copy scripts directory for local build
+COPY scripts /opt/drupal/scripts
+
+# Copy SAML configuration and certificates from git repo
+COPY saml-config /opt/drupal/saml-config
+
+# Set up SAML certificates for production using enhanced script
+RUN chmod +x /opt/drupal/scripts/manage-saml-certificates-enhanced.sh && \
+    /opt/drupal/scripts/manage-saml-certificates-enhanced.sh production
+
 RUN mkdir /var/run/sqlite && chown www-data:www-data /var/run/sqlite 
 # Add the build tag
 ARG BUILD_TAG

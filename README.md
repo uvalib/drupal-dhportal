@@ -148,6 +148,35 @@ npm run menu:rebuild  # Rebuild menu cache
 
 For comprehensive testing procedures, see [TESTING_GUIDE.md](TESTING_GUIDE.md).
 
+### SAML Development Workflow
+
+For local development, you have two options for SAML certificates:
+
+#### 🔗 Complete SAML Ecosystem (Recommended)
+```bash
+# Setup coordinated IDP + SP certificates with drupal-netbadge test server
+./scripts/setup-dev-saml-ecosystem.sh ../drupal-netbadge
+
+# ... do your development work with full SAML testing ...
+
+# Clean up when done
+./scripts/setup-dev-saml-ecosystem.sh cleanup
+```
+
+#### 📋 SP-Only Development
+```bash
+# Generate only SP certificates (for external IDP testing)
+./scripts/generate-saml-certificates.sh dev
+
+# ... do your development work ...
+
+# Clean up when done
+./scripts/generate-saml-certificates.sh cleanup-dev
+```
+
+📋 **Quick Reference**: See [DEV_WORKFLOW.md](DEV_WORKFLOW.md) for complete development workflow.  
+🔐 **Certificate Lifecycle**: See [SAML_CERTIFICATE_LIFECYCLE.md](SAML_CERTIFICATE_LIFECYCLE.md) for staging/production setup.
+
 **Quick validation:**
 ```bash
 npm run test:menu     # Test menu structure
