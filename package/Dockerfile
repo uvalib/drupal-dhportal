@@ -50,6 +50,9 @@ RUN chmod +x /opt/drupal/entrypoint-saml.sh
 # install other dependancies
 RUN pecl install apcu-5.1.22 && docker-php-ext-enable apcu
 
+# Enable Apache mod_headers module for SimpleSAMLphp security headers
+RUN a2enmod headers
+
 # need to mount volume in /opt/drupal/web/sites (is that done here?)
 # need to run composer install here
 # Note: themes will be deployed via composer

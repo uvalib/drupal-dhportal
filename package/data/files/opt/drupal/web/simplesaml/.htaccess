@@ -19,10 +19,12 @@ RewriteEngine On
     SetHandler application/x-httpd-php
 </FilesMatch>
 
-# Security headers
-Header always set X-Frame-Options DENY
-Header always set X-Content-Type-Options nosniff
-Header always set X-XSS-Protection "1; mode=block"
+# Security headers (requires mod_headers)
+<IfModule mod_headers.c>
+    Header always set X-Frame-Options DENY
+    Header always set X-Content-Type-Options nosniff
+    Header always set X-XSS-Protection "1; mode=block"
+</IfModule>
 
 # Allow access to main interface files
 <Files "index.php">
@@ -41,12 +43,12 @@ Header always set X-XSS-Protection "1; mode=block"
     Require all granted
 </Files>
 
-# Default deny for other files
-<Files "*">
-    Require all denied
-</Files>
-
-# Override for CSS, JS, and image files if they exist
+# Allow access to CSS, JS, and image files
 <FilesMatch "\.(css|js|png|jpg|jpeg|gif|ico)$">
     Require all granted
+</FilesMatch>
+
+# Deny access to sensitive files
+<FilesMatch "\.(conf|ini|log|bak|old|tmp)$">
+    Require all denied
 </FilesMatch>
