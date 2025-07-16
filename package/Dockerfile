@@ -85,9 +85,8 @@ COPY scripts /opt/drupal/scripts
 # Copy SAML configuration and certificates from git repo
 COPY saml-config /opt/drupal/saml-config
 
-# Set up SAML certificates for production using enhanced script
-RUN chmod +x /opt/drupal/scripts/manage-saml-certificates-enhanced.sh && \
-    /opt/drupal/scripts/manage-saml-certificates-enhanced.sh production
+# Make SAML certificate management scripts executable (setup happens during deployment)
+RUN chmod +x /opt/drupal/scripts/manage-saml-certificates*.sh
 
 RUN mkdir /var/run/sqlite && chown www-data:www-data /var/run/sqlite 
 # Add the build tag
