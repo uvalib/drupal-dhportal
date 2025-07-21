@@ -297,6 +297,94 @@ After moving environment-specific configurations to terraform-infrastructure, th
 
 ## Deployment Error Fixes
 
+### Certificate Security Configuration
+
+#### SAML Service Provider Certificate Management
+The implementation properly integrates with the existing terraform-infrastructure encrypted key management system:
+
+**Certificate Sources**:
+
+1. **Production/Staging Deployment**: Uses existing `terraform-infrastructure/scripts/decrypt-key.ksh` and `crypt-key.ksh` infrastructure
+   - **Encrypted Keys**: Stored in terraform-infrastructure repository as `.cpt` files
+   - **Decryption**: AWS CodeBuild deployment pipeline uses `decrypt-key.ksh` to decrypt private keys
+   - **Integration**: Ansible deployment checks for decrypted keys and reuses them
+   - **Fallback**: Generates self-signed certificates if encrypted keys not available
+
+2. **Self-Signed Fallback**: When terraform infrastructure keys are not available
+   - **Algorithm**: RSA 2048-bit keys with SHA-256 signatures (SAML standard)
+   - **Validity**: 365 days (appropriate for SAML certificates)
+   - **Standard Practice**: Self-signed certificates are normal for SAML Service Provider use
+   - **Subject**: Includes environment-specific CN for identification
+
+**Deployment Integration**:
+
+**AWS CodeBuild Pipeline**:
+```bash
+# Existing decrypt process in deployspec.yml
+${CODEBUILD_SRC_DIR}/terraform-infrastructure/scripts/decrypt-key.ksh ${SAML_PRIVATE_KEY}.cpt ${SAML_SECRET_NAME}
+```
+
+**Ansible Certificate Deployment**:
+1. **Check for decrypted terraform keys**: Looks for keys in `terraform-infrastructure/.../keys/dh-drupal-{env}-saml.pem`
+2. **Use existing infrastructure**: If terraform key available, generates certificate from existing private key
+3. **Self-signed fallback**: If terraform key not available, generates new self-signed certificate pair
+4. **Container deployment**: Copies certificates to SimpleSAMLphp cert directory with proper permissions
+
+**Staging Certificates**:
+- **CN**: `dhportal-dev.internal.lib.virginia.edu`
+- **Location**: `/opt/drupal/vendor/simplesamlphp/simplesamlphp/cert/`
+- **Files**: `saml.crt` (public certificate), `saml.pem` (private key)
+
+**Production Certificates**:
+- **CN**: `dh.library.virginia.edu`
+- **Location**: `/opt/drupal/vendor/simplesamlphp/simplesamlphp/cert/`
+- **Files**: `saml.crt` (public certificate), `saml.pem` (private key)
+
+**Security Measures**:
+- Private keys (`saml.pem`) have 600 permissions (owner read/write only)
+- Public certificates (`saml.crt`) have 644 permissions
+- Files owned by `www-data:www-data` for proper container access
+- Certificates automatically generated during deployment if not present
+
+**Certificate Deployment Process**:
+1. **Check terraform-infrastructure**: Ansible checks for decrypted SAML keys from deployment pipeline
+2. **Primary method**: If terraform key exists, generates certificate from existing private key using `openssl req -new -x509`
+3. **Fallback method**: If terraform key not available, generates new RSA 2048-bit self-signed certificate pair
+4. **Container integration**: Copies certificates into SimpleSAMLphp cert directory within container
+5. **Security**: Sets proper ownership (`www-data:www-data`) and permissions (600 for private keys, 644 for certificates)
+6. **Cleanup**: Removes temporary files after deployment
+
+**Integration with Existing Infrastructure**:
+- **Leverages existing encryption**: Uses same `ccrypt`-based encryption as SSH keys
+- **Pipeline compatibility**: Works with existing `decrypt-key.ksh` scripts in deployment pipeline
+- **Key management**: SAML private keys encrypted and stored in terraform-infrastructure alongside other secrets
+- **Deployment flow**: AWS CodeBuild → decrypt keys → Ansible → deploy certificates to container
+
+**Production Security Features**:
+- **Assertion Encryption**: `'assertion.encryption' => true` (requires certificates)
+- **Signed Logout**: `'sign.logout' => true` (requires private key)
+- **Response Validation**: `'validate.response' => true` and `'validate.assertion' => true`
+- **SHA-256 Signatures**: `'signature.algorithm' => 'http://www.w3.org/2001/04/xmldsig-more#rsa-sha256'`
+
+#### Certificate Management for SAML
+
+**SAML Certificate Purpose**:
+Self-signed certificates are the standard and recommended approach for SAML Service Provider certificates. These certificates are used for:
+- Signing SAML requests to the Identity Provider
+- Encrypting SAML assertions (when encryption is enabled)
+- Digital signatures for authentication, not transport security
+
+**Certificate Lifecycle**:
+1. **Self-Signed is Standard**: SAML SP certificates are typically self-signed and don't require CA validation
+2. **Long Validity Period**: Generated certificates have 365-day validity, appropriate for SAML use
+3. **Key Rotation**: Plan for periodic certificate regeneration and metadata updates
+4. **Metadata Updates**: When certificates change, update SP metadata with the Identity Provider
+
+**DDEV Environment**:
+- Uses SimpleSAMLphp default certificates for local development
+- No certificate configuration specified in authsources.php (uses defaults)
+- Perfectly appropriate for development and testing
+
 ### AWS Staging Deployment Errors
 During the initial AWS staging deployment, several errors were encountered and resolved:
 
