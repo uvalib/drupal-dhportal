@@ -402,7 +402,18 @@ During the initial AWS staging deployment, several errors were encountered and r
 
 **Fix**: Updated both staging and production config templates to use `'debug' => null`
 
-#### 3. SimpleSAMLphp Logging Directory Missing
+#### 4. SimpleSAMLphp Proxy Configuration Error
+**Error**: `Setting secure cookie on plain HTTP is not allowed`
+
+**Cause**: AWS environment uses HTTPS termination at load balancer/proxy, but internal traffic to container is HTTP
+
+**Fix**: Updated configuration templates to handle proxy setup:
+- Set `'session.cookie.secure' => false` for internal HTTP traffic
+- Added proxy headers configuration: `'proxy' => ['X-Forwarded-Proto', 'X-Forwarded-For']`
+- Allows SimpleSAMLphp to detect HTTPS from proxy headers while accepting internal HTTP connections
+**Error**: `Unable to create file /opt/drupal/vendor/simplesamlphp/simplesamlphp/log/simplesamlphp.log`
+
+#### 5. SimpleSAMLphp Logging Directory Missing
 **Error**: `Unable to create file /opt/drupal/vendor/simplesamlphp/simplesamlphp/log/simplesamlphp.log`
 
 **Cause**: Log directory not being created during deployment and incorrect logging path
