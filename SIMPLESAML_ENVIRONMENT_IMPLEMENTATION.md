@@ -144,6 +144,14 @@ cd /Users/ys2n/Code/uvalib/terraform-infrastructure/dh.library.virginia.edu/prod
 ansible-playbook deploy_backend.yml
 ```
 
+#### Critical Deployment Sequence
+**⚠️ IMPORTANT**: When making changes that span both repositories, always commit and push terraform-infrastructure changes BEFORE drupal-dhportal changes:
+
+1. **First**: Commit and push terraform-infrastructure changes
+2. **Second**: Commit and push drupal-dhportal changes
+
+**Reason**: The drupal-dhportal repository has CI/CD triggers that will immediately start a build process. If the terraform-infrastructure changes aren't already deployed, the CI/CD build may fail or deploy with outdated configurations.
+
 ## Security Considerations
 
 ### Environment-Specific Security Settings
