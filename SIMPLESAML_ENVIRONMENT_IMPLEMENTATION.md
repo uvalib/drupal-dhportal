@@ -295,6 +295,35 @@ After moving environment-specific configurations to terraform-infrastructure, th
 - `SIMPLESAML_ENVIRONMENT_IMPLEMENTATION.md` - Main implementation documentation
 - `TESTING_GUIDE.md` - Testing procedures
 
+## Deployment Error Fixes
+
+### AWS Staging Deployment Errors
+During the initial AWS staging deployment, several errors were encountered and resolved:
+
+#### 1. Docker Build Error - Missing saml-config Directory
+**Error**: `ERROR: failed to solve: "/saml-config": not found`
+
+**Cause**: Dockerfile was trying to copy the `saml-config` directory that was removed during cleanup
+
+**Fix**: Updated `package/Dockerfile` to remove obsolete `COPY saml-config` command and script references
+
+#### 2. SimpleSAMLphp Configuration Error - Invalid debug Option
+**Error**: `The option 'debug' is not an array or null`
+
+**Cause**: Configuration templates had `'debug' => false` instead of the required `'debug' => null`
+
+**Fix**: Updated both staging and production config templates to use `'debug' => null`
+
+#### 3. SimpleSAMLphp Logging Directory Missing
+**Error**: `Unable to create file /opt/drupal/vendor/simplesamlphp/simplesamlphp/log/simplesamlphp.log`
+
+**Cause**: Log directory not being created during deployment and incorrect logging path
+
+**Fixes**:
+- Updated config templates to use absolute path: `'loggingdir' => '/opt/drupal/simplesamlphp/log/'`
+- Added directory creation tasks in deployment playbooks
+- Added proper permissions setting for SimpleSAMLphp directories
+
 ## Conclusion
 
 The implementation successfully addresses the original deployment configuration issue by:
