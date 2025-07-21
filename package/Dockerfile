@@ -41,7 +41,6 @@ RUN 	mkdir /opt/drupal/util \
 
 # Copy SimpleSAMLphp production configuration files (overrides development config)
 COPY package/data/files/opt/drupal/simplesamlphp/ /opt/drupal/simplesamlphp/
-COPY package/data/files/opt/drupal/web/simplesaml/ /opt/drupal/web/simplesaml/
 COPY package/data/files/opt/drupal/entrypoint-saml.sh /opt/drupal/entrypoint-saml.sh
 
 # Make entrypoint executable
@@ -74,17 +73,22 @@ RUN mkdir -p /opt/drupal/simplesamlphp/config \
     && mkdir -p /opt/drupal/simplesamlphp/tmp \
     && mkdir -p /opt/drupal/simplesamlphp/cache \
     && mkdir -p /opt/drupal/simplesamlphp/data \
-    && mkdir -p /opt/drupal/web/simplesaml \
     && chown -R www-data:www-data /opt/drupal/simplesamlphp \
-    && chown -R www-data:www-data /opt/drupal/web/simplesaml \
     && chmod -R 755 /opt/drupal/simplesamlphp \
-    && chmod -R 755 /opt/drupal/web/simplesaml \
     && chmod -R 775 /opt/drupal/simplesamlphp/log \
     && chmod -R 775 /opt/drupal/simplesamlphp/tmp \
     && chmod -R 775 /opt/drupal/simplesamlphp/cache \
     && chmod -R 775 /opt/drupal/simplesamlphp/data
 
 RUN composer install
+
+# Copy complete SimpleSAMLphp public files from vendor, then overlay custom files
+RUN rm -rf /opt/drupal/web/simplesaml \
+    && cp -r /opt/drupal/vendor/simplesamlphp/simplesamlphp/public /opt/drupal/web/simplesaml \
+    && chown -R www-data:www-data /opt/drupal/web/simplesaml
+
+# Copy custom SimpleSAMLphp files (overlays vendor files)
+COPY package/data/files/opt/drupal/web/simplesaml/ /opt/drupal/web/simplesaml/
 
 # Copy scripts directory for local build
 COPY scripts /opt/drupal/scripts
