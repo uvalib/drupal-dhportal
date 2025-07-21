@@ -82,9 +82,6 @@ RUN mkdir -p /opt/drupal/simplesamlphp/config \
 
 RUN composer install
 
-# Copy missing SimpleSAMLphp templates for backward compatibility after composer install
-COPY package/data/templates/frontpage_welcome.twig /opt/drupal/vendor/simplesamlphp/simplesamlphp/templates/
-
 # Copy scripts directory for local build
 COPY scripts /opt/drupal/scripts
 

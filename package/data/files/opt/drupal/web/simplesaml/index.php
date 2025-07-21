@@ -2,21 +2,20 @@
 
 declare(strict_types=1);
 
+namespace SimpleSAML;
+
 require_once('_include.php');
 
-use SimpleSAML\Configuration;
-use SimpleSAML\Utils;
-use SimpleSAML\XHTML\Template;
-
-// Initialize configuration
 $config = Configuration::getInstance();
+$httpUtils = new Utils\HTTP();
 
-// Create template
-$t = new Template($config, 'frontpage_welcome.twig');
-
-// Set template variables
-$t->data['title'] = 'SimpleSAMLphp';
-$t->data['pageid'] = 'frontpage_welcome';
-
-// Show the template
-$t->show();
+$headers = $config->getOptionalArray('headers.security', Configuration::DEFAULT_SECURITY_HEADERS);
+$redirect = $config->getOptionalString('frontpage.redirect', Module::getModuleURL('core/welcome'));
+$response =  new HTTP\RunnableResponse([$httpUtils, 'redirectTrustedURL'], [$redirect]);
+foreach ($headers as $header => $value) {
+    // Some pages may have specific requirements that we must follow. Don't touch them.
+    if (!$response->headers->has($header)) {
+        $response->headers->set($header, $value);
+    }
+}
+$response->send();
