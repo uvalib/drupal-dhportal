@@ -90,6 +90,20 @@ RUN rm -rf /opt/drupal/web/simplesaml \
 # Copy custom SimpleSAMLphp files (overlays vendor files)
 COPY package/data/files/opt/drupal/web/simplesaml/ /opt/drupal/web/simplesaml/
 
+# Fix permissions for SimpleSAMLphp directories after all files are in place
+RUN mkdir -p /opt/drupal/simplesamlphp/log \
+    && mkdir -p /opt/drupal/simplesamlphp/tmp \
+    && mkdir -p /opt/drupal/simplesamlphp/cache \
+    && mkdir -p /opt/drupal/simplesamlphp/data \
+    && chown -R www-data:www-data /opt/drupal/simplesamlphp \
+    && chown -R www-data:www-data /opt/drupal/web/simplesaml \
+    && chmod -R 755 /opt/drupal/simplesamlphp \
+    && chmod -R 755 /opt/drupal/web/simplesaml \
+    && chmod -R 775 /opt/drupal/simplesamlphp/log \
+    && chmod -R 775 /opt/drupal/simplesamlphp/tmp \
+    && chmod -R 775 /opt/drupal/simplesamlphp/cache \
+    && chmod -R 775 /opt/drupal/simplesamlphp/data
+
 # Copy scripts directory for local build
 COPY scripts /opt/drupal/scripts
 
