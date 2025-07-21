@@ -85,11 +85,8 @@ RUN composer install
 # Copy scripts directory for local build
 COPY scripts /opt/drupal/scripts
 
-# Copy SAML configuration and certificates from git repo
-COPY saml-config /opt/drupal/saml-config
-
-# Make SAML certificate management scripts executable (setup happens during deployment)
-RUN chmod +x /opt/drupal/scripts/manage-saml-certificates*.sh
+# Make remaining scripts executable
+RUN find /opt/drupal/scripts -name "*.sh" -type f -exec chmod +x {} \;
 
 RUN mkdir /var/run/sqlite && chown www-data:www-data /var/run/sqlite 
 # Add the build tag

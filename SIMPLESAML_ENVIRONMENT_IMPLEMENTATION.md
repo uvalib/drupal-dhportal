@@ -228,6 +228,7 @@ Created comprehensive testing scripts:
 
 ### Modified Files
 - `/Users/ys2n/Code/ddev/drupal-dhportal/web/simplesaml/.htaccess` - Fixed Apache mod_headers compatibility
+- `/Users/ys2n/Code/ddev/drupal-dhportal/package/Dockerfile` - Removed obsolete saml-config references
 - `/Users/ys2n/Code/uvalib/terraform-infrastructure/dh.library.virginia.edu/staging/ansible/container_1.env` - Added SimpleSAMLphp environment variables
 - `/Users/ys2n/Code/uvalib/terraform-infrastructure/dh.library.virginia.edu/staging/ansible/deploy_backend_1.yml` - Added SimpleSAMLphp deployment tasks
 - `/Users/ys2n/Code/uvalib/terraform-infrastructure/dh.library.virginia.edu/production.new/ansible/container_0.env` - Added SimpleSAMLphp environment variables
