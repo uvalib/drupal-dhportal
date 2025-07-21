@@ -65,20 +65,10 @@ WORKDIR /opt/drupal
 RUN mkdir -p /opt/drupal/web/modules/contrib && chmod 755 /opt/drupal/web/modules/contrib
 RUN mkdir -p /opt/drupal/config/sync && chown www-data:www-data /opt/drupal/config/sync && chmod 2775 /opt/drupal/config/sync
 
-# Set up SimpleSAMLphp configuration directory structure and permissions
+# Set up SimpleSAMLphp configuration directory structure (initial setup only)
 RUN mkdir -p /opt/drupal/simplesamlphp/config \
     && mkdir -p /opt/drupal/simplesamlphp/metadata \
-    && mkdir -p /opt/drupal/simplesamlphp/cert \
-    && mkdir -p /opt/drupal/simplesamlphp/log \
-    && mkdir -p /opt/drupal/simplesamlphp/tmp \
-    && mkdir -p /opt/drupal/simplesamlphp/cache \
-    && mkdir -p /opt/drupal/simplesamlphp/data \
-    && chown -R www-data:www-data /opt/drupal/simplesamlphp \
-    && chmod -R 755 /opt/drupal/simplesamlphp \
-    && chmod -R 775 /opt/drupal/simplesamlphp/log \
-    && chmod -R 775 /opt/drupal/simplesamlphp/tmp \
-    && chmod -R 775 /opt/drupal/simplesamlphp/cache \
-    && chmod -R 775 /opt/drupal/simplesamlphp/data
+    && mkdir -p /opt/drupal/simplesamlphp/cert
 
 RUN composer install
 
@@ -95,17 +85,30 @@ RUN mkdir -p /opt/drupal/simplesamlphp/log \
     && mkdir -p /opt/drupal/simplesamlphp/tmp \
     && mkdir -p /opt/drupal/simplesamlphp/cache \
     && mkdir -p /opt/drupal/simplesamlphp/data \
-    && chown -R www-data:www-data /opt/drupal/simplesamlphp \
-    && chown -R www-data:www-data /opt/drupal/web/simplesaml \
+    && chown -R 33:33 /opt/drupal/simplesamlphp \
+    && chown -R 33:33 /opt/drupal/web/simplesaml \
     && chmod -R 755 /opt/drupal/simplesamlphp \
     && chmod -R 755 /opt/drupal/web/simplesaml \
-    && chmod -R 775 /opt/drupal/simplesamlphp/log \
-    && chmod -R 775 /opt/drupal/simplesamlphp/tmp \
-    && chmod -R 775 /opt/drupal/simplesamlphp/cache \
-    && chmod -R 775 /opt/drupal/simplesamlphp/data
+    && chmod -R 777 /opt/drupal/simplesamlphp/log \
+    && chmod -R 777 /opt/drupal/simplesamlphp/tmp \
+    && chmod -R 777 /opt/drupal/simplesamlphp/cache \
+    && chmod -R 777 /opt/drupal/simplesamlphp/data
 
 # Copy scripts directory for local build
 COPY scripts /opt/drupal/scripts
+
+# Make remaining scripts executable
+RUN find /opt/drupal/scripts -name "*.sh" -type f -exec chmod +x {} \;
+
+# Final permissions fix to ensure SimpleSAMLphp can write logs at runtime
+RUN chown -R 33:33 /opt/drupal/simplesamlphp/log \
+    && chown -R 33:33 /opt/drupal/simplesamlphp/tmp \
+    && chown -R 33:33 /opt/drupal/simplesamlphp/cache \
+    && chown -R 33:33 /opt/drupal/simplesamlphp/data \
+    && chmod -R 777 /opt/drupal/simplesamlphp/log \
+    && chmod -R 777 /opt/drupal/simplesamlphp/tmp \
+    && chmod -R 777 /opt/drupal/simplesamlphp/cache \
+    && chmod -R 777 /opt/drupal/simplesamlphp/data
 
 # Make remaining scripts executable
 RUN find /opt/drupal/scripts -name "*.sh" -type f -exec chmod +x {} \;
