@@ -25,6 +25,7 @@ $config = [
 
     // Session configuration
     'session.cookie.name' => 'SimpleSAMLSessionID',
+    'session.phpsession.cookiename' => 'SimpleSAMLphpSession',
     'session.cookie.lifetime' => 0,
     'session.cookie.path' => '/',
     'session.cookie.domain' => getenv('COOKIE_DOMAIN') ?: null,
