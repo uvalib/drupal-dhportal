@@ -5,6 +5,11 @@
  */
 
 $config = [
+    // Admin authentication source - required for SimpleSAMLphp administration
+    'admin' => [
+        'core:AdminPassword',
+    ],
+
     // Default SP configuration - connects to production NetBadge
     'default-sp' => [
         'saml:SP',
