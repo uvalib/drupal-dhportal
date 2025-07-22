@@ -14,8 +14,11 @@ AWS uses Ansible templates located in:
 |------|---------|---------|
 | `authsources.php` | Documentation | Reference configuration |
 | `config.php` | Documentation | Reference configuration |
-| `authsources.production.php` | ❌ Not Used | Legacy - can be removed |
-| `authsources.staging.php` | ❌ Not Used | Legacy - can be removed |
+| `acl.php` | Container Build | Basic access control configuration |
+| ~~`authsources.production.php`~~ | ❌ Removed | Legacy - was unused |
+| ~~`authsources.staging.php`~~ | ❌ Removed | Legacy - was unused |
+| ~~`config.production.php`~~ | ❌ Removed | Legacy - was unused |
+| ~~`config.staging.php`~~ | ❌ Removed | Legacy - was unused |
 
 ## 🔧 Making Configuration Changes
 
