@@ -75,25 +75,18 @@ RUN composer install
 # Ensure vendor directory permissions are correct for copying
 RUN chmod -R 755 /opt/drupal/vendor/simplesamlphp/simplesamlphp/public
 
-# Copy complete SimpleSAMLphp public files from vendor using rsync for reliability
+# Create symlink to SimpleSAMLphp vendor public directory instead of copying
 RUN rm -rf /opt/drupal/web/simplesaml \
-    && echo "Checking vendor assets before copy:" \
-    && ls -la /opt/drupal/vendor/simplesamlphp/simplesamlphp/public/ || echo "Public directory not found" \
-    && find /opt/drupal/vendor/simplesamlphp/simplesamlphp/public -name "*.css" -o -name "*.js" | head -5 || echo "No CSS/JS found" \
-    && rsync -av /opt/drupal/vendor/simplesamlphp/simplesamlphp/public/ /opt/drupal/web/simplesaml/ \
-    && echo "Checking copied assets:" \
-    && ls -la /opt/drupal/web/simplesaml/ || echo "Copy failed" \
-    && find /opt/drupal/web/simplesaml -name "*.css" -o -name "*.js" | head -5 || echo "No assets copied" \
-    && chown -R www-data:www-data /opt/drupal/web/simplesaml \
-    && chmod -R 755 /opt/drupal/web/simplesaml
+    && echo "Creating symlink from web/simplesaml to vendor public directory:" \
+    && ls -la /opt/drupal/vendor/simplesamlphp/simplesamlphp/public/ || echo "Vendor public directory not found" \
+    && ln -sf /opt/drupal/vendor/simplesamlphp/simplesamlphp/public /opt/drupal/web/simplesaml \
+    && echo "Verifying symlink:" \
+    && ls -la /opt/drupal/web/simplesaml \
+    && echo "Checking assets in linked directory:" \
+    && find /opt/drupal/web/simplesaml -name "*.css" -o -name "*.js" | head -5 || echo "No assets found via symlink"
 
-# Selectively overlay only our custom configuration files (preserving vendor assets)
-COPY package/data/files/opt/drupal/web/simplesaml/.htaccess /opt/drupal/web/simplesaml/.htaccess
-COPY package/data/files/opt/drupal/web/simplesaml/_include.php /opt/drupal/web/simplesaml/_include.php
-COPY package/data/files/opt/drupal/web/simplesaml/admin.php /opt/drupal/web/simplesaml/admin.php
-COPY package/data/files/opt/drupal/web/simplesaml/index.php /opt/drupal/web/simplesaml/index.php
-COPY package/data/files/opt/drupal/web/simplesaml/saml2-metadata.php /opt/drupal/web/simplesaml/saml2-metadata.php
-COPY package/data/files/opt/drupal/web/simplesaml/status.php /opt/drupal/web/simplesaml/status.php
+# Note: Custom SimpleSAMLphp configuration is handled via config directory, not web directory overlays
+# The symlink points directly to vendor public files, preserving all assets and default functionality
 
 # Ensure proper permissions for all SimpleSAMLphp files including assets
 RUN chown -R www-data:www-data /opt/drupal/web/simplesaml \
