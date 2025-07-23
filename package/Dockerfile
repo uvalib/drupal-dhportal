@@ -53,9 +53,11 @@ RUN pecl install apcu-5.1.22 && docker-php-ext-enable apcu
 
 # Configure Apache for Drupal and SimpleSAMLphp
 RUN a2enmod headers && \
-    echo "LogLevel warn" >> /etc/apache2/apache2.conf && \
+    echo "LogLevel info" >> /etc/apache2/apache2.conf && \
     sed -i 's|DocumentRoot /var/www/html|DocumentRoot /opt/drupal/web|g' /etc/apache2/sites-enabled/000-default.conf && \
-    sed -i '/<VirtualHost \*:80>/a\\t<Directory /opt/drupal/web>\n\t\tOptions FollowSymLinks\n\t\tAllowOverride All\n\t\tRequire all granted\n\t</Directory>' /etc/apache2/sites-enabled/000-default.conf
+    sed -i '/<VirtualHost \*:80>/a\\t<Directory /opt/drupal/web>\n\t\tOptions FollowSymLinks\n\t\tAllowOverride All\n\t\tRequire all granted\n\t</Directory>' /etc/apache2/sites-enabled/000-default.conf && \
+    echo "Apache config verification:" && \
+    grep -A 10 -B 2 "DocumentRoot\|FollowSymLinks" /etc/apache2/sites-enabled/000-default.conf
 
 # Set up Drupal working environment
 WORKDIR /opt/drupal
@@ -73,7 +75,10 @@ RUN chmod -R 755 /opt/drupal/vendor/simplesamlphp/simplesamlphp/public
 # Create symlink to SimpleSAMLphp vendor public directory
 RUN rm -rf /opt/drupal/web/simplesaml \
     && ln -sf /opt/drupal/vendor/simplesamlphp/simplesamlphp/public /opt/drupal/web/simplesaml \
-    && echo "SimpleSAMLphp symlink created successfully"
+    && echo "SimpleSAMLphp symlink created successfully" \
+    && echo "Build-time verification:" \
+    && ls -la /opt/drupal/web/simplesaml/index.php \
+    && echo "Symlink target readable: $(cat /opt/drupal/web/simplesaml/index.php | head -1)"
 
 # Note: Custom SimpleSAMLphp configuration is handled via config directory, not web directory overlays
 # The symlink points directly to vendor public files, preserving all assets and default functionality
