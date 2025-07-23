@@ -72,13 +72,18 @@ RUN mkdir -p /opt/drupal/simplesamlphp/config \
 
 RUN composer install
 
-# Copy complete SimpleSAMLphp public files from vendor, then overlay custom files
+# Copy complete SimpleSAMLphp public files from vendor
 RUN rm -rf /opt/drupal/web/simplesaml \
     && cp -r /opt/drupal/vendor/simplesamlphp/simplesamlphp/public /opt/drupal/web/simplesaml \
     && chown -R www-data:www-data /opt/drupal/web/simplesaml
 
-# Copy custom SimpleSAMLphp files (overlays vendor files)
-COPY package/data/files/opt/drupal/web/simplesaml/ /opt/drupal/web/simplesaml/
+# Selectively overlay only our custom configuration files (preserving vendor assets)
+COPY package/data/files/opt/drupal/web/simplesaml/.htaccess /opt/drupal/web/simplesaml/.htaccess
+COPY package/data/files/opt/drupal/web/simplesaml/_include.php /opt/drupal/web/simplesaml/_include.php
+COPY package/data/files/opt/drupal/web/simplesaml/admin.php /opt/drupal/web/simplesaml/admin.php
+COPY package/data/files/opt/drupal/web/simplesaml/index.php /opt/drupal/web/simplesaml/index.php
+COPY package/data/files/opt/drupal/web/simplesaml/saml2-metadata.php /opt/drupal/web/simplesaml/saml2-metadata.php
+COPY package/data/files/opt/drupal/web/simplesaml/status.php /opt/drupal/web/simplesaml/status.php
 
 # Fix permissions for SimpleSAMLphp directories after all files are in place
 RUN mkdir -p /opt/drupal/simplesamlphp/log \
