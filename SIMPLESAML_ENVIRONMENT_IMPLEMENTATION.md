@@ -1,13 +1,14 @@
 # SimpleSAMLphp Environment Configuration Implementation
 
 ## Overview
-This document summarizes the implementation of environment-specific SimpleSAMLphp configuration for the Digital Humanities Portal project, addressing the deployment issue where AWS environments were receiving DDEV configurations instead of appropriate environment-specific settings.
+This document summarizes the implementation of environment-specific SimpleSAMLphp configuration for the Digital Humanities Portal project, addressing deployment issues and implementing comprehensive security improvements for AWS load balancer environments.
 
 ## Problem Statement
 - **Original Issue**: Apache mod_headers error in SimpleSAMLphp web interface
 - **Root Cause**: Missing mod_headers module and overly restrictive .htaccess rules
-- **Deployment Issue**: AWS dev environment receiving DDEV configs instead of environment-appropriate configurations
-- **Solution**: Implemented Ansible-based environment management with three-tier configuration strategy
+- **Deployment Issue**: AWS environments receiving DDEV configs instead of environment-appropriate configurations
+- **Security Issues**: Missing admin authentication, weak default passwords, improper HTTPS detection behind load balancers
+- **Solution**: Implemented Ansible-based environment management with comprehensive security hardening
 
 ## Architecture
 
@@ -20,12 +21,76 @@ This document summarizes the implementation of environment-specific SimpleSAMLph
 2. **AWS Staging Environment** 
    - Configuration: Ansible templates in `terraform-infrastructure/staging/`
    - Domain: `dhportal-dev.internal.lib.virginia.edu`
-   - Security: Production-like with INFO logging
+   - Security: Production-like with INFO logging, strong credentials
    
 3. **AWS Production Environment**
    - Configuration: Ansible templates in `terraform-infrastructure/production.new/`
    - Domain: `dh.library.virginia.edu`
-   - Security: Maximum security (NOTICE logging, assertion encryption)
+   - Security: Maximum security (NOTICE logging, assertion encryption, strong credentials)
+
+## Security Enhancements (Latest Implementation)
+
+### Load Balancer HTTPS Configuration
+**Challenge**: AWS load balancers terminate SSL, making internal traffic HTTP while requiring HTTPS-only cookies for security.
+
+**Solution**: Enhanced proxy configuration in SimpleSAMLphp templates:
+```php
+// Proxy configuration - HTTPS termination at load balancer
+'proxy' => [
+    'X-Forwarded-Proto',
+    'X-Forwarded-For', 
+    'X-Forwarded-Host',
+    'X-Forwarded-Port',
+],
+
+// Trust proxy headers for HTTPS detection - critical for load balancer
+'proxy.protocol' => true,
+
+// Additional proxy settings for proper HTTPS detection
+'proxy.trusted' => null, // Trust all proxies (load balancer)
+'proxy.force_https' => true, // Force HTTPS detection from headers
+
+// Maintain secure cookies while detecting HTTPS from headers
+'session.cookie.secure' => true, // Force secure cookies (HTTPS only)
+```
+
+### Container Environment Security
+
+**Implementation**: Strong credential management using UVA Library container environment pattern:
+
+- Staging: `container_1.env` with 32-character admin password and secret salt
+- Production: `container_0.env` with production-specific strong credentials
+- Variables loaded by Ansible during deployment, eliminating plaintext storage
+
+### Admin Authentication Security
+
+**Problem**: SimpleSAMLphp v2.x requires explicit admin authentication source configuration.
+
+**Solution**: Added admin auth source to all Ansible templates:
+
+```php
+// Admin authentication - required for SimpleSAMLphp v2.x
+'auth.adminpassword' => '{{ simplesamlphp_admin_password }}',
+'admin.protectindexpage' => true,
+'admin.protectmetadata' => true,
+'admin.requirehttps' => true,
+'admin.forcehttps' => true,
+```
+
+### Recent Security Fixes (Latest Commits)
+
+**Commit**: `22fae3080` - Proper SimpleSAMLphp HTTPS detection for load balancer
+
+**Issues Resolved**:
+1. "Setting secure cookie on plain HTTP is not allowed" error
+2. SimpleSAMLphp not detecting HTTPS behind AWS load balancer
+3. Proper proxy header trust configuration
+
+**Implementation**:
+- Enhanced proxy configuration with all required headers (`X-Forwarded-Proto`, `X-Forwarded-Host`, etc.)
+- Added `proxy.trusted => null` to trust load balancer
+- Added `proxy.force_https => true` for proper HTTPS detection
+- Maintained `session.cookie.secure => true` for security while enabling HTTPS detection
 
 ## Implementation Details
 
