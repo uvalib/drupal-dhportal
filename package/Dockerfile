@@ -52,9 +52,9 @@ RUN pecl install apcu-5.1.22 && docker-php-ext-enable apcu
 # Enable Apache mod_headers module for SimpleSAMLphp security headers
 RUN a2enmod headers
 
-# Update Apache DocumentRoot to point to the correct location
+# Update Apache DocumentRoot and enable symlink following for SimpleSAMLphp
 RUN sed -i 's|DocumentRoot /var/www/html|DocumentRoot /opt/drupal/web|g' /etc/apache2/sites-enabled/000-default.conf \
-    && sed -i '/<VirtualHost \*:80>/a\\t<Directory /opt/drupal/web>\n\t\tAllowOverride All\n\t\tRequire all granted\n\t</Directory>' /etc/apache2/sites-enabled/000-default.conf
+    && sed -i '/<VirtualHost \*:80>/a\\t<Directory /opt/drupal/web>\n\t\tOptions FollowSymLinks\n\t\tAllowOverride All\n\t\tRequire all granted\n\t</Directory>' /etc/apache2/sites-enabled/000-default.conf
 
 # need to mount volume in /opt/drupal/web/sites (is that done here?)
 # need to run composer install here
