@@ -72,9 +72,16 @@ RUN mkdir -p /opt/drupal/simplesamlphp/config \
 
 RUN composer install
 
+# Ensure vendor directory permissions are correct for copying
+RUN chmod -R 755 /opt/drupal/vendor/simplesamlphp/simplesamlphp/public
+
 # Copy complete SimpleSAMLphp public files from vendor
 RUN rm -rf /opt/drupal/web/simplesaml \
+    && echo "Checking vendor assets before copy:" \
+    && ls -la /opt/drupal/vendor/simplesamlphp/simplesamlphp/public/assets/ || echo "Assets directory not found" \
     && cp -r /opt/drupal/vendor/simplesamlphp/simplesamlphp/public /opt/drupal/web/simplesaml \
+    && echo "Checking copied assets:" \
+    && ls -la /opt/drupal/web/simplesaml/assets/ || echo "Assets copy failed" \
     && chown -R www-data:www-data /opt/drupal/web/simplesaml \
     && chmod -R 755 /opt/drupal/web/simplesaml
 
