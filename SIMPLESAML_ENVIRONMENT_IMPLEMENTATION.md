@@ -31,28 +31,29 @@ This document summarizes the implementation of environment-specific SimpleSAMLph
 ## Security Enhancements (Latest Implementation)
 
 ### Load Balancer HTTPS Configuration
+
 **Challenge**: AWS load balancers terminate SSL, making internal traffic HTTP while requiring HTTPS-only cookies for security.
 
-**Solution**: Enhanced proxy configuration in SimpleSAMLphp templates:
+**Solution**: Configure SimpleSAMLphp with proper HTTPS base URLs:
+
 ```php
-// Proxy configuration - HTTPS termination at load balancer
-'proxy' => [
-    'X-Forwarded-Proto',
-    'X-Forwarded-For', 
-    'X-Forwarded-Host',
-    'X-Forwarded-Port',
+// Basic configuration - Force HTTPS base URL for load balancer environments
+'baseurlpath' => 'https://{{ staging_domain | default("dhportal-dev.internal.lib.virginia.edu") }}/simplesaml/',
+
+// Application configuration - critical for load balancer HTTPS detection
+'application' => [
+    'baseURL' => 'https://{{ staging_domain | default("dhportal-dev.internal.lib.virginia.edu") }}/',
 ],
 
-// Trust proxy headers for HTTPS detection - critical for load balancer
-'proxy.protocol' => true,
-
-// Additional proxy settings for proper HTTPS detection
-'proxy.trusted' => null, // Trust all proxies (load balancer)
-'proxy.force_https' => true, // Force HTTPS detection from headers
-
-// Maintain secure cookies while detecting HTTPS from headers
+// Maintain secure cookies as SimpleSAMLphp now knows it's HTTPS
 'session.cookie.secure' => true, // Force secure cookies (HTTPS only)
 ```
+
+**Key Points**:
+- SimpleSAMLphp deliberately ignores `X-Forwarded-*` headers for security
+- The proper solution requires both `baseurlpath` and `application.baseURL` configured with HTTPS
+- This tells SimpleSAMLphp the canonical HTTPS URLs even when internal traffic is HTTP
+- Secure cookies work correctly once SimpleSAMLphp knows it's in an HTTPS environment
 
 ### Container Environment Security
 
@@ -79,18 +80,20 @@ This document summarizes the implementation of environment-specific SimpleSAMLph
 
 ### Recent Security Fixes (Latest Commits)
 
-**Commit**: `22fae3080` - Proper SimpleSAMLphp HTTPS detection for load balancer
+**Commit**: `12e39af84` - Add application.baseURL for proper HTTPS detection
 
 **Issues Resolved**:
+
 1. "Setting secure cookie on plain HTTP is not allowed" error
 2. SimpleSAMLphp not detecting HTTPS behind AWS load balancer
-3. Proper proxy header trust configuration
+3. Incorrect reliance on proxy headers that SimpleSAMLphp ignores
 
 **Implementation**:
-- Enhanced proxy configuration with all required headers (`X-Forwarded-Proto`, `X-Forwarded-Host`, etc.)
-- Added `proxy.trusted => null` to trust load balancer
-- Added `proxy.force_https => true` for proper HTTPS detection
-- Maintained `session.cookie.secure => true` for security while enabling HTTPS detection
+
+- Added `application.baseURL` configuration with HTTPS URLs for both environments
+- Removed ineffective proxy configuration (SimpleSAMLphp deliberately ignores X-Forwarded headers)
+- Based on official SimpleSAMLphp documentation and GitHub issue #879
+- Maintained `session.cookie.secure => true` for security while enabling proper HTTPS detection
 
 ## Implementation Details
 
