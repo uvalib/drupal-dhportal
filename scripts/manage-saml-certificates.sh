@@ -17,6 +17,44 @@ echo "🔐 Managing SAML certificates (Mode: ${MODE})"
 # Ensure certificate directory exists
 mkdir -p "${CERT_DIR}"
 
+# Function definitions
+function fallback_certificate_setup() {
+    echo "🔧 Checking environment variables for certificates..."
+    
+    # Check if certificates are provided via environment variables (legacy support)
+    if [[ -n "${SIMPLESAMLPHP_SP_PRIVATE_KEY}" && -n "${SIMPLESAMLPHP_SP_CERTIFICATE}" ]]; then
+        echo "✅ Found certificates in environment variables"
+        echo "${SIMPLESAMLPHP_SP_PRIVATE_KEY}" > "${SP_KEY_FILE}"
+        echo "${SIMPLESAMLPHP_SP_CERTIFICATE}" > "${SP_CERT_FILE}"
+        chmod 600 "${SP_KEY_FILE}"
+        chmod 644 "${SP_CERT_FILE}"
+        echo "✅ Certificates installed from environment"
+    elif [[ -f "${SP_KEY_FILE}" && -f "${SP_CERT_FILE}" ]]; then
+        echo "✅ Using existing certificates"
+    else
+        echo "⚠️  No certificates provided via environment or existing files"
+        echo "🔧 Generating self-signed certificates for development fallback"
+        generate_self_signed_cert
+    fi
+}
+
+function generate_self_signed_cert() {
+    echo "🔧 Generating self-signed certificate..."
+    
+    # Generate private key
+    openssl genrsa -out "${SP_KEY_FILE}" 2048
+    
+    # Generate certificate
+    openssl req -new -x509 -key "${SP_KEY_FILE}" -out "${SP_CERT_FILE}" -days 365 \
+        -subj "/C=US/ST=Virginia/L=Charlottesville/O=University of Virginia/OU=Digital Humanities Portal/CN=${SIMPLESAMLPHP_SP_ENTITY_ID:-drupal-dhportal.example.com}"
+    
+    # Set permissions
+    chmod 600 "${SP_KEY_FILE}"
+    chmod 644 "${SP_CERT_FILE}"
+    
+    echo "✅ Self-signed certificate generated"
+}
+
 case "${MODE}" in
     "prod"|"production")
         echo "📋 Production mode: Using AWS Secrets Manager"
@@ -66,44 +104,6 @@ case "${MODE}" in
         ;;
 esac
 
-# Set proper ownership
+# Set proper ownership and exit
 chown -R 33:33 "${CERT_DIR}"
-
 echo "🎯 Certificate setup completed"
-
-function fallback_certificate_setup() {
-    echo "🔧 Checking environment variables for certificates..."
-    
-    # Check if certificates are provided via environment variables (legacy support)
-    if [[ -n "${SIMPLESAMLPHP_SP_PRIVATE_KEY}" && -n "${SIMPLESAMLPHP_SP_CERTIFICATE}" ]]; then
-        echo "✅ Found certificates in environment variables"
-        echo "${SIMPLESAMLPHP_SP_PRIVATE_KEY}" > "${SP_KEY_FILE}"
-        echo "${SIMPLESAMLPHP_SP_CERTIFICATE}" > "${SP_CERT_FILE}"
-        chmod 600 "${SP_KEY_FILE}"
-        chmod 644 "${SP_CERT_FILE}"
-        echo "✅ Certificates installed from environment"
-    elif [[ -f "${SP_KEY_FILE}" && -f "${SP_CERT_FILE}" ]]; then
-        echo "✅ Using existing certificates"
-    else
-        echo "⚠️  No certificates provided via environment or existing files"
-        echo "🔧 Generating self-signed certificates for development fallback"
-        generate_self_signed_cert
-    fi
-}
-
-function generate_self_signed_cert() {
-    echo "🔧 Generating self-signed certificate..."
-    
-    # Generate private key
-    openssl genrsa -out "${SP_KEY_FILE}" 2048
-    
-    # Generate certificate
-    openssl req -new -x509 -key "${SP_KEY_FILE}" -out "${SP_CERT_FILE}" -days 365 \
-        -subj "/C=US/ST=Virginia/L=Charlottesville/O=University of Virginia/OU=Digital Humanities Portal/CN=${SIMPLESAMLPHP_SP_ENTITY_ID:-drupal-dhportal.example.com}"
-    
-    # Set permissions
-    chmod 600 "${SP_KEY_FILE}"
-    chmod 644 "${SP_CERT_FILE}"
-    
-    echo "✅ Self-signed certificate generated"
-}
