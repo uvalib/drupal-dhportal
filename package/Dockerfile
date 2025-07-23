@@ -52,10 +52,8 @@ RUN pecl install apcu-5.1.22 && docker-php-ext-enable apcu
 # Enable Apache mod_headers module for SimpleSAMLphp security headers
 RUN a2enmod headers
 
-# Enable Apache error logging for debugging 403 issues
-RUN echo "LogLevel debug" >> /etc/apache2/apache2.conf \
-    && echo "ErrorLog /var/log/apache2/error.log" >> /etc/apache2/apache2.conf \
-    && echo "CustomLog /var/log/apache2/access.log combined" >> /etc/apache2/apache2.conf
+# Enable basic Apache error logging
+RUN echo "LogLevel warn" >> /etc/apache2/apache2.conf
 
 # Update Apache DocumentRoot and enable symlink following for SimpleSAMLphp
 RUN sed -i 's|DocumentRoot /var/www/html|DocumentRoot /opt/drupal/web|g' /etc/apache2/sites-enabled/000-default.conf \
@@ -82,22 +80,13 @@ RUN chmod -R 755 /opt/drupal/vendor/simplesamlphp/simplesamlphp/public
 
 # Create symlink to SimpleSAMLphp vendor public directory instead of copying
 RUN rm -rf /opt/drupal/web/simplesaml \
-    && echo "=== DEBUGGING SIMPLESAMLPHP SETUP ===" \
-    && echo "Checking vendor directory structure:" \
-    && ls -la /opt/drupal/vendor/simplesamlphp/ || echo "simplesamlphp vendor dir not found" \
-    && ls -la /opt/drupal/vendor/simplesamlphp/simplesamlphp/ || echo "simplesamlphp/simplesamlphp dir not found" \
-    && ls -la /opt/drupal/vendor/simplesamlphp/simplesamlphp/public/ || echo "public dir not found" \
-    && echo "Creating symlink from web/simplesaml to vendor public directory:" \
+    && echo "=== SimpleSAMLphp Setup ===" \
+    && ls -la /opt/drupal/vendor/simplesamlphp/ 2>/dev/null || echo "No simplesamlphp vendor dir" \
+    && ls -la /opt/drupal/vendor/simplesamlphp/simplesamlphp/public/ 2>/dev/null || echo "No public dir" \
     && ln -sf /opt/drupal/vendor/simplesamlphp/simplesamlphp/public /opt/drupal/web/simplesaml \
-    && echo "Verifying symlink creation:" \
-    && ls -la /opt/drupal/web/simplesaml \
-    && echo "Checking symlink target permissions:" \
-    && ls -la /opt/drupal/vendor/simplesamlphp/simplesamlphp/public/ \
-    && echo "Looking for assets in target:" \
-    && find /opt/drupal/vendor/simplesamlphp/simplesamlphp/public -name "*.css" -o -name "*.js" | head -5 || echo "No CSS/JS assets found" \
-    && echo "Testing symlink access:" \
-    && ls -la /opt/drupal/web/simplesaml/ || echo "Cannot access via symlink" \
-    && echo "=== END DEBUGGING ==="
+    && echo "Symlink created, verifying:" \
+    && ls -la /opt/drupal/web/simplesaml 2>/dev/null || echo "Symlink failed" \
+    && echo "=== End Setup ==="
 
 # Note: Custom SimpleSAMLphp configuration is handled via config directory, not web directory overlays
 # The symlink points directly to vendor public files, preserving all assets and default functionality
