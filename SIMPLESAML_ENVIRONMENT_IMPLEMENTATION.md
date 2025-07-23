@@ -80,6 +80,70 @@ This document summarizes the implementation of environment-specific SimpleSAMLph
 
 ### Recent Security Fixes (Latest Commits)
 
+**Latest Updates - July 2025**:
+
+#### Commit `4bf4f7308` - Fix CSS/JavaScript Mixed Content Issues
+**Problem**: SimpleSAMLphp pages were completely unstyled due to mixed content blocking (HTTPS pages loading HTTP assets).
+
+**Root Cause**: Behind AWS load balancers that terminate SSL, SimpleSAMLphp was generating HTTP URLs for CSS and JavaScript, causing browsers to block these assets.
+
+**Solution**: Use full HTTPS URL in `baseurlpath` per official SimpleSAMLphp documentation:
+
+```php
+// Official SimpleSAMLphp reverse proxy configuration
+'baseurlpath' => 'https://{{ staging_domain | default("dhportal-dev.internal.lib.virginia.edu") }}/simplesaml/',
+```
+
+**Key Documentation Finding**: SimpleSAMLphp documentation explicitly states:
+> "if you are running behind a reverse proxy and you are offloading TLS to it, the proper way to tell SimpleSAMLphp that its base URL should use HTTPS is to set the `baseurlpath` configuration option properly. SimpleSAMLphp deliberately **ignores** the `X-Forwarded-*` set of headers that your proxy might be setting, so **do not rely on those**."
+
+#### Commit `9564b6038` - Fix NameIDPolicy Array Configuration
+**Problem**: SimpleSAMLphp 2.x assertion error: "NameIDPolicy is not an array"
+
+**Solution**: Updated authsources.php templates to use proper array format:
+
+```php
+// Old (SimpleSAMLphp 1.x format)
+'NameIDPolicy' => 'urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress',
+
+// New (SimpleSAMLphp 2.x format)
+'NameIDPolicy' => [
+    'Format' => 'urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress',
+    'AllowCreate' => true,
+],
+```
+
+#### Commit `4499c1046` - Fix Argon2 Password Hash Escaping
+**Problem**: Ansible deployment failure due to YAML parsing errors with Argon2 password hashes.
+
+**Root Cause**: Dollar signs (`$`) in Argon2 hashes were treated as YAML escape characters when in double quotes.
+
+**Solution**: Use single quotes for Argon2 hashes in container environment files:
+
+```bash
+# Fixed escaping issue
+SIMPLESAMLPHP_ADMIN_PASSWORD: '$argon2id$v=19$m=64,t=4,p=1$...'
+```
+
+#### Commit `92f074d74` - Implement Argon2 Password Hashing
+**Problem**: "Admin password not set to a hashed value" error in SimpleSAMLphp 2.x.
+
+**Solution**: Generated proper Argon2 password hashes using SimpleSAMLphp's pwgen.php utility:
+
+```bash
+# Generate Argon2 hash
+ddev exec php vendor/simplesamlphp/simplesamlphp/bin/pwgen.php
+```
+
+**Security Enhancement**: Replaced plain text passwords with Argon2id hashes in container environment files.
+
+#### Password Manager Interference Resolution
+**Issue**: Admin login form username field disabled by browser password managers.
+
+**Root Cause**: SimpleSAMLphp `core:AdminPassword` authentication source pre-fills username as "admin" and disables the field (correct behavior).
+
+**Solution**: Use private browsing mode for admin access, or temporarily disable password manager for the domain.
+
 **Commit**: `12e39af84` - Add application.baseURL for proper HTTPS detection
 
 **Issues Resolved**:
@@ -508,5 +572,16 @@ The implementation successfully addresses the original deployment configuration 
 3. **Establishing proper security boundaries** - Environment-appropriate security settings
 4. **Creating comprehensive testing infrastructure** - Validation scripts and deployment procedures
 5. **Documenting the complete solution** - Clear documentation for maintenance and troubleshooting
+
+### Latest Security and Deployment Fixes (July 2025)
+
+The solution has been enhanced with comprehensive fixes for SimpleSAMLphp 2.x compatibility and AWS load balancer environments:
+
+1. **Fixed CSS/JavaScript Mixed Content Issues** - Implemented proper HTTPS base URL configuration per official SimpleSAMLphp documentation
+2. **Resolved SimpleSAMLphp 2.x Compatibility** - Updated NameIDPolicy array format and password hashing requirements  
+3. **Implemented Secure Password Management** - Added Argon2 password hashing with proper YAML escaping
+4. **Documented Browser Compatibility Issues** - Password manager interference and private browsing solutions
+
+**Key Technical Learning**: SimpleSAMLphp deliberately ignores X-Forwarded headers for security. The proper solution for reverse proxy/load balancer environments is to configure `baseurlpath` with the full HTTPS URL, not rely on proxy headers.
 
 The solution leverages existing terraform-infrastructure patterns and Ansible deployment processes, ensuring consistency with established DevOps practices while providing the flexibility needed for environment-specific SimpleSAMLphp configuration management.
