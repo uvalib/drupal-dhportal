@@ -581,6 +581,29 @@ The solution has been enhanced with comprehensive fixes for SimpleSAMLphp 2.x co
 2. **Resolved SimpleSAMLphp 2.x Compatibility** - Updated NameIDPolicy array format and password hashing requirements  
 3. **Implemented Secure Password Management** - Added Argon2 password hashing with proper YAML escaping
 4. **Documented Browser Compatibility Issues** - Password manager interference and private browsing solutions
+5. **Fixed Asset Deployment Architecture** - Preserve vendor assets while selectively overlaying custom configuration only
+
+### Asset Deployment Fix (Commit a2627a9)
+
+**Problem**: SimpleSAMLphp CSS and JavaScript assets were returning 404 errors because the container deployment was inadvertently removing vendor assets when overlaying custom configuration files.
+
+**Root Cause**: The Dockerfile was copying all custom files over vendor files, which removed the vendor `assets/`, `admin/`, `saml2/`, and `module.php` components.
+
+**Solution**: Modified the Dockerfile to use selective file overlay instead of directory overlay:
+
+- **First**: Copy complete vendor SimpleSAMLphp public directory (preserves all assets)
+- **Second**: Selectively overlay only our custom configuration files (.htaccess, _include.php, etc.)
+- **Result**: Vendor assets preserved, only custom config applied
+
+**Benefits**:
+
+- ✅ CSS/JS assets work correctly in deployed containers
+- ✅ Admin interface and SAML2 endpoints function properly  
+- ✅ No vendor code duplication in our repository
+- ✅ Clean upgrade path for SimpleSAMLphp updates
+- ✅ Maintains separation between vendor and custom code
+
+This approach ensures that SimpleSAMLphp functionality works correctly while maintaining clean development practices.
 
 **Key Technical Learning**: SimpleSAMLphp deliberately ignores X-Forwarded headers for security. The proper solution for reverse proxy/load balancer environments is to configure `baseurlpath` with the full HTTPS URL, not rely on proxy headers.
 
