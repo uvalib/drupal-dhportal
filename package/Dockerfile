@@ -75,13 +75,15 @@ RUN composer install
 # Ensure vendor directory permissions are correct for copying
 RUN chmod -R 755 /opt/drupal/vendor/simplesamlphp/simplesamlphp/public
 
-# Copy complete SimpleSAMLphp public files from vendor
+# Copy complete SimpleSAMLphp public files from vendor using rsync for reliability
 RUN rm -rf /opt/drupal/web/simplesaml \
     && echo "Checking vendor assets before copy:" \
-    && ls -la /opt/drupal/vendor/simplesamlphp/simplesamlphp/public/assets/ || echo "Assets directory not found" \
-    && cp -r /opt/drupal/vendor/simplesamlphp/simplesamlphp/public /opt/drupal/web/simplesaml \
+    && ls -la /opt/drupal/vendor/simplesamlphp/simplesamlphp/public/ || echo "Public directory not found" \
+    && find /opt/drupal/vendor/simplesamlphp/simplesamlphp/public -name "*.css" -o -name "*.js" | head -5 || echo "No CSS/JS found" \
+    && rsync -av /opt/drupal/vendor/simplesamlphp/simplesamlphp/public/ /opt/drupal/web/simplesaml/ \
     && echo "Checking copied assets:" \
-    && ls -la /opt/drupal/web/simplesaml/assets/ || echo "Assets copy failed" \
+    && ls -la /opt/drupal/web/simplesaml/ || echo "Copy failed" \
+    && find /opt/drupal/web/simplesaml -name "*.css" -o -name "*.js" | head -5 || echo "No assets copied" \
     && chown -R www-data:www-data /opt/drupal/web/simplesaml \
     && chmod -R 755 /opt/drupal/web/simplesaml
 
