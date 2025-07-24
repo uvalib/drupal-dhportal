@@ -59,7 +59,7 @@ RUN pecl install apcu-5.1.22 && docker-php-ext-enable apcu
 
 # Configure Apache for Drupal and SimpleSAMLphp
 RUN a2enmod headers && \
-    echo "LogLevel info" >> /etc/apache2/apache2.conf && \
+    echo "LogLevel debug" >> /etc/apache2/apache2.conf && \
     sed -i 's|DocumentRoot /var/www/html|DocumentRoot /opt/drupal/web|g' /etc/apache2/sites-enabled/000-default.conf && \
     sed -i '/<VirtualHost \*:80>/a\\t<Directory /opt/drupal/web>\n\t\tOptions FollowSymLinks\n\t\tAllowOverride All\n\t\tRequire all granted\n\t</Directory>' /etc/apache2/sites-enabled/000-default.conf && \
     echo "Apache config verification:" && \
