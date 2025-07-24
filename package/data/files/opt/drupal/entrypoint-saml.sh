@@ -29,8 +29,15 @@ realpath /opt/drupal/web/simplesaml/index.php || echo "Cannot resolve real path"
 echo "Directory permissions on symlink path:"
 ls -ld /opt/drupal/web/simplesaml
 ls -ld /opt/drupal/vendor/simplesamlphp/simplesamlphp/public
+echo "Testing Apache access as www-data user:"
+su www-data -s /bin/bash -c "cat /opt/drupal/web/simplesaml/index.php | head -1" || echo "www-data cannot read index.php content"
 echo "Apache configuration check:"
 grep -A 5 -B 2 "DocumentRoot\|Directory.*drupal" /etc/apache2/sites-enabled/000-default.conf
+echo "Apache log configuration (should be symlinks to stdout/stderr):"
+ls -la /var/log/apache2/
+echo "Apache error logging test (this should appear in container logs):"
+echo "[ENTRYPOINT-DEBUG] Testing Apache error log - this message should appear in container stderr" >&2
+echo "SimpleSAMLphp debugging complete - errors will appear in container logs (stdout/stderr)"
 
 # Continue with the original entrypoint
 exec "$@"

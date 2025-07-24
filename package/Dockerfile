@@ -57,7 +57,9 @@ RUN a2enmod headers && \
     sed -i 's|DocumentRoot /var/www/html|DocumentRoot /opt/drupal/web|g' /etc/apache2/sites-enabled/000-default.conf && \
     sed -i '/<VirtualHost \*:80>/a\\t<Directory /opt/drupal/web>\n\t\tOptions FollowSymLinks\n\t\tAllowOverride All\n\t\tRequire all granted\n\t</Directory>' /etc/apache2/sites-enabled/000-default.conf && \
     echo "Apache config verification:" && \
-    grep -A 10 -B 2 "DocumentRoot\|FollowSymLinks" /etc/apache2/sites-enabled/000-default.conf
+    grep -A 10 -B 2 "DocumentRoot\|FollowSymLinks" /etc/apache2/sites-enabled/000-default.conf && \
+    echo "Apache log configuration (should be symlinks to stdout/stderr):" && \
+    ls -la /var/log/apache2/
 
 # Set up Drupal working environment
 WORKDIR /opt/drupal
