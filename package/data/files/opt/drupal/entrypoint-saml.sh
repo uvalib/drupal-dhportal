@@ -85,6 +85,18 @@ echo "- SimpleSAMLphp library version and admin access:"
 if [[ -f "/opt/drupal/vendor/simplesamlphp/simplesamlphp/composer.json" ]]; then
     grep '"version"' /opt/drupal/vendor/simplesamlphp/simplesamlphp/composer.json || echo "Version not found in composer.json"
 fi
+echo "- SimpleSAMLphp configuration verification:"
+echo "  Testing config loading with PHP..."
+php -r "
+require_once('/opt/drupal/web/simplesaml/_include.php');
+\$config = \SimpleSAML\Configuration::getInstance();
+echo 'Config loaded successfully' . PHP_EOL;
+echo 'admin.protectindexpage: ' . (\$config->getOptionalBoolean('admin.protectindexpage', true) ? 'true' : 'false') . PHP_EOL;
+echo 'admin.protectmetadata: ' . (\$config->getOptionalBoolean('admin.protectmetadata', true) ? 'true' : 'false') . PHP_EOL;
+echo 'debug: ' . (\$config->getOptionalBoolean('debug', false) ? 'true' : 'false') . PHP_EOL;
+echo 'showerrors: ' . (\$config->getOptionalBoolean('showerrors', false) ? 'true' : 'false') . PHP_EOL;
+echo 'PHP_MODE env in config context: ' . (getenv('PHP_MODE') ?: 'not set') . PHP_EOL;
+"
 echo "📋 Testing container logging channels:"
 echo "[STDOUT-TEST] This message should appear in container stdout logs"
 echo "[STDERR-TEST] This message should appear in container stderr logs" >&2
