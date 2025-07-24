@@ -25,6 +25,15 @@ echo "[LOG-CHECKER] This error message should appear in container stderr" >&2
 echo "[LOG-CHECKER] This info message should appear in container stdout"
 
 echo ""
+echo "=== PHP Configuration ==="
+echo "PHP error logging settings:"
+php -r "echo 'error_log: ' . ini_get('error_log') . PHP_EOL;"
+php -r "echo 'log_errors: ' . (ini_get('log_errors') ? 'On' : 'Off') . PHP_EOL;"
+php -r "echo 'display_errors: ' . (ini_get('display_errors') ? 'On' : 'Off') . PHP_EOL;"
+echo "PHP error test:"
+php -r "error_log('[LOG-CHECKER] PHP error test - should appear in container stderr');"
+
+echo ""
 echo "=== Apache Configuration Status ==="
 echo "Apache modules:"
 apache2ctl -M | grep -E "(headers|rewrite)"

@@ -39,5 +39,10 @@ echo "Apache error logging test (this should appear in container logs):"
 echo "[ENTRYPOINT-DEBUG] Testing Apache error log - this message should appear in container stderr" >&2
 echo "SimpleSAMLphp debugging complete - errors will appear in container logs (stdout/stderr)"
 
+echo "PHP error logging test:"
+php -r "error_log('[ENTRYPOINT-DEBUG] Testing PHP error log - this should appear in container stderr');"
+echo "PHP configuration check:"
+php -r "echo 'PHP error_log: ' . ini_get('error_log') . PHP_EOL; echo 'PHP log_errors: ' . (ini_get('log_errors') ? 'On' : 'Off') . PHP_EOL; echo 'PHP display_errors: ' . (ini_get('display_errors') ? 'On' : 'Off') . PHP_EOL;"
+
 # Continue with the original entrypoint
 exec "$@"

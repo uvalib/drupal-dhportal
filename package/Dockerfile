@@ -61,6 +61,13 @@ RUN a2enmod headers && \
     echo "Apache log configuration (should be symlinks to stdout/stderr):" && \
     ls -la /var/log/apache2/
 
+# Configure PHP error logging for container environment
+RUN echo "error_log = /dev/stderr" >> /usr/local/etc/php/php.ini && \
+    echo "display_errors = Off" >> /usr/local/etc/php/php.ini && \
+    echo "display_startup_errors = Off" >> /usr/local/etc/php/php.ini && \
+    echo "log_errors = On" >> /usr/local/etc/php/php.ini && \
+    echo "PHP error logging configured to stderr for container logs"
+
 # Set up Drupal working environment
 WORKDIR /opt/drupal
 
