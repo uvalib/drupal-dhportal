@@ -25,7 +25,13 @@ WORKDIR $APP_HOME
 # Move in necessary assets
 COPY package/data/container_bash_profile /root/.profile
 COPY package/data/files/opt/drupal/web/sites/default/settings.php /opt/drupal/web/sites/default/settings.php
-COPY package/data/files/usr/local/etc/php/php.ini-production /usr/local/etc/php/php.ini
+# Copy both PHP configurations for runtime switching
+COPY package/data/files/usr/local/etc/php/php.ini-development /usr/local/etc/php/php.ini-development
+COPY package/data/files/usr/local/etc/php/php.ini-production /usr/local/etc/php/php.ini-production
+# Default to development configuration (staging/dev friendly)
+COPY package/data/files/usr/local/etc/php/php.ini-development /usr/local/etc/php/php.ini
+RUN echo "PHP configuration: Using php.ini-${PHP_ENV}" && \
+    echo "PHP display_errors setting: $(grep '^display_errors' /usr/local/etc/php/php.ini || echo 'not set')"
 
 RUN mkdir -p /opt/drupal/dhportal && chown www-data:www-data /opt/drupal/dhportal
 
@@ -60,13 +66,6 @@ RUN a2enmod headers && \
     grep -A 10 -B 2 "DocumentRoot\|FollowSymLinks" /etc/apache2/sites-enabled/000-default.conf && \
     echo "Apache log configuration (should be symlinks to stdout/stderr):" && \
     ls -la /var/log/apache2/
-
-# Configure PHP error logging for container environment
-RUN echo "error_log = /dev/stderr" >> /usr/local/etc/php/php.ini && \
-    echo "display_errors = Off" >> /usr/local/etc/php/php.ini && \
-    echo "display_startup_errors = Off" >> /usr/local/etc/php/php.ini && \
-    echo "log_errors = On" >> /usr/local/etc/php/php.ini && \
-    echo "PHP error logging configured to stderr for container logs"
 
 # Set up Drupal working environment
 WORKDIR /opt/drupal

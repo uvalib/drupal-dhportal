@@ -7,6 +7,20 @@ set -e
 
 echo "🔐 Setting up SAML certificates for production..."
 
+# Configure PHP based on environment
+PHP_MODE="${PHP_MODE:-development}"
+if [[ "${PHP_MODE}" == "production" ]]; then
+    echo "📝 Switching to production PHP configuration"
+    cp /usr/local/etc/php/php.ini-production /usr/local/etc/php/php.ini
+else
+    echo "📝 Using development PHP configuration (display_errors=On)"
+    cp /usr/local/etc/php/php.ini-development /usr/local/etc/php/php.ini
+fi
+
+# Always ensure error logging goes to stderr for container logs
+echo "error_log = /dev/stderr" >> /usr/local/etc/php/php.ini
+echo "log_errors = On" >> /usr/local/etc/php/php.ini
+
 # Run certificate setup with production mode
 /opt/drupal/scripts/manage-saml-certificates.sh prod
 
@@ -42,6 +56,7 @@ echo "SimpleSAMLphp debugging complete - errors will appear in container logs (s
 echo "PHP error logging test:"
 php -r "error_log('[ENTRYPOINT-DEBUG] Testing PHP error log - this should appear in container stderr');"
 echo "PHP configuration check:"
+echo "PHP_MODE environment variable: ${PHP_MODE:-development}"
 php -r "echo 'PHP error_log: ' . ini_get('error_log') . PHP_EOL; echo 'PHP log_errors: ' . (ini_get('log_errors') ? 'On' : 'Off') . PHP_EOL; echo 'PHP display_errors: ' . (ini_get('display_errors') ? 'On' : 'Off') . PHP_EOL;"
 
 # Continue with the original entrypoint
