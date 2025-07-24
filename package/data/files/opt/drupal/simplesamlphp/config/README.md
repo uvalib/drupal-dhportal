@@ -8,6 +8,20 @@ AWS uses Ansible templates located in:
 - **Staging**: `/Users/ys2n/Code/uvalib/terraform-infrastructure/dh.library.virginia.edu/staging/ansible/templates/simplesamlphp/authsources.php.j2`
 - **Production**: `/Users/ys2n/Code/uvalib/terraform-infrastructure/dh.library.virginia.edu/production.new/ansible/templates/simplesamlphp/authsources.php.j2`
 
+## 🚨 CRITICAL DEBUGGING REMINDER
+
+When debugging SimpleSAMLphp 403 admin errors:
+
+### AWS Environments (staging/production):
+- Configuration is **GENERATED** from Ansible templates during deployment
+- Files like `authsources.php` are created by Ansible, not stored in git
+- **TO FIX**: Edit templates in `terraform-infrastructure` repository, then run deployment
+- **DEPLOYMENT REQUIRED**: Changes don't take effect until `ansible-playbook deploy_backend_1.yml` (staging) or `deploy_backend.yml` (production) is executed
+
+### DDEV Local Environment:
+- Configuration files are in `.ddev/simplesamlphp/config/` directory  
+- **TO FIX**: Edit files directly and restart DDEV
+
 ## 📁 File Usage
 
 | File | Used By | Purpose |

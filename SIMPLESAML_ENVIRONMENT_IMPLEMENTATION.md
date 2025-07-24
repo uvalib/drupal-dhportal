@@ -13,20 +13,32 @@ This document summarizes the implementation of environment-specific SimpleSAMLph
 ## Architecture
 
 ### Three-Tier Environment Strategy
+
+> **🚨 CRITICAL DEBUGGING NOTE**: When troubleshooting SimpleSAMLphp issues, always identify which environment you're debugging:
+> - **DDEV Local**: Configuration files are in THIS repository (`simplesamlphp/config/`)
+> - **AWS Staging/Production**: Configuration is generated from Ansible templates in `terraform-infrastructure` repository
+> - **403 Admin Errors**: For AWS environments, check if deployment has been run with updated templates
+
 1. **DDEV (Local Development)**
-   - Configuration: Git-managed files in `simplesamlphp/config/` directory
+   - **Configuration Source**: Git-managed files in `simplesamlphp/config/` directory (THIS REPOSITORY)
+   - **Volume Mount**: `.ddev/simplesamlphp/config/` → `/var/www/html/simplesamlphp/config/`
    - Domain: `*.ddev.site`
    - Security: Relaxed for development (unsecured cookies, debug logging)
+   - **Debugging**: Edit files directly in this repository
    
 2. **AWS Staging Environment** 
-   - Configuration: Ansible templates in `terraform-infrastructure/staging/`
+   - **Configuration Source**: Ansible templates in `terraform-infrastructure/staging/ansible/templates/simplesamlphp/`
+   - **Generated Files**: Templates create `authsources.php` and `config.php` during deployment
    - Domain: `dhportal-dev.internal.lib.virginia.edu`
    - Security: Production-like with INFO logging, strong credentials
+   - **Debugging**: Check templates in terraform-infrastructure, then run deployment
    
 3. **AWS Production Environment**
-   - Configuration: Ansible templates in `terraform-infrastructure/production.new/`
+   - **Configuration Source**: Ansible templates in `terraform-infrastructure/production.new/ansible/templates/simplesamlphp/`
+   - **Generated Files**: Templates create `authsources.php` and `config.php` during deployment
    - Domain: `dh.library.virginia.edu`
    - Security: Maximum security (NOTICE logging, assertion encryption, strong credentials)
+   - **Debugging**: Check templates in terraform-infrastructure, then run deployment
 
 ## Security Enhancements (Latest Implementation)
 
@@ -336,6 +348,50 @@ Created comprehensive testing scripts:
 2. **Staging Validation**: Deploy and test staging environment configuration
 3. **Production Deployment**: Deploy to production after staging validation
 4. **SAML Integration**: Register with NetBadge IDP and test authentication flow
+
+## 🔧 Quick Troubleshooting Reference
+
+### When Debugging SimpleSAMLphp Issues
+
+#### Step 1: Identify Your Environment
+- **URL starts with `*.ddev.site`** → You're in DDEV local environment
+- **URL is `dhportal-dev.internal.lib.virginia.edu`** → You're in AWS staging environment  
+- **URL is `dh.library.virginia.edu`** → You're in AWS production environment
+
+#### Step 2: Locate Configuration Source
+- **DDEV**: Configuration files are in THIS repository
+  - Path: `simplesamlphp/config/authsources.php`
+  - Edit directly and restart DDEV
+- **AWS Staging/Production**: Configuration is generated from terraform-infrastructure
+  - Templates: `terraform-infrastructure/dh.library.virginia.edu/{env}/ansible/templates/simplesamlphp/`
+  - Must run deployment to apply changes
+
+#### Step 3: Common Issues and Solutions
+
+**403 Admin Access Error:**
+- **DDEV**: Check `.ddev/simplesamlphp/config/authsources.php` has admin source
+- **AWS**: Verify terraform-infrastructure templates have admin source, then run deployment
+
+**Configuration Not Taking Effect:**
+- **DDEV**: Restart with `ddev restart`
+- **AWS**: Run ansible deployment: `ansible-playbook deploy_backend_1.yml` (staging) or `deploy_backend.yml` (production)
+
+**"authsources.php file not found":**
+- **DDEV**: File should exist in `.ddev/simplesamlphp/config/`
+- **AWS**: Generated during deployment from templates - check if deployment completed successfully
+
+#### Step 4: Deployment Commands
+```bash
+# AWS Staging
+cd /Users/ys2n/Code/uvalib/terraform-infrastructure/dh.library.virginia.edu/staging/ansible
+ansible-playbook deploy_backend_1.yml
+
+# AWS Production  
+cd /Users/ys2n/Code/uvalib/terraform-infrastructure/dh.library.virginia.edu/production.new/ansible
+ansible-playbook deploy_backend.yml
+```
+
+### Remember: AWS Configurations Are Generated, Not Static Files!
 
 ## Next Steps
 

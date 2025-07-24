@@ -5,6 +5,11 @@
  */
 
 $config = [
+    // Admin authentication source for SimpleSAMLphp admin interface
+    'admin' => [
+        'core:AdminPassword',
+    ],
+
     // Default SP configuration - connects to drupal-netbadge
     'default-sp' => [
         'saml:SP',
