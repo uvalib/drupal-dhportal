@@ -16,7 +16,7 @@ $config = [
     // Security settings (should be overridden by environment variables in production)
     'secretsalt' => getenv('SIMPLESAMLPHP_SECRET_SALT') ?: 'default-salt-change-in-production',
     'auth.adminpassword' => getenv('SIMPLESAMLPHP_ADMIN_PASSWORD') ?: 'admin',
-    'admin.protectindexpage' => true,
+    'admin.protectindexpage' => (getenv('PHP_MODE') !== 'development'), // Disable admin protection in development
     'admin.protectmetadata' => true,
 
     // Technical contact
@@ -51,8 +51,8 @@ $config = [
     'store.sql.username' => getenv('DB_USER') ?: null,
     'store.sql.password' => getenv('DB_PASSWORD') ?: null,
 
-    // Logging
-    'logging.level' => SimpleSAML\Logger::NOTICE,
+    // Logging - enhanced for development environments
+    'logging.level' => (getenv('PHP_MODE') === 'development') ? SimpleSAML\Logger::DEBUG : SimpleSAML\Logger::NOTICE,
     'logging.handler' => 'file',
     'logging.logfile' => 'simplesamlphp.log',
 
@@ -71,10 +71,10 @@ $config = [
     // Proxy configuration
     'proxy' => null,
 
-    // Production settings
-    'debug' => false,
-    'showerrors' => false,
-    'errorreporting' => false,
+    // Production settings - enable debugging in development mode
+    'debug' => (getenv('PHP_MODE') === 'development'),
+    'showerrors' => (getenv('PHP_MODE') === 'development'),
+    'errorreporting' => (getenv('PHP_MODE') === 'development'),
 
     // Security headers
     'headers.security' => [

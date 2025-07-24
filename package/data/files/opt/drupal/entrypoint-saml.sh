@@ -47,6 +47,16 @@ echo "Apache log configuration (should be symlinks to stdout/stderr):"
 ls -la /var/log/apache2/
 echo "Apache error logging test (this should appear in container logs):"
 echo "[ENTRYPOINT-DEBUG] Testing Apache error log - this message should appear in container stderr" >&2
+echo "SimpleSAMLphp environment configuration check:"
+echo "- PHP_MODE: ${PHP_MODE}"
+echo "- SIMPLESAMLPHP_ADMIN_PASSWORD: ${SIMPLESAMLPHP_ADMIN_PASSWORD:0:20}... (truncated)"
+echo "- SIMPLESAMLPHP_SECRET_SALT: ${SIMPLESAMLPHP_SECRET_SALT:0:10}... (truncated)"
+echo "- Config file permissions:"
+ls -la /opt/drupal/simplesamlphp/config/config.php
+echo "- SimpleSAMLphp library version and admin access:"
+if [[ -f "/opt/drupal/vendor/simplesamlphp/simplesamlphp/composer.json" ]]; then
+    grep '"version"' /opt/drupal/vendor/simplesamlphp/simplesamlphp/composer.json || echo "Version not found in composer.json"
+fi
 echo "SimpleSAMLphp debugging complete - errors will appear in container logs (stdout/stderr)"
 
 echo "PHP error logging test:"
