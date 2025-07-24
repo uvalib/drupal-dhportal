@@ -104,9 +104,14 @@ RUN mkdir -p /opt/drupal/simplesamlphp/{log,tmp,cache,data} \
     && find /opt/drupal/scripts -name "*.sh" -type f -exec chmod +x {} \;
 
 RUN mkdir /var/run/sqlite && chown www-data:www-data /var/run/sqlite 
+
 # Add the build tag
 ARG BUILD_TAG
 RUN test -n "$BUILD_TAG" && touch $APP_HOME/buildtag.build-$BUILD_TAG || touch $APP_HOME/buildtag.build-0
+
+# Set the custom entrypoint for SimpleSAMLphp setup and debugging
+ENTRYPOINT ["/opt/drupal/entrypoint-saml.sh"]
+CMD ["apache2-foreground"]
 #
 # end of file
 
