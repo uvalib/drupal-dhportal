@@ -57,6 +57,12 @@ echo "- SimpleSAMLphp library version and admin access:"
 if [[ -f "/opt/drupal/vendor/simplesamlphp/simplesamlphp/composer.json" ]]; then
     grep '"version"' /opt/drupal/vendor/simplesamlphp/simplesamlphp/composer.json || echo "Version not found in composer.json"
 fi
+echo "📋 Testing container logging channels:"
+echo "[STDOUT-TEST] This message should appear in container stdout logs"
+echo "[STDERR-TEST] This message should appear in container stderr logs" >&2
+echo "[PHP-ERROR-TEST] Testing PHP error logging..." 
+php -r "error_log('[PHP-ERROR-LOG-TEST] PHP error_log to stderr test', 0);"
+echo "✅ Logging tests complete - check container logs for [*-TEST] markers"
 echo "SimpleSAMLphp debugging complete - errors will appear in container logs (stdout/stderr)"
 
 echo "PHP error logging test:"

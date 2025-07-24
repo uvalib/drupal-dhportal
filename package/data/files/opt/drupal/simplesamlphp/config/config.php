@@ -53,7 +53,7 @@ $config = [
 
     // Logging - enhanced for development environments
     'logging.level' => (getenv('PHP_MODE') === 'development') ? SimpleSAML\Logger::DEBUG : SimpleSAML\Logger::NOTICE,
-    'logging.handler' => 'file',
+    'logging.handler' => (getenv('PHP_MODE') === 'development') ? 'stderr' : 'file',
     'logging.logfile' => 'simplesamlphp.log',
 
     // Timezone
