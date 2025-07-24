@@ -112,6 +112,20 @@ RUN test -n "$BUILD_TAG" && touch $APP_HOME/buildtag.build-$BUILD_TAG || touch $
 # Set the custom entrypoint for SimpleSAMLphp setup and debugging
 ENTRYPOINT ["/opt/drupal/entrypoint-saml.sh"]
 CMD ["apache2-foreground"]
+
+# Build-time verification that will appear in CodePipeline build logs
+RUN echo "=== BUILD-TIME VERIFICATION ===" && \
+    echo "[BUILD-TEST] Entrypoint script exists and is executable:" && \
+    ls -la /opt/drupal/entrypoint-saml.sh && \
+    echo "[BUILD-TEST] PHP templates exist:" && \
+    ls -la /usr/local/etc/php/php.ini-* && \
+    echo "[BUILD-TEST] SimpleSAMLphp config exists:" && \
+    ls -la /opt/drupal/simplesamlphp/config/config.php && \
+    echo "[BUILD-TEST] SimpleSAMLphp symlink verification:" && \
+    ls -la /opt/drupal/web/simplesaml && \
+    echo "[BUILD-TEST] Build-time tests complete - entrypoint will run at container startup" && \
+    echo "=== END BUILD-TIME VERIFICATION ==="
+
 #
 # end of file
 

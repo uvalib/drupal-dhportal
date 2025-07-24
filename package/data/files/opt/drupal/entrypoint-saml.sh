@@ -5,6 +5,11 @@
 
 set -e
 
+echo "=== ENTRYPOINT START: $(date) ==="
+echo "=== ENTRYPOINT ARGS: $@ ==="
+echo "=== PWD: $(pwd) ==="
+echo "=== USER: $(whoami) ==="
+
 echo "🔐 Setting up SAML certificates for production..."
 
 # Configure PHP based on environment
