@@ -16,8 +16,8 @@ $config = [
     // Security settings (should be overridden by environment variables in production)
     'secretsalt' => getenv('SIMPLESAMLPHP_SECRET_SALT') ?: 'default-salt-change-in-production',
     'auth.adminpassword' => getenv('SIMPLESAMLPHP_ADMIN_PASSWORD') ?: 'admin',
-    'admin.protectindexpage' => (getenv('PHP_MODE') !== 'development'), // Disable admin protection in development
-    'admin.protectmetadata' => true,
+    'admin.protectindexpage' => false, // Explicitly disable admin protection for development
+    'admin.protectmetadata' => false, // Also disable metadata protection
 
     // Technical contact
     'technicalcontact_name' => getenv('SIMPLESAMLPHP_TECH_NAME') ?: 'DH Portal Admin',
