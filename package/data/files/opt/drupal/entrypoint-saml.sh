@@ -50,6 +50,17 @@ echo "Apache configuration check:"
 grep -A 5 -B 2 "DocumentRoot\|Directory.*drupal" /etc/apache2/sites-enabled/000-default.conf
 echo "Apache log configuration (should be symlinks to stdout/stderr):"
 ls -la /var/log/apache2/
+echo "Apache directory permissions test:"
+echo "- /opt/drupal/web permissions:"
+ls -ld /opt/drupal/web
+echo "- /opt/drupal/web/simplesaml permissions:"
+ls -ld /opt/drupal/web/simplesaml
+echo "- /opt/drupal/web/simplesaml/admin permissions:"
+ls -ld /opt/drupal/web/simplesaml/admin 2>/dev/null || echo "admin directory not found"
+echo "- Contents of simplesaml/admin directory:"
+ls -la /opt/drupal/web/simplesaml/admin/ 2>/dev/null || echo "Cannot list admin directory contents"
+echo "- Apache user access test to admin directory:"
+su www-data -s /bin/bash -c "ls -la /opt/drupal/web/simplesaml/admin/" 2>/dev/null || echo "www-data cannot access admin directory"
 echo "Apache error logging test (this should appear in container logs):"
 echo "[ENTRYPOINT-DEBUG] Testing Apache error log - this message should appear in container stderr" >&2
 echo "SimpleSAMLphp environment configuration check:"
