@@ -595,6 +595,8 @@ report_memleaks = On
 ;error_log = php_errors.log
 ; Log errors to syslog (Event Log on Windows).
 ;error_log = syslog
+; For containerized environments, send errors to stderr
+error_log = /dev/stderr
 
 ; The syslog ident is a string which is prepended to every message logged
 ; to syslog. Only used when error_log is set to syslog.

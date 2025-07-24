@@ -17,10 +17,6 @@ else
     cp /usr/local/etc/php/php.ini-development /usr/local/etc/php/php.ini
 fi
 
-# Always ensure error logging goes to stderr for container logs
-echo "error_log = /dev/stderr" >> /usr/local/etc/php/php.ini
-echo "log_errors = On" >> /usr/local/etc/php/php.ini
-
 # Run certificate setup with production mode
 /opt/drupal/scripts/manage-saml-certificates.sh prod
 

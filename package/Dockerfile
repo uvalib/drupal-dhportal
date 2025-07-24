@@ -30,7 +30,7 @@ COPY package/data/files/usr/local/etc/php/php.ini-development /usr/local/etc/php
 COPY package/data/files/usr/local/etc/php/php.ini-production /usr/local/etc/php/php.ini-production
 # Default to development configuration (staging/dev friendly)
 COPY package/data/files/usr/local/etc/php/php.ini-development /usr/local/etc/php/php.ini
-RUN echo "PHP configuration: Using php.ini-${PHP_ENV}" && \
+RUN echo "PHP configuration: Default development mode (will be switched at runtime via PHP_MODE env var)" && \
     echo "PHP display_errors setting: $(grep '^display_errors' /usr/local/etc/php/php.ini || echo 'not set')"
 
 RUN mkdir -p /opt/drupal/dhportal && chown www-data:www-data /opt/drupal/dhportal
