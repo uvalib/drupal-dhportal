@@ -47,7 +47,11 @@ ls -ld /opt/drupal/vendor/simplesamlphp/simplesamlphp/public
 echo "Testing Apache access as www-data user:"
 su www-data -s /bin/bash -c "cat /opt/drupal/web/simplesaml/index.php | head -1" || echo "www-data cannot read index.php content"
 echo "Apache configuration check:"
-grep -A 5 -B 2 "DocumentRoot\|Directory.*drupal" /etc/apache2/sites-enabled/000-default.conf
+grep -A 5 -B 2 "DocumentRoot\|Directory.*drupal\|Alias.*simplesaml" /etc/apache2/sites-enabled/000-default.conf
+echo "SimpleSAMLphp Apache alias verification:"
+apache2ctl -S 2>/dev/null | grep -i simplesaml || echo "No SimpleSAMLphp alias found in Apache config"
+echo "Testing Apache configuration syntax:"
+apache2ctl configtest || echo "Apache configuration has syntax errors"
 echo "Apache log configuration (should be symlinks to stdout/stderr):"
 ls -la /var/log/apache2/
 echo "Apache directory permissions test:"

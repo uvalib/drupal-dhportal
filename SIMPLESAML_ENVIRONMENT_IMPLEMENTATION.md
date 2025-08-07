@@ -275,15 +275,19 @@ Both environments include SimpleSAMLphp deployment tasks in their playbooks:
     mode: '0644'
 ```
 
-#### Deployment Commands
-**Staging:**
+#### AWS CodePipeline Deployment
+**Normal Operation:** AWS CodePipeline automatically executes deployments when changes are pushed to the terraform-infrastructure repository:
+
+- **Staging**: Pipeline runs `deploy_backend_1.yml` automatically
+- **Production**: Pipeline runs `deploy_backend.yml` automatically
+
+**Manual Deployment (Emergency Use):**
 ```bash
+# Staging
 cd /Users/ys2n/Code/uvalib/terraform-infrastructure/dh.library.virginia.edu/staging/ansible
 ansible-playbook deploy_backend_1.yml
-```
 
-**Production:**
-```bash
+# Production
 cd /Users/ys2n/Code/uvalib/terraform-infrastructure/dh.library.virginia.edu/production.new/ansible
 ansible-playbook deploy_backend.yml
 ```
@@ -291,10 +295,10 @@ ansible-playbook deploy_backend.yml
 #### Critical Deployment Sequence
 **⚠️ IMPORTANT**: When making changes that span both repositories, always commit and push terraform-infrastructure changes BEFORE drupal-dhportal changes:
 
-1. **First**: Commit and push terraform-infrastructure changes
-2. **Second**: Commit and push drupal-dhportal changes
+1. **First**: Commit and push terraform-infrastructure changes (updates configuration templates, but does NOT trigger builds)
+2. **Second**: Commit and push drupal-dhportal changes (triggers AWS CodePipeline deployment, which uses current terraform-infrastructure)
 
-**Reason**: The drupal-dhportal repository has CI/CD triggers that will immediately start a build process. If the terraform-infrastructure changes aren't already deployed, the CI/CD build may fail or deploy with outdated configurations.
+**Reason**: The drupal-dhportal repository has CI/CD triggers that will immediately start the AWS CodePipeline build process. The pipeline pulls the current state of terraform-infrastructure templates during deployment. If the terraform-infrastructure changes aren't already committed, the pipeline will deploy with outdated configurations.
 
 ## Security Considerations
 
@@ -374,22 +378,19 @@ Created comprehensive testing scripts:
 
 **Configuration Not Taking Effect:**
 - **DDEV**: Restart with `ddev restart`
-- **AWS**: Run ansible deployment: `ansible-playbook deploy_backend_1.yml` (staging) or `deploy_backend.yml` (production)
+- **AWS**: Configuration changes require deployment triggered by pushing to drupal-dhportal - AWS CodePipeline automatically runs the Ansible playbook using current terraform-infrastructure templates
 
 **"authsources.php file not found":**
 - **DDEV**: File should exist in `.ddev/simplesamlphp/config/`
-- **AWS**: Generated during deployment from templates - check if deployment completed successfully
+- **AWS**: Generated during CodePipeline deployment from terraform-infrastructure templates - check if deployment completed successfully
 
-#### Step 4: Deployment Commands
-```bash
-# AWS Staging
-cd /Users/ys2n/Code/uvalib/terraform-infrastructure/dh.library.virginia.edu/staging/ansible
-ansible-playbook deploy_backend_1.yml
+#### Step 4: AWS Deployment Process
+**Important**: AWS environments use CodePipeline triggered by drupal-dhportal changes. The pipeline pulls and uses current terraform-infrastructure templates:
 
-# AWS Production  
-cd /Users/ys2n/Code/uvalib/terraform-infrastructure/dh.library.virginia.edu/production.new/ansible
-ansible-playbook deploy_backend.yml
-```
+- **Build Trigger**: Push to `drupal-dhportal` repository triggers AWS CodePipeline
+- **Template Source**: Pipeline pulls current Ansible templates from `terraform-infrastructure` repository
+- **Deployment**: CodePipeline runs `deploy_backend_1.yml` (staging) or `deploy_backend.yml` (production)
+- **Manual Option**: For emergency deployments, playbooks can still be run manually from the terraform-infrastructure repository
 
 ### Remember: AWS Configurations Are Generated, Not Static Files!
 
