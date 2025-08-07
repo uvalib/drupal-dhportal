@@ -7,7 +7,7 @@ set -e
 
 COMMAND="${1:-help}"
 ENVIRONMENT="${2:-staging}"
-CERT_DIR="/opt/drupal/simplesamlphp/cert"
+CERT_DIR="${CERT_DIR:-/opt/drupal/simplesamlphp/cert}"
 
 # Try to find terraform-infrastructure in multiple locations
 TERRAFORM_REPO_PATH="${TERRAFORM_REPO_PATH:-}"
@@ -41,6 +41,7 @@ function help_and_exit() {
     echo "  validate   Validate existing certificates"
     echo "  rotate     Generate new certificates and update secrets"
     echo "  info       Show terraform infrastructure information"
+    echo "  test       Test certificate extraction from PEM file (test <pem-file>)"
     echo "  help       Show this help message"
     echo ""
     echo "Environment: development | staging | production"
@@ -48,6 +49,7 @@ function help_and_exit() {
     echo "Environment Variables:"
     echo "  TERRAFORM_REPO_PATH - Path to terraform-infrastructure repository"
     echo "  SAML_KEY_AVAILABLE  - Set by pipeline if encrypted keys are available"
+    echo "  CERT_DIR           - Output directory for certificates (default: /opt/drupal/simplesamlphp/cert)"
     exit 1
 }
 
@@ -137,27 +139,46 @@ function extract_certificates_from_pem() {
     
     echo "📝 Extracting certificates from PEM file: ${pem_file}"
     
+    # Ensure certificate directory exists
+    mkdir -p "${CERT_DIR}"
+    
     # Extract private key
     if grep -q "BEGIN PRIVATE KEY\|BEGIN RSA PRIVATE KEY\|BEGIN EC PRIVATE KEY" "${pem_file}"; then
-        echo "� Extracting private key..."
-        openssl pkey -in "${pem_file}" -out "${CERT_DIR}/sp.key" 2>/dev/null || {
-            echo "⚠️  Modern pkey command failed, trying rsa..."
-            openssl rsa -in "${pem_file}" -out "${CERT_DIR}/sp.key" 2>/dev/null
-        }
-        chmod 600 "${CERT_DIR}/sp.key"
-        echo "✅ Private key extracted to ${CERT_DIR}/sp.key"
+        echo "🔐 Extracting private key..."
+        if openssl pkey -in "${pem_file}" -out "${CERT_DIR}/sp.key" 2>/dev/null || openssl rsa -in "${pem_file}" -out "${CERT_DIR}/sp.key" 2>/dev/null; then
+            chmod 600 "${CERT_DIR}/sp.key"
+            echo "✅ Private key extracted to ${CERT_DIR}/sp.key"
+        else
+            echo "❌ Failed to extract private key"
+            return 1
+        fi
     else
         echo "⚠️  No private key found in PEM file"
+        return 1
     fi
     
     # Extract certificate
     if grep -q "BEGIN CERTIFICATE" "${pem_file}"; then
-        echo "� Extracting certificate..."
+        echo "📜 Extracting certificate..."
         openssl x509 -in "${pem_file}" -out "${CERT_DIR}/sp.crt"
         chmod 644 "${CERT_DIR}/sp.crt"
         echo "✅ Certificate extracted to ${CERT_DIR}/sp.crt"
     else
-        echo "⚠️  No certificate found in PEM file"
+        echo "⚠️  No certificate found in PEM file - generating self-signed certificate"
+        echo "🔧 Generating self-signed certificate from private key..."
+        
+        # Generate self-signed certificate from the private key
+        # This is common for SAML SP certificates where CA validation isn't required
+        openssl req -new -x509 -key "${CERT_DIR}/sp.key" -out "${CERT_DIR}/sp.crt" -days 3650 \
+            -subj "/C=US/ST=Virginia/L=Charlottesville/O=University of Virginia/OU=Library/CN=dh.library.virginia.edu" 2>/dev/null
+        
+        if [[ $? -eq 0 && -f "${CERT_DIR}/sp.crt" ]]; then
+            chmod 644 "${CERT_DIR}/sp.crt"
+            echo "✅ Self-signed certificate generated: ${CERT_DIR}/sp.crt"
+        else
+            echo "❌ Failed to generate self-signed certificate"
+            return 1
+        fi
     fi
     
     # Verify extraction was successful
@@ -331,6 +352,15 @@ case "${COMMAND}" in
         ;;
     info)
         show_terraform_info
+        ;;
+    test)
+        if [[ -n "${ENVIRONMENT}" && -f "${ENVIRONMENT}" ]]; then
+            echo "🧪 Testing certificate extraction from: ${ENVIRONMENT}"
+            extract_certificates_from_pem "${ENVIRONMENT}"
+        else
+            echo "❌ Usage: ${0} test <path-to-pem-file>"
+            exit 1
+        fi
         ;;
     help|*)
         help_and_exit

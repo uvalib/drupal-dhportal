@@ -115,17 +115,21 @@ function check_terraform_certificates() {
                 local keys_dir="${env_dir}/keys"
                 
                 if [[ -d "${keys_dir}" ]]; then
-                    echo "  🔑 Available keys:"
+                    echo "  🔑 Available SAML files:"
                     for key_file in "${keys_dir}"/dh-drupal-*-saml*; do
                         if [[ -f "${key_file}" ]]; then
                             local key_name=$(basename "${key_file}")
                             if [[ "${key_name}" == *.cpt ]]; then
-                                echo "    🔐 ${key_name} (encrypted)"
+                                echo "    🔐 ${key_name} (encrypted private key)"
                             else
-                                echo "    🔓 ${key_name} (decrypted)"
+                                echo "    🔓 ${key_name} (contains private key, certificate auto-generated)"
                             fi
                         fi
                     done
+                    
+                    # Note about certificate generation
+                    echo "  💡 Note: Certificates are auto-generated from private keys during deployment"
+                    echo "     Only private keys need encryption for security"
                 else
                     echo "  ❌ Keys directory not found: ${keys_dir}"
                 fi
@@ -173,6 +177,11 @@ function main() {
     check_environment_variables
     
     echo "🎯 Summary:"
+    echo "• Only private keys need encryption for security"
+    echo "• Certificates (public keys) are auto-generated from private keys"
+    echo "• Self-signed certificates are standard for SAML Service Providers"
+    echo ""
+    echo "📋 Commands:"
     echo "Run 'manage-saml-certificates-terraform.sh deploy ${ENVIRONMENT}' to deploy certificates"
     echo "Run 'check-saml-certificates.sh' for detailed certificate health check"
 }
