@@ -94,13 +94,18 @@ $config = [
     'proxy' => null,
 
     // Environment-specific settings
-    'debug' => ($environment === 'development'),
+    'debug' => ($environment === 'development') ? [
+        'saml' => true,
+        'backtraces' => true,
+        'validatexml' => true,
+    ] : false,
     'showerrors' => ($environment !== 'production'),
     'errorreporting' => ($environment === 'development'),
 
     // Security headers for production
     'headers.security' => ($environment === 'production') ? [
-        'Content-Security-Policy' => "default-src 'self'; script-src 'self' 'unsafe-inline'; " .
+        'Content-Security-Policy' => "default-src 'self'; " .
+                                     "script-src 'self' 'unsafe-inline'; " .
                                      "style-src 'self' 'unsafe-inline'",
         'X-Frame-Options' => 'DENY',
         'X-Content-Type-Options' => 'nosniff',
@@ -109,10 +114,12 @@ $config = [
 ];
 
 // Log configuration summary for debugging
-error_log(sprintf(
-    '[SimpleSAML-Config] Environment: %s, BaseURL: %s, Logging: %s, Debug: %s',
-    $environment,
-    $baseUrl,
-    $config['logging.level'],
-    $config['debug'] ? 'enabled' : 'disabled'
-));
+error_log(
+    sprintf(
+        '[SimpleSAML-Config] Environment: %s, BaseURL: %s, Logging: %s, Debug: %s',
+        $environment,
+        $baseUrl,
+        $config['logging.level'],
+        $config['debug'] ? 'enabled' : 'disabled'
+    )
+);
