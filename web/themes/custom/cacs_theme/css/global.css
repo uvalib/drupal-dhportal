@@ -11962,6 +11962,10 @@ ul.sf-menu.sf-style-white a, ul.sf-menu.sf-style-white a:visited, ul.sf-menu.sf-
   color: #fff;
 }
 
+.field--name-field-full-width-banner-text h2 a, .field--name-field-full-width-banner-text h3 a, .field--name-field-full-width-banner-text h4 a, .field--name-field-full-width-banner-text h5 a {
+  color: #fff;
+}
+
 .paragraph--type--image-right-text-left .field--name-field-title {
   font-size: 2em;
   line-height: 1.3;
@@ -11970,6 +11974,9 @@ ul.sf-menu.sf-style-white a, ul.sf-menu.sf-style-white a:visited, ul.sf-menu.sf-
   font-weight: 600;
   font-style: italic;
   text-transform: uppercase;
+  color: #fff;
+}
+.paragraph--type--image-right-text-left a {
   color: #fff;
 }
 
