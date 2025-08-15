@@ -12582,3 +12582,38 @@ ul.sf-menu.sf-style-default {
   background: white;
   color: #232D4B;
 }
+
+/* Styling added below is for Course and Event detail pages to adjust how they look until A&S Drupal Support 
+ * can provide design/styling assistance. Below CSS can probably be removed after the A&S Drupal Support team
+ * has provided a design/styling solution. */
+/* identify an event field label in the layout builder and style it small bold */
+.node--type-event.node--view-mode-full .block-layout-builder > h2 {
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+/* identify an event field value in the layout builder and style it as large text */
+.node--type-event.node--view-mode-full .block-layout-builder > div.content {
+  font-size: 1.3rem;
+}
+/* identify the pithy event summary and style it larger text with some padding below before the event details */
+.node--type-event.node--view-mode-full .block-layout-builder .field--name-field-pithy-event-summary {
+  font-size: 1.5rem;
+  padding-bottom: 15px;
+}
+/* identify the region where the "sidebar" content is and style it with a border and background and adjust 
+ * the text to be slightly smaller so the event details in the other column stand out more. */
+.node--type-event.node--view-mode-full .layout__region--second {
+  padding: 10px 15px;
+  border: 2px solid #232D4B;
+  background: #F1F1EF;
+}
+.node--type-event.node--view-mode-full .layout__region--second a {
+  color: #232D4B;
+}
+.node--type-event.node--view-mode-full  .layout__region--second .block-layout-builder > h2 {
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+.node--type-event.node--view-mode-full  .layout__region--second .block-layout-builder > div.content {
+  font-size: 1.1rem;
+}
