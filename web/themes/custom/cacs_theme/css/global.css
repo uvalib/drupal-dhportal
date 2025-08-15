@@ -12594,6 +12594,7 @@ ul.sf-menu.sf-style-default {
 /* identify an event field value in the layout builder and style it as large text */
 .node--type-event.node--view-mode-full .block-layout-builder > div.content {
   font-size: 1.3rem;
+  margin-bottom: 1em;
 }
 /* identify the pithy event summary and style it larger text with some padding below before the event details */
 .node--type-event.node--view-mode-full .block-layout-builder .field--name-field-pithy-event-summary {
@@ -12616,6 +12617,7 @@ ul.sf-menu.sf-style-default {
 }
 .node--type-event.node--view-mode-full  .layout__region--second .block-layout-builder > div.content {
   font-size: 1.1rem;
+  margin-bottom: 1em;
 }
 /* identify a course field label in the layout builder and style it small bold */
 .node--type-course.node--view-mode-full .block-layout-builder > h2,
@@ -12626,6 +12628,7 @@ ul.sf-menu.sf-style-default {
 /* identify a course field value in the layout builder and style it as large text */
 .node--type-course.node--view-mode-full .block-layout-builder > div.content {
   font-size: 1.3rem;
+  margin-bottom: 1em;
 }
 /* identify the course region where the "sidebar" content is and style it with a border and background and adjust 
  * the text to be slightly smaller so the event details in the other column stand out more. */
@@ -12643,4 +12646,9 @@ ul.sf-menu.sf-style-default {
 }
 .node--type-course.node--view-mode-full  .layout__region--second .block-layout-builder > div.content {
   font-size: 1.1rem;
+  margin-bottom: 1em;
+}
+/* hide the DH Sidebar which is the legend of a fieldset that is not part of any layout block */
+.node--type-course.node--view-mode-full fieldset {
+  display: none;
 }
