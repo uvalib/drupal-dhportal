@@ -12583,6 +12583,14 @@ ul.sf-menu.sf-style-default {
   color: #232D4B;
 }
 
+/* Home page blue background regions seemed off alignment compared to white regions, some padding added */
+.paragraph--type--image-right-text-left .two-wide {
+    padding: 2.5em 0 2em 0;
+}
+.paragraph--type--image-right-text-left .group-right {
+    padding: 0 1em 0 2em;
+}
+
 /* Styling added below is for Course and Event detail pages to adjust how they look until A&S Drupal Support 
  * can provide design/styling assistance. Below CSS can probably be removed after the A&S Drupal Support team
  * has provided a design/styling solution. */
