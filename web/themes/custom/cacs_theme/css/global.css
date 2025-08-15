@@ -12600,7 +12600,7 @@ ul.sf-menu.sf-style-default {
   font-size: 1.5rem;
   padding-bottom: 15px;
 }
-/* identify the region where the "sidebar" content is and style it with a border and background and adjust 
+/* identify the event region where the "sidebar" content is and style it with a border and background and adjust 
  * the text to be slightly smaller so the event details in the other column stand out more. */
 .node--type-event.node--view-mode-full .layout__region--second {
   padding: 10px 15px;
@@ -12615,5 +12615,32 @@ ul.sf-menu.sf-style-default {
   font-weight: 600;
 }
 .node--type-event.node--view-mode-full  .layout__region--second .block-layout-builder > div.content {
+  font-size: 1.1rem;
+}
+/* identify a course field label in the layout builder and style it small bold */
+.node--type-course.node--view-mode-full .block-layout-builder > h2,
+.node--type-course.node--view-mode-full .block-layout-builder .field__label {
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+/* identify a course field value in the layout builder and style it as large text */
+.node--type-course.node--view-mode-full .block-layout-builder > div.content {
+  font-size: 1.3rem;
+}
+/* identify the course region where the "sidebar" content is and style it with a border and background and adjust 
+ * the text to be slightly smaller so the event details in the other column stand out more. */
+.node--type-course.node--view-mode-full .layout__region--second {
+  padding: 10px 15px;
+  border: 2px solid #232D4B;
+  background: #F1F1EF;
+}
+.node--type-course.node--view-mode-full .layout__region--second a {
+  color: #232D4B;
+}
+.node--type-course.node--view-mode-full  .layout__region--second .block-layout-builder > h2 {
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+.node--type-course.node--view-mode-full  .layout__region--second .block-layout-builder > div.content {
   font-size: 1.1rem;
 }
