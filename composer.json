@@ -30,6 +30,7 @@
         "drupal/metatag": "^2.1",
         "drupal/paragraphs": "^1.19",
         "drupal/pathauto": "^1.13",
+        "drupal/redirect": "^1.11",
         "drupal/simplesamlphp_auth": "^4.0",
         "drupal/smart_date": "^4.2",
         "drupal/smart_date_calendar_kit": "^2.2",
