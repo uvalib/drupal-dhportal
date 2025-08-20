@@ -549,6 +549,25 @@ ${CODEBUILD_SRC_DIR}/terraform-infrastructure/scripts/decrypt-key.ksh ${SAML_PRI
 3. **Fallback method**: If terraform key not available, generates new RSA 2048-bit self-signed certificate pair
 4. **Container integration**: Copies certificates into SimpleSAMLphp cert directory within container
 5. **Security**: Sets proper ownership (`www-data:www-data`) and permissions (600 for private keys, 644 for certificates)
+
+**Critical Log Directory Permissions**:
+The SimpleSAMLphp log directory `/opt/drupal/simplesamlphp/log` must be owned by `www-data:www-data` and have write permissions for proper logging functionality. This should be handled in the Ansible deployment tasks:
+
+```yaml
+- name: Set writable permissions on SimpleSAMLphp log directory
+  command: >
+    docker exec {{ container_name }}
+    chown -R www-data:www-data /opt/drupal/simplesamlphp/log
+  become: true
+
+- name: Ensure log directory is writable
+  command: >
+    docker exec {{ container_name }}
+    chmod 755 /opt/drupal/simplesamlphp/log
+  become: true
+```
+
+Without proper ownership, SimpleSAMLphp will fail to write log files, causing runtime errors.
 6. **Cleanup**: Removes temporary files after deployment
 
 **Integration with Existing Infrastructure**:

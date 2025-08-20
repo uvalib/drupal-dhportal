@@ -1577,7 +1577,7 @@ zend.assertions = -1
 ; Assert(expr); active by default.
 ; http://php.net/assert.active
 ; Note: assert.active is deprecated as of PHP 8.3.0, but we set it to suppress warnings
-assert.active = Off
+;assert.active = Off
 
 ; Throw an AssertionError on failed assertions
 ; http://php.net/assert.exception
