@@ -28,7 +28,8 @@ COPY package/data/files/opt/drupal/web/sites/default/settings.php /opt/drupal/we
 # Copy both PHP configurations for runtime switching
 COPY package/data/files/usr/local/etc/php/php.ini-development /usr/local/etc/php/php.ini-development
 COPY package/data/files/usr/local/etc/php/php.ini-production /usr/local/etc/php/php.ini-production
-# Default to development configuration (staging/dev friendly)
+# Remove any existing php.ini and default to development configuration (staging/dev friendly)
+RUN rm -f /usr/local/etc/php/php.ini
 COPY package/data/files/usr/local/etc/php/php.ini-development /usr/local/etc/php/php.ini
 RUN echo "PHP configuration: Default development mode (will be switched at runtime via PHP_MODE env var)" && \
     echo "PHP display_errors setting: $(grep '^display_errors' /usr/local/etc/php/php.ini || echo 'not set')"
